@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './LandingPage.scss';
 
 const LandingPage = () => {
@@ -34,9 +35,9 @@ const LandingPage = () => {
               Krijo fatura profesionale në pak minuta dhe fokusohu në biznesin tënd.
             </p>
             <div className="landing__hero-cta">
-              <a href="/login" className="btn btn--primary">
+              <Link to="/login" className="btn btn--primary">
                 Fillo Tani
-              </a>
+              </Link>
               <a href="#features" className="btn btn--secondary">
                 Mëso Më Shumë
               </a>
@@ -90,9 +91,9 @@ const LandingPage = () => {
             <p className="landing__cta-subtitle">
               Krijo faturën tënde të parë sot dhe përjetoni lehtësinë e menaxhimit të faturave.
             </p>
-            <a href="/login" className="btn btn--primary btn--large">
+            <Link to="/login" className="btn btn--primary btn--large">
               Krijo Faturë Tani
-            </a>
+            </Link>
           </div>
         </div>
       </section>

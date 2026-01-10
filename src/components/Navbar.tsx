@@ -1,20 +1,30 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/useAuth';
 import './Navbar.scss';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+    setIsMenuOpen(false);
   };
 
   return (
     <nav className="navbar">
       <div className="navbar__container">
         <div className="navbar__brand">
-          <a href="/" className="navbar__logo">
+          <Link to="/" className="navbar__logo">
             Faturëime
-          </a>
+          </Link>
         </div>
 
         <button
@@ -29,9 +39,26 @@ const Navbar = () => {
         </button>
 
         <div className={`navbar__menu ${isMenuOpen ? 'navbar__menu--open' : ''}`}>
-          <a href="/login" className="navbar__link navbar__link--login">
-            Hyrje
-          </a>
+          {isAuthenticated ? (
+            <>
+              <Link to="/dashboard" className="navbar__link">
+                Dashboard
+              </Link>
+              <div className="navbar__user">
+                <span className="navbar__user-email">{user?.email}</span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="navbar__link navbar__link--logout"
+              >
+                Dil
+              </button>
+            </>
+          ) : (
+            <Link to="/login" className="navbar__link navbar__link--login">
+              Hyrje
+            </Link>
+          )}
         </div>
       </div>
     </nav>

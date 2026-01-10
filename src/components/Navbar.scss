@@ -106,6 +106,10 @@
     padding: $spacing-sm $spacing-md;
     border-radius: $border-radius;
     transition: all $transition-fast;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: inherit;
 
     &:hover {
       color: $primary;
@@ -121,6 +125,33 @@
         background-color: $primary-dark;
         color: white;
       }
+    }
+
+    &--logout {
+      background-color: #fee2e2;
+      color: #dc2626;
+      padding: $spacing-sm $spacing-lg;
+
+      &:hover {
+        background-color: #fecaca;
+        color: #b91c1c;
+      }
+    }
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    padding: $spacing-sm $spacing-md;
+  }
+
+  &__user-email {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    font-weight: $font-weight-medium;
+
+    @include mobile {
+      font-size: $font-size-xs;
     }
   }
 }

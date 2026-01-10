@@ -1,0 +1,152 @@
+import axios, { AxiosInstance, AxiosError } from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+// Create axios instance
+const api: AxiosInstance = axios.create({
+  baseURL: `${API_URL}/api`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor to add JWT token to requests
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor to handle errors
+api.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid - clear auth data
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('remember_me_token');
+      // Redirect to login will be handled by the app
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Types
+export interface RegisterData {
+  email: string;
+  password: string;
+}
+
+export interface LoginData {
+  email: string;
+  password: string;
+  remember_me?: boolean;
+}
+
+export interface VerifyEmailData {
+  token: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: {
+    id: number;
+    email: string;
+    roles: string[];
+  };
+  remember_me_token?: string | null;
+}
+
+export interface User {
+  id: number;
+  email: string;
+  roles: string[];
+  email_verified: boolean;
+}
+
+// API methods
+export const authApi = {
+  /**
+   * Register a new user
+   */
+  async register(data: RegisterData): Promise<{ message: string; email: string }> {
+    const response = await api.post('/register', data);
+    return response.data;
+  },
+
+  /**
+   * Login user
+   */
+  async login(data: LoginData): Promise<AuthResponse> {
+    const response = await api.post('/login', data);
+    const authData: AuthResponse = response.data;
+    
+    // Store token and user data
+    localStorage.setItem('auth_token', authData.token);
+    localStorage.setItem('user', JSON.stringify(authData.user));
+    
+    // Store remember me token if provided
+    if (authData.remember_me_token) {
+      localStorage.setItem('remember_me_token', authData.remember_me_token);
+    }
+    
+    return authData;
+  },
+
+  /**
+   * Verify email with token
+   */
+  async verifyEmail(data: VerifyEmailData): Promise<{ message: string; email: string }> {
+    const response = await api.post('/verify-email', data);
+    return response.data;
+  },
+
+  /**
+   * Get current authenticated user
+   */
+  async getCurrentUser(): Promise<User> {
+    const response = await api.get('/user');
+    return response.data;
+  },
+
+  /**
+   * Logout user (clear local storage)
+   */
+  logout(): void {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('remember_me_token');
+  },
+
+  /**
+   * Check if user is authenticated
+   */
+  isAuthenticated(): boolean {
+    return !!localStorage.getItem('auth_token');
+  },
+
+  /**
+   * Get stored user data
+   */
+  getStoredUser(): User | null {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        return JSON.parse(userStr);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  },
+};
+
+export default api;
