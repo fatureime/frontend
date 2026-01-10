@@ -44,6 +44,11 @@ const Navbar = () => {
               <Link to="/dashboard" className="navbar__link">
                 Dashboard
               </Link>
+              {user?.roles?.includes('ROLE_ADMIN') && (
+                <Link to="/users" className="navbar__link">
+                  Users
+                </Link>
+              )}
               {user?.tenant?.is_admin && (
                 <Link to="/tenants" className="navbar__link">
                   Tenants

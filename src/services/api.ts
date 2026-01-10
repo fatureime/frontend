@@ -84,6 +84,36 @@ export interface User {
   email_verified: boolean;
   is_active: boolean;
   tenant: Tenant | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateUserData {
+  email: string;
+  password: string;
+  roles?: string[];
+  email_verified?: boolean;
+  is_active?: boolean;
+  tenant_id?: number;
+}
+
+export interface InviteUserData {
+  email: string;
+  roles?: string[];
+  tenant_id?: number;
+}
+
+export interface UpdateUserData {
+  email?: string;
+  password?: string;
+  roles?: string[];
+  is_active?: boolean;
+  tenant_id?: number;
+}
+
+export interface AcceptInvitationData {
+  token: string;
+  password: string;
 }
 
 // API methods
@@ -194,6 +224,66 @@ export const tenantsApi = {
    */
   async deleteTenant(id: number): Promise<{ message: string }> {
     const response = await api.delete(`/tenants/${id}`);
+    return response.data;
+  },
+};
+
+// User API methods
+export const usersApi = {
+  /**
+   * Get all users (admin users see their tenant's users, admin tenant users see all)
+   */
+  async getUsers(tenantId?: number): Promise<User[]> {
+    const params = tenantId ? { tenant_id: tenantId } : {};
+    const response = await api.get('/users', { params });
+    return response.data;
+  },
+
+  /**
+   * Get a single user by ID
+   */
+  async getUser(id: number): Promise<User> {
+    const response = await api.get(`/users/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Create a user directly (for admins)
+   */
+  async createUser(data: CreateUserData): Promise<User> {
+    const response = await api.post('/users', data);
+    return response.data;
+  },
+
+  /**
+   * Invite a user via email
+   */
+  async inviteUser(data: InviteUserData): Promise<{ message: string; user: User }> {
+    const response = await api.post('/users/invite', data);
+    return response.data;
+  },
+
+  /**
+   * Update a user
+   */
+  async updateUser(id: number, data: UpdateUserData): Promise<User> {
+    const response = await api.put(`/users/${id}`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete a user
+   */
+  async deleteUser(id: number): Promise<{ message: string }> {
+    const response = await api.delete(`/users/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Accept invitation and set password
+   */
+  async acceptInvitation(data: AcceptInvitationData): Promise<{ message: string; user: User }> {
+    const response = await api.post('/users/accept-invitation', data);
     return response.data;
   },
 };

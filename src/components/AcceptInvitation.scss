@@ -1,0 +1,216 @@
+@import '../styles/variables';
+@import '../styles/responsive';
+
+.accept-invitation-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-xl;
+  background: $bg-secondary;
+
+  @include mobile {
+    padding: $spacing-md;
+    min-height: calc(100vh - 60px);
+  }
+}
+
+.accept-invitation-container {
+  width: 100%;
+  max-width: 500px;
+}
+
+.accept-invitation-card {
+  background: $bg-primary;
+  border-radius: $border-radius;
+  padding: $spacing-2xl;
+  box-shadow: $shadow-lg;
+
+  @include mobile {
+    padding: $spacing-xl;
+  }
+}
+
+.accept-invitation-title {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin-bottom: $spacing-lg;
+  text-align: center;
+}
+
+.accept-invitation-success {
+  text-align: center;
+  padding: $spacing-xl 0;
+
+  .accept-invitation-icon {
+    color: $accent;
+    margin-bottom: $spacing-md;
+  }
+
+  p {
+    font-size: $font-size-base;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+  }
+}
+
+.accept-invitation-redirect {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin-top: $spacing-md;
+}
+
+.accept-invitation-error {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: $spacing-md;
+  border-radius: $border-radius;
+  margin-bottom: $spacing-lg;
+  font-size: $font-size-sm;
+  border: 1px solid #fecaca;
+}
+
+.accept-invitation-form-container {
+  margin-top: $spacing-lg;
+}
+
+.accept-invitation-description {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin-bottom: $spacing-lg;
+  text-align: center;
+}
+
+.accept-invitation-form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.form-label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+}
+
+.form-input {
+  padding: $spacing-md;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  font-size: $font-size-base;
+  transition: all $transition-fast;
+  background: $bg-primary;
+  color: $text-primary;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  &:disabled {
+    background: $bg-secondary;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &::placeholder {
+    color: $text-light;
+  }
+}
+
+.form-hint {
+  font-size: $font-size-xs;
+  color: $text-secondary;
+  margin-top: -$spacing-xs;
+}
+
+.btn {
+  padding: $spacing-md $spacing-xl;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  border: none;
+  border-radius: $border-radius;
+  cursor: pointer;
+  transition: all $transition-fast;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+
+  &--primary {
+    background-color: $primary;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background-color: $primary-dark;
+      transform: translateY(-1px);
+      box-shadow: $shadow-md;
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    &:disabled {
+      background-color: $text-light;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  &--full {
+    width: 100%;
+  }
+}
+
+.accept-invitation-loading {
+  text-align: center;
+  padding: $spacing-xl 0;
+
+  .spinner {
+    border: 3px solid $bg-secondary;
+    border-top: 3px solid $primary;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto $spacing-md;
+  }
+
+  p {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.accept-invitation-footer {
+  margin-top: $spacing-xl;
+  text-align: center;
+}
+
+.accept-invitation-footer-text {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.accept-invitation-footer-link {
+  color: $primary;
+  text-decoration: none;
+  font-weight: $font-weight-medium;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

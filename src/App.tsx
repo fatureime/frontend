@@ -5,9 +5,11 @@ import LandingPage from './components/LandingPage'
 import Login from './components/Login'
 import Signup from './components/Signup'
 import EmailVerification from './components/EmailVerification'
+import AcceptInvitation from './components/AcceptInvitation'
 import ProtectedRoute from './components/ProtectedRoute'
 import InvoicePage from './components/InvoicePage'
 import TenantsPage from './components/TenantsPage'
+import UsersPage from './components/UsersPage'
 import './styles/main.scss'
 
 function App() {
@@ -21,6 +23,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/verify-email" element={<EmailVerification />} />
+            <Route path="/accept-invitation" element={<AcceptInvitation />} />
             <Route
               path="/dashboard"
               element={
@@ -34,6 +37,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <TenantsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                <ProtectedRoute>
+                  <UsersPage />
                 </ProtectedRoute>
               }
             />
