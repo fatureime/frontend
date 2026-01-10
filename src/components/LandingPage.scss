@@ -1,0 +1,215 @@
+@import '../styles/variables';
+@import '../styles/responsive';
+
+.landing {
+  flex: 1;
+  width: 100%;
+}
+
+// Hero Section
+.landing__hero {
+  background: linear-gradient(135deg, $primary 0%, $primary-dark 100%);
+  color: white;
+  padding: $spacing-4xl 0;
+  text-align: center;
+
+  @include mobile {
+    padding: $spacing-3xl 0;
+  }
+}
+
+.landing__hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.landing__hero-title {
+  font-size: $font-size-4xl;
+  font-weight: $font-weight-bold;
+  line-height: $line-height-tight;
+  margin-bottom: $spacing-lg;
+  color: white;
+
+  @include mobile {
+    font-size: $font-size-3xl;
+  }
+}
+
+.landing__hero-subtitle {
+  font-size: $font-size-xl;
+  line-height: $line-height-relaxed;
+  margin-bottom: $spacing-2xl;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+
+  @include mobile {
+    font-size: $font-size-lg;
+    margin-bottom: $spacing-xl;
+  }
+}
+
+.landing__hero-cta {
+  display: flex;
+  gap: $spacing-md;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+// Features Section
+.landing__features {
+  padding: $spacing-4xl 0;
+  background-color: $bg-secondary;
+
+  @include mobile {
+    padding: $spacing-3xl 0;
+  }
+}
+
+.landing__features-header {
+  text-align: center;
+  margin-bottom: $spacing-3xl;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+
+  @include mobile {
+    margin-bottom: $spacing-2xl;
+  }
+}
+
+.landing__features-title {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin-bottom: $spacing-md;
+
+  @include mobile {
+    font-size: $font-size-2xl;
+  }
+}
+
+.landing__features-subtitle {
+  font-size: $font-size-lg;
+  color: $text-secondary;
+  line-height: $line-height-relaxed;
+}
+
+.landing__features-grid {
+  margin-top: $spacing-2xl;
+}
+
+.landing__feature-card {
+  background-color: $bg-primary;
+  padding: $spacing-xl;
+  border-radius: $border-radius;
+  box-shadow: $shadow-md;
+  transition: transform $transition-base, box-shadow $transition-base;
+  text-align: center;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $shadow-lg;
+  }
+}
+
+.landing__feature-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto $spacing-lg;
+  color: $primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba($primary, 0.1);
+  border-radius: 50%;
+}
+
+.landing__feature-title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.landing__feature-description {
+  font-size: $font-size-base;
+  color: $text-secondary;
+  line-height: $line-height-relaxed;
+}
+
+// CTA Section
+.landing__cta {
+  padding: $spacing-4xl 0;
+  background: linear-gradient(135deg, $bg-secondary 0%, $bg-primary 100%);
+  text-align: center;
+
+  @include mobile {
+    padding: $spacing-3xl 0;
+  }
+}
+
+.landing__cta-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.landing__cta-title {
+  font-size: $font-size-3xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin-bottom: $spacing-md;
+
+  @include mobile {
+    font-size: $font-size-2xl;
+  }
+}
+
+.landing__cta-subtitle {
+  font-size: $font-size-lg;
+  color: $text-secondary;
+  line-height: $line-height-relaxed;
+  margin-bottom: $spacing-2xl;
+}
+
+// Button Styles
+.btn {
+  display: inline-block;
+  padding: $spacing-md $spacing-xl;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  text-decoration: none;
+  border-radius: $border-radius;
+  transition: all $transition-fast;
+  cursor: pointer;
+  border: none;
+  text-align: center;
+
+  &--primary {
+    background-color: white;
+    color: $primary;
+
+    &:hover {
+      background-color: $bg-secondary;
+      transform: translateY(-2px);
+      box-shadow: $shadow-md;
+    }
+  }
+
+  &--secondary {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+
+    &:hover {
+      background-color: white;
+      color: $primary;
+    }
+  }
+
+  &--large {
+    padding: $spacing-lg $spacing-2xl;
+    font-size: $font-size-lg;
+  }
+}

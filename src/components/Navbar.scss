@@ -1,0 +1,126 @@
+@import '../styles/variables';
+@import '../styles/responsive';
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: $bg-primary;
+  box-shadow: $shadow-sm;
+  border-bottom: 1px solid $border-color;
+
+  &__container {
+    width: 100%;
+    margin: 0 auto;
+    padding: $spacing-md $spacing-md;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 64px;
+
+    @include tablet {
+      max-width: $tablet;
+      padding: $spacing-md $spacing-lg;
+    }
+
+    @include desktop {
+      max-width: $desktop;
+      padding: $spacing-md $spacing-xl;
+    }
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+  }
+
+  &__logo {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-bold;
+    color: $primary;
+    text-decoration: none;
+    transition: color $transition-fast;
+
+    &:hover {
+      color: $primary-dark;
+    }
+  }
+
+  &__toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: $spacing-sm;
+    z-index: 1001;
+
+    @include tablet {
+      display: none;
+    }
+
+    &:focus {
+      outline: 2px solid $primary;
+      outline-offset: 2px;
+    }
+  }
+
+  &__toggle-icon {
+    width: 24px;
+    height: 3px;
+    background-color: $text-primary;
+    border-radius: 2px;
+    transition: all $transition-fast;
+  }
+
+  &__menu {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+
+    @include mobile {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      right: 0;
+      background-color: $bg-primary;
+      flex-direction: column;
+      padding: $spacing-lg;
+      box-shadow: $shadow-lg;
+      transform: translateX(-100%);
+      transition: transform $transition-base;
+      border-top: 1px solid $border-color;
+
+      &--open {
+        transform: translateX(0);
+      }
+    }
+  }
+
+  &__link {
+    color: $text-primary;
+    text-decoration: none;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    padding: $spacing-sm $spacing-md;
+    border-radius: $border-radius;
+    transition: all $transition-fast;
+
+    &:hover {
+      color: $primary;
+      background-color: $bg-secondary;
+    }
+
+    &--login {
+      background-color: $primary;
+      color: white;
+      padding: $spacing-sm $spacing-lg;
+
+      &:hover {
+        background-color: $primary-dark;
+        color: white;
+      }
+    }
+  }
+}
