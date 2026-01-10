@@ -141,8 +141,14 @@
 
   &__user {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-end;
     padding: $spacing-sm $spacing-md;
+    gap: 0.25rem;
+
+    @include mobile {
+      align-items: flex-start;
+    }
   }
 
   &__user-email {
@@ -152,6 +158,23 @@
 
     @include mobile {
       font-size: $font-size-xs;
+    }
+  }
+
+  &__user-tenant {
+    font-size: $font-size-xs;
+    color: $text-secondary;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .badge {
+      padding: 0.125rem 0.5rem;
+      background: #4caf50;
+      color: white;
+      border-radius: 4px;
+      font-size: 0.625rem;
+      font-weight: 600;
     }
   }
 }

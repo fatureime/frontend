@@ -55,12 +55,24 @@ export interface VerifyEmailData {
   token: string;
 }
 
+export interface Tenant {
+  id: number;
+  name: string;
+  has_paid: boolean;
+  is_admin: boolean;
+  created_at?: string;
+  updated_at?: string;
+  users?: User[];
+}
+
 export interface AuthResponse {
   token: string;
   user: {
     id: number;
     email: string;
     roles: string[];
+    is_active: boolean;
+    tenant: Tenant | null;
   };
   remember_me_token?: string | null;
 }
@@ -70,6 +82,8 @@ export interface User {
   email: string;
   roles: string[];
   email_verified: boolean;
+  is_active: boolean;
+  tenant: Tenant | null;
 }
 
 // API methods
@@ -146,6 +160,41 @@ export const authApi = {
       }
     }
     return null;
+  },
+};
+
+// Tenant API methods
+export const tenantsApi = {
+  /**
+   * Get all tenants (admin tenants see all, regular users see only their own)
+   */
+  async getTenants(): Promise<Tenant[]> {
+    const response = await api.get('/tenants');
+    return response.data;
+  },
+
+  /**
+   * Get a single tenant by ID
+   */
+  async getTenant(id: number): Promise<Tenant> {
+    const response = await api.get(`/tenants/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Update a tenant
+   */
+  async updateTenant(id: number, data: Partial<Tenant>): Promise<Tenant> {
+    const response = await api.put(`/tenants/${id}`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete a tenant (admin only)
+   */
+  async deleteTenant(id: number): Promise<{ message: string }> {
+    const response = await api.delete(`/tenants/${id}`);
+    return response.data;
   },
 };
 

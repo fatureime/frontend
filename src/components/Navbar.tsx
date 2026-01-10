@@ -44,8 +44,19 @@ const Navbar = () => {
               <Link to="/dashboard" className="navbar__link">
                 Dashboard
               </Link>
+              {user?.tenant?.is_admin && (
+                <Link to="/tenants" className="navbar__link">
+                  Tenants
+                </Link>
+              )}
               <div className="navbar__user">
                 <span className="navbar__user-email">{user?.email}</span>
+                {user?.tenant && (
+                  <span className="navbar__user-tenant">
+                    {user.tenant.name}
+                    {user.tenant.is_admin && <span className="badge">Admin</span>}
+                  </span>
+                )}
               </div>
               <button
                 onClick={handleLogout}

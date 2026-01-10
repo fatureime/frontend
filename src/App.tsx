@@ -7,6 +7,7 @@ import Signup from './components/Signup'
 import EmailVerification from './components/EmailVerification'
 import ProtectedRoute from './components/ProtectedRoute'
 import InvoicePage from './components/InvoicePage'
+import TenantsPage from './components/TenantsPage'
 import './styles/main.scss'
 
 function App() {
@@ -25,6 +26,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <InvoicePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tenants"
+              element={
+                <ProtectedRoute>
+                  <TenantsPage />
                 </ProtectedRoute>
               }
             />

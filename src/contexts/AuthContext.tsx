@@ -56,9 +56,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const login = async (data: LoginData) => {
-    await authApi.login(data);
-    const currentUser = await authApi.getCurrentUser();
-    setUser(currentUser);
+    const authResponse = await authApi.login(data);
+    // Use the user data from login response which includes tenant info
+    const userData: User = {
+      id: authResponse.user.id,
+      email: authResponse.user.email,
+      roles: authResponse.user.roles,
+      email_verified: true, // If login succeeded, email is verified
+      is_active: authResponse.user.is_active,
+      tenant: authResponse.user.tenant,
+    };
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   const logout = () => {
