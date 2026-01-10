@@ -18,12 +18,18 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
-# Copy built files from builder
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Copy built files from builder to temporary location
+COPY --from=builder /app/dist /app/dist
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Create entrypoint script to copy files to volume mount
+RUN echo '#!/bin/sh' > /entrypoint.sh && \
+    echo 'cp -r /app/dist/* /usr/share/nginx/html/ 2>/dev/null || true' >> /entrypoint.sh && \
+    echo 'exec nginx -g "daemon off;"' >> /entrypoint.sh && \
+    chmod +x /entrypoint.sh
+
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/entrypoint.sh"]
