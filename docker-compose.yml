@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  node:
+    build: .
+    container_name: frontend_node
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    networks:
+      - frontend_network
+    environment:
+      - NODE_ENV=development
+
+networks:
+  frontend_network:
+    driver: bridge
