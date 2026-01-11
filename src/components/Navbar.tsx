@@ -44,6 +44,9 @@ const Navbar = () => {
               <Link to="/dashboard" className="navbar__link">
                 Paneli
               </Link>
+              <Link to="/businesses" className="navbar__link">
+                Bizneset
+              </Link>
               {user?.roles?.includes('ROLE_ADMIN') && (
                 <Link to="/users" className="navbar__link">
                   Përdoruesit

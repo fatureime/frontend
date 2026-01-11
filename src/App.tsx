@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import InvoicePage from './components/InvoicePage'
 import TenantsPage from './components/TenantsPage'
 import UsersPage from './components/UsersPage'
+import BusinessesPage from './components/BusinessesPage'
 import './styles/main.scss'
 
 function App() {
@@ -45,6 +46,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <UsersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/businesses"
+              element={
+                <ProtectedRoute>
+                  <BusinessesPage />
                 </ProtectedRoute>
               }
             />

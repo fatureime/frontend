@@ -116,6 +116,55 @@ export interface AcceptInvitationData {
   password: string;
 }
 
+export interface Business {
+  id: number;
+  business_name: string;
+  trade_name?: string;
+  business_type?: string;
+  unique_identifier_number?: string;
+  business_number?: string;
+  fiscal_number?: string;
+  number_of_employees?: number;
+  registration_date?: string;
+  municipality?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  capital?: string;
+  arbk_status?: string;
+  created_by_id: number;
+  tenant_id: number;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: {
+    id: number;
+    email: string;
+  };
+  tenant?: {
+    id: number;
+    name: string;
+  };
+}
+
+export interface CreateBusinessData {
+  business_name: string;
+  trade_name?: string;
+  business_type?: string;
+  unique_identifier_number?: string;
+  business_number?: string;
+  fiscal_number?: string;
+  number_of_employees?: number;
+  registration_date?: string;
+  municipality?: string;
+  address?: string;
+  phone?: string;
+  email?: string;
+  capital?: string;
+  arbk_status?: string;
+}
+
+export interface UpdateBusinessData extends Partial<CreateBusinessData> {}
+
 // API methods
 export const authApi = {
   /**
@@ -284,6 +333,49 @@ export const usersApi = {
    */
   async acceptInvitation(data: AcceptInvitationData): Promise<{ message: string; user: User }> {
     const response = await api.post('/users/accept-invitation', data);
+    return response.data;
+  },
+};
+
+// Business API methods
+export const businessesApi = {
+  /**
+   * Get all businesses (admin tenants see all, regular users see only their tenant's businesses)
+   */
+  async getBusinesses(): Promise<Business[]> {
+    const response = await api.get('/businesses');
+    return response.data;
+  },
+
+  /**
+   * Get a single business by ID
+   */
+  async getBusiness(id: number): Promise<Business> {
+    const response = await api.get(`/businesses/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Create a new business
+   */
+  async createBusiness(data: CreateBusinessData): Promise<Business> {
+    const response = await api.post('/businesses', data);
+    return response.data;
+  },
+
+  /**
+   * Update a business
+   */
+  async updateBusiness(id: number, data: UpdateBusinessData): Promise<Business> {
+    const response = await api.put(`/businesses/${id}`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete a business
+   */
+  async deleteBusiness(id: number): Promise<{ message: string }> {
+    const response = await api.delete(`/businesses/${id}`);
     return response.data;
   },
 };
