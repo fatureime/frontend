@@ -156,6 +156,9 @@ const TenantsPage = () => {
                       </div>
                       <div className="tenant-card-body">
                         <p><strong>ID:</strong> {tenant.id}</p>
+                        {tenant.issuer_business && (
+                          <p><strong>Biznesi Lëshues:</strong> {tenant.issuer_business.business_name}</p>
+                        )}
                         {tenant.users && (
                           <p><strong>Përdoruesit:</strong> {tenant.users.length}</p>
                         )}

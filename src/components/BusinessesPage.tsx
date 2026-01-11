@@ -56,6 +56,12 @@ const BusinessesPage = () => {
   };
 
   const handleDelete = async (businessId: number) => {
+    // Check if this is the issuer business
+    if (user?.tenant?.issuer_business_id === businessId) {
+      setError('Nuk mund të fshihet biznesi emetues. Ky biznes përdoret për krijimin e faturave.');
+      return;
+    }
+
     if (!window.confirm('Jeni të sigurt që dëshironi të fshini këtë biznes? Ky veprim nuk mund të zhbëhet.')) {
       return;
     }
@@ -113,10 +119,15 @@ const BusinessesPage = () => {
                 <p className="no-businesses">Nuk u gjetën biznese.</p>
               ) : (
                 <div className="business-cards">
-                  {businesses.map((business) => (
+                  {businesses.map((business) => {
+                    const isIssuer = user?.tenant?.issuer_business_id === business.id;
+                    return (
                     <div key={business.id} className="business-card">
                       <div className="business-card-header">
                         <h3>{business.business_name}</h3>
+                        {isIssuer && (
+                          <span className="badge issuer">Biznesi Lëshues</span>
+                        )}
                       </div>
                       <div className="business-card-body">
                         {business.trade_name && (
@@ -160,12 +171,15 @@ const BusinessesPage = () => {
                         <button
                           onClick={() => handleDelete(business.id)}
                           className="btn btn-danger"
+                          disabled={isIssuer}
+                          title={isIssuer ? 'Nuk mund të fshihet biznesi lëshues' : ''}
                         >
                           Fshi
                         </button>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

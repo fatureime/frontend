@@ -60,6 +60,12 @@ export interface Tenant {
   name: string;
   has_paid: boolean;
   is_admin: boolean;
+  issuer_business_id?: number;
+  issuer_business?: {
+    id: number;
+    business_name: string;
+    fiscal_number?: string;
+  };
   created_at?: string;
   updated_at?: string;
   users?: User[];

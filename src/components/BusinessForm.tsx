@@ -72,10 +72,20 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'number' ? (value === '' ? undefined : parseInt(value)) : value,
-    }));
+    setFormData(prev => {
+      if (type === 'number') {
+        if (value === '') {
+          return { ...prev, [name]: undefined };
+        }
+        // For capital field, use parseFloat for decimal numbers
+        if (name === 'capital') {
+          return { ...prev, [name]: parseFloat(value).toString() };
+        }
+        // For other number fields (like number_of_employees), use parseInt
+        return { ...prev, [name]: parseInt(value) };
+      }
+      return { ...prev, [name]: value };
+    });
   };
 
   const parseBulkInput = () => {
@@ -161,6 +171,19 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
             } else if (fieldValue) {
               parsed[mappedField] = fieldValue;
               parsedCount++;
+            }
+          } else if (mappedField === 'capital') {
+            // Handle formatted capital values like "2,500.00 €" or "2500.00"
+            if (fieldValue && fieldValue !== '' && fieldValue !== ',' && fieldValue !== '-') {
+              // Remove currency symbols (€, $, etc.), thousands separators (commas), and whitespace
+              const cleanValue = fieldValue.replace(/[€$£¥,\s]/g, '');
+              // Parse as float
+              const numValue = parseFloat(cleanValue);
+              if (!isNaN(numValue) && numValue >= 0) {
+                // Convert to string with 2 decimal places
+                parsed[mappedField] = numValue.toFixed(2);
+                parsedCount++;
+              }
             }
           } else {
             // Set value even if empty (for fields like address, phone, etc.)
@@ -378,11 +401,13 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
         <div className="form-group">
           <label htmlFor="capital">Kapitali</label>
           <input
-            type="text"
+            type="number"
             id="capital"
             name="capital"
             value={formData.capital || ''}
             onChange={handleChange}
+            step="0.01"
+            min="0"
             placeholder="0.00"
             disabled={loading}
           />
