@@ -47,6 +47,14 @@ const Navbar = () => {
               <Link to="/businesses" className="navbar__link">
                 Bizneset
               </Link>
+              {user?.tenant?.issuer_business_id && (
+                <Link 
+                  to={`/businesses/${user.tenant.issuer_business_id}/articles`} 
+                  className="navbar__link"
+                >
+                  Artikujt
+                </Link>
+              )}
               {user?.roles?.includes('ROLE_ADMIN') && (
                 <Link to="/users" className="navbar__link">
                   Përdoruesit

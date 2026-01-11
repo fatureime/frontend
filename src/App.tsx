@@ -11,6 +11,7 @@ import InvoicePage from './components/InvoicePage'
 import TenantsPage from './components/TenantsPage'
 import UsersPage from './components/UsersPage'
 import BusinessesPage from './components/BusinessesPage'
+import ArticlesPage from './components/ArticlesPage'
 import './styles/main.scss'
 
 function App() {
@@ -54,6 +55,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <BusinessesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/businesses/:businessId/articles"
+              element={
+                <ProtectedRoute>
+                  <ArticlesPage />
                 </ProtectedRoute>
               }
             />

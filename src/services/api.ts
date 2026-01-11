@@ -171,6 +171,30 @@ export interface CreateBusinessData {
 
 export interface UpdateBusinessData extends Partial<CreateBusinessData> {}
 
+export interface Article {
+  id: number;
+  name: string;
+  description?: string;
+  unit_price: string;
+  unit?: string;
+  business_id: number;
+  created_at?: string;
+  updated_at?: string;
+  business?: {
+    id: number;
+    business_name: string;
+  };
+}
+
+export interface CreateArticleData {
+  name: string;
+  description?: string;
+  unit_price: number | string;
+  unit?: string;
+}
+
+export interface UpdateArticleData extends Partial<CreateArticleData> {}
+
 // API methods
 export const authApi = {
   /**
@@ -382,6 +406,49 @@ export const businessesApi = {
    */
   async deleteBusiness(id: number): Promise<{ message: string }> {
     const response = await api.delete(`/businesses/${id}`);
+    return response.data;
+  },
+};
+
+// Article API methods
+export const articlesApi = {
+  /**
+   * Get all articles for a business
+   */
+  async getArticles(businessId: number): Promise<Article[]> {
+    const response = await api.get(`/businesses/${businessId}/articles`);
+    return response.data;
+  },
+
+  /**
+   * Get a single article by ID
+   */
+  async getArticle(businessId: number, id: number): Promise<Article> {
+    const response = await api.get(`/businesses/${businessId}/articles/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Create a new article
+   */
+  async createArticle(businessId: number, data: CreateArticleData): Promise<Article> {
+    const response = await api.post(`/businesses/${businessId}/articles`, data);
+    return response.data;
+  },
+
+  /**
+   * Update an article
+   */
+  async updateArticle(businessId: number, id: number, data: UpdateArticleData): Promise<Article> {
+    const response = await api.put(`/businesses/${businessId}/articles/${id}`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete an article
+   */
+  async deleteArticle(businessId: number, id: number): Promise<{ message: string }> {
+    const response = await api.delete(`/businesses/${businessId}/articles/${id}`);
     return response.data;
   },
 };
