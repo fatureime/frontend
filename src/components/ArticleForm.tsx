@@ -1,15 +1,19 @@
-import { useState } from 'react';
-import { articlesApi, Article, CreateArticleData } from '../services/api';
+import { useState, useEffect } from 'react';
+import { articlesApi, Article, CreateArticleData, Business } from '../services/api';
 import './ArticleForm.scss';
 
 interface ArticleFormProps {
-  businessId: number;
+  businessId: number | null;
   article?: Article | null;
+  businesses: Business[];
+  currentBusiness: Business | null;
+  isAdminTenant: boolean;
+  onBusinessChange?: (businessId: number) => void;
   onSave: () => void;
   onCancel: () => void;
 }
 
-const ArticleForm = ({ businessId, article, onSave, onCancel }: ArticleFormProps) => {
+const ArticleForm = ({ businessId, article, businesses, currentBusiness, isAdminTenant, onBusinessChange, onSave, onCancel }: ArticleFormProps) => {
   const isEditMode = !!article;
 
   const [formData, setFormData] = useState<CreateArticleData>({
@@ -19,8 +23,31 @@ const ArticleForm = ({ businessId, article, onSave, onCancel }: ArticleFormProps
     unit: article?.unit || '',
   });
 
+  const [selectedBusinessId, setSelectedBusinessId] = useState<number>(() => {
+    // If editing, use the article's business_id, otherwise use the provided businessId
+    return article?.business_id || businessId || (businesses.length > 0 ? businesses[0].id : 0);
+  });
+
+  // Update selectedBusinessId when businessId or article changes
+  useEffect(() => {
+    if (isEditMode && article?.business_id) {
+      setSelectedBusinessId(article.business_id);
+    } else if (businessId) {
+      setSelectedBusinessId(businessId);
+    } else if (businesses.length > 0) {
+      setSelectedBusinessId(businesses[0].id);
+    }
+  }, [businessId, article, isEditMode, businesses]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleBusinessChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newBusinessId = parseInt(e.target.value);
+    setSelectedBusinessId(newBusinessId);
+    if (onBusinessChange) {
+      onBusinessChange(newBusinessId);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,10 +63,16 @@ const ArticleForm = ({ businessId, article, onSave, onCancel }: ArticleFormProps
         unit: formData.unit?.trim() || undefined,
       };
 
+      const targetBusinessId = isAdminTenant ? selectedBusinessId : (businessId || selectedBusinessId);
+      if (!targetBusinessId) {
+        setError('Ju lutem zgjidhni një biznes');
+        setLoading(false);
+        return;
+      }
       if (isEditMode && article) {
-        await articlesApi.updateArticle(businessId, article.id, cleanedData);
+        await articlesApi.updateArticle(targetBusinessId, article.id, cleanedData);
       } else {
-        await articlesApi.createArticle(businessId, cleanedData);
+        await articlesApi.createArticle(targetBusinessId, cleanedData);
       }
       onSave();
     } catch (err: unknown) {
@@ -71,6 +104,41 @@ const ArticleForm = ({ businessId, article, onSave, onCancel }: ArticleFormProps
         {error && (
           <div className="error-message">
             {error}
+          </div>
+        )}
+
+        {businesses.length > 0 && (
+          <div className="form-group">
+            <label htmlFor="business">Biznesi</label>
+            {isAdminTenant ? (
+              <select
+                id="business"
+                name="business"
+                value={selectedBusinessId}
+                onChange={handleBusinessChange}
+                disabled={loading}
+                className="form-select"
+              >
+                {businesses.map((business) => (
+                  <option key={business.id} value={business.id}>
+                    {business.business_name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                id="business"
+                name="business"
+                value={currentBusiness?.business_name || ''}
+                disabled
+                className="form-input-disabled"
+                style={{ backgroundColor: '#f5f5f5', color: '#666', cursor: 'not-allowed' }}
+              />
+            )}
+            <small className="form-hint">
+              {isAdminTenant ? 'Zgjidhni biznesin për të cilin dëshironi të krijoni artikullin' : 'Biznesi aktual i hapësirëmarrësit tuaj'}
+            </small>
           </div>
         )}
 
