@@ -31,7 +31,7 @@ const TenantsPage = () => {
         }
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load tenants');
+      setError(err.response?.data?.error || 'Dështoi ngarkimi i hapësirëmarrësve');
     } finally {
       setLoading(false);
     }
@@ -67,7 +67,7 @@ const TenantsPage = () => {
   };
 
   const handleDelete = async (tenantId: number) => {
-    if (!window.confirm('Are you sure you want to delete this tenant? This action cannot be undone.')) {
+    if (!window.confirm('Jeni të sigurt që dëshironi të fshini këtë hapësirëmarrës? Ky veprim nuk mund të zhbëhet.')) {
       return;
     }
 
@@ -79,7 +79,7 @@ const TenantsPage = () => {
         setIsEditing(false);
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to delete tenant');
+      setError(err.response?.data?.error || 'Dështoi fshirja e hapësirëmarrësit');
     }
   };
 
@@ -89,10 +89,10 @@ const TenantsPage = () => {
       <div className="tenants-page">
         <div className="container">
           <div className="access-denied">
-            <h2>Access Denied</h2>
-            <p>You do not have permission to access tenant management. Only users from admin tenants can view this page.</p>
+            <h2>Qasja e Refuzuar</h2>
+            <p>Ju nuk keni leje për të qasur menaxhimin e hapësirëmarrësve. Vetëm përdoruesit nga hapësirëmarrësit menagjues mund ta shohin këtë faqe.</p>
             <button onClick={() => navigate('/dashboard')} className="btn btn-primary">
-              Go to Dashboard
+              Shko te Paneli
             </button>
           </div>
         </div>
@@ -104,7 +104,7 @@ const TenantsPage = () => {
     return (
       <div className="tenants-page">
         <div className="container">
-          <div className="loading">Loading tenants...</div>
+          <div className="loading">Duke u ngarkuar hapësirëmarrësit...</div>
         </div>
       </div>
     );
@@ -114,12 +114,12 @@ const TenantsPage = () => {
     <div className="tenants-page">
       <div className="container">
         <div className="tenants-header">
-          <h1>Tenant Management</h1>
+          <h1>Menaxhimi i Hapësirëmarrësve</h1>
           {user?.tenant && (
             <div className="current-tenant-info">
-              <span>Current Tenant: <strong>{user.tenant.name}</strong></span>
-              {user.tenant.is_admin && <span className="badge admin">Admin</span>}
-              {user.tenant.has_paid && <span className="badge paid">Paid</span>}
+              <span>Hapësirëmarrësi Aktual: <strong>{user.tenant.name}</strong></span>
+              {user.tenant.is_admin && <span className="badge admin">Menagjues</span>}
+              {user.tenant.has_paid && <span className="badge paid">Ka Paguar</span>}
             </div>
           )}
         </div>
@@ -140,9 +140,9 @@ const TenantsPage = () => {
         ) : (
           <div className="tenants-content">
             <div className="tenants-list">
-              <h2>Tenants</h2>
+              <h2>Hapësirëmarrësit</h2>
               {tenants.length === 0 ? (
-                <p className="no-tenants">No tenants found.</p>
+                <p className="no-tenants">Nuk u gjetën hapësirëmarrës.</p>
               ) : (
                 <div className="tenant-cards">
                   {tenants.map((tenant) => (
@@ -150,29 +150,29 @@ const TenantsPage = () => {
                       <div className="tenant-card-header">
                         <h3>{tenant.name}</h3>
                         <div className="tenant-badges">
-                          {tenant.is_admin && <span className="badge admin">Admin</span>}
-                          {tenant.has_paid && <span className="badge paid">Paid</span>}
+                          {tenant.is_admin && <span className="badge admin">Menagjues</span>}
+                          {tenant.has_paid && <span className="badge paid">I Paguar</span>}
                         </div>
                       </div>
                       <div className="tenant-card-body">
                         <p><strong>ID:</strong> {tenant.id}</p>
                         {tenant.users && (
-                          <p><strong>Users:</strong> {tenant.users.length}</p>
+                          <p><strong>Përdoruesit:</strong> {tenant.users.length}</p>
                         )}
                         {tenant.created_at && (
-                          <p><strong>Created:</strong> {new Date(tenant.created_at).toLocaleDateString()}</p>
+                          <p><strong>Krijuar:</strong> {new Date(tenant.created_at).toLocaleDateString()}</p>
                         )}
                       </div>
                       <div className="tenant-card-actions">
                         <button onClick={() => handleEdit(tenant)} className="btn btn-primary">
-                          Edit
+                          Ndrysho
                         </button>
                         {user?.tenant?.is_admin && (
                           <button
                             onClick={() => handleDelete(tenant.id)}
                             className="btn btn-danger"
                           >
-                            Delete
+                            Fshi
                           </button>
                         )}
                       </div>

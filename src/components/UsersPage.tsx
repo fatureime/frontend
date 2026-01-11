@@ -90,7 +90,7 @@ const UsersPage = () => {
   };
 
   const handleDelete = async (userId: number) => {
-    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+    if (!window.confirm('Jeni të sigurt që dëshironi të fshini këtë përdorues? Ky veprim nuk mund të zhbëhet.')) {
       return;
     }
 
@@ -102,7 +102,7 @@ const UsersPage = () => {
         setIsEditing(false);
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to delete user');
+      setError(err.response?.data?.error || 'Dështoi fshirja e përdoruesit');
     }
   };
 
@@ -112,10 +112,10 @@ const UsersPage = () => {
       <div className="users-page">
         <div className="container">
           <div className="access-denied">
-            <h2>Access Denied</h2>
-            <p>You do not have permission to access user management. Only admin users can view this page.</p>
+            <h2>Qasja e Refuzuar</h2>
+            <p>Ju nuk keni leje për të aksesuar menaxhimin e përdoruesve. Vetëm përdoruesit menagjerial mund ta shohin këtë faqe.</p>
             <button onClick={() => navigate('/dashboard')} className="btn btn-primary">
-              Go to Dashboard
+              Shko te Paneli
             </button>
           </div>
         </div>
@@ -127,7 +127,7 @@ const UsersPage = () => {
     return (
       <div className="users-page">
         <div className="container">
-          <div className="loading">Loading users...</div>
+          <div className="loading">Duke u ngarkuar përdoruesit...</div>
         </div>
       </div>
     );
@@ -137,16 +137,16 @@ const UsersPage = () => {
     <div className="users-page">
       <div className="container">
         <div className="users-header">
-          <h1>User Management</h1>
+          <h1>Menaxhimi i Përdoruesve</h1>
           <div className="users-header-actions">
             {user?.tenant && (
               <div className="current-tenant-info">
-                <span>Current Tenant: <strong>{user.tenant.name}</strong></span>
-                {user.tenant.is_admin && <span className="badge admin">Admin</span>}
+                <span>Hapësirëmarrësi Aktual: <strong>{user.tenant.name}</strong></span>
+                {user.tenant.is_admin && <span className="badge admin">Menagjues</span>}
               </div>
             )}
             <button onClick={handleInvite} className="btn btn-primary">
-              Invite User
+              Fto Përdorues
             </button>
           </div>
         </div>
@@ -176,7 +176,7 @@ const UsersPage = () => {
           <div className="users-content">
             {isAdminTenant && tenants.length > 0 && (
               <div className="tenant-filter">
-                <label htmlFor="tenant-filter">Filter by Tenant:</label>
+                <label htmlFor="tenant-filter">Filtro sipas Hapësirëmarrësit:</label>
                 <select
                   id="tenant-filter"
                   value={selectedTenantId || ''}
@@ -193,9 +193,9 @@ const UsersPage = () => {
             )}
 
             <div className="users-list">
-              <h2>Users</h2>
+              <h2>Përdoruesit</h2>
               {users.length === 0 ? (
-                <p className="no-users">No users found.</p>
+                <p className="no-users">Nuk u gjetën përdorues.</p>
               ) : (
                 <div className="user-cards">
                   {users.map((userItem) => (
@@ -204,26 +204,26 @@ const UsersPage = () => {
                         <h3>{userItem.email}</h3>
                         <div className="user-badges">
                           {userItem.roles?.includes('ROLE_ADMIN') && (
-                            <span className="badge admin">Admin</span>
+                            <span className="badge admin">Menagjues</span>
                           )}
                           {userItem.is_active ? (
-                            <span className="badge active">Active</span>
+                            <span className="badge active">Aktiv</span>
                           ) : (
-                            <span className="badge inactive">Inactive</span>
+                            <span className="badge inactive">Jo Aktiv</span>
                           )}
                           {!userItem.email_verified && (
-                            <span className="badge unverified">Unverified</span>
+                            <span className="badge unverified">I Paverifikuar</span>
                           )}
                         </div>
                       </div>
                       <div className="user-card-body">
                         <p><strong>ID:</strong> {userItem.id}</p>
-                        <p><strong>Roles:</strong> {userItem.roles?.join(', ') || 'ROLE_USER'}</p>
+                        <p><strong>Rolet:</strong> {userItem.roles?.join(', ') || 'ROLE_USER'}</p>
                         {userItem.tenant && (
-                          <p><strong>Tenant:</strong> {userItem.tenant.name}</p>
+                          <p><strong>Hapësirëmarrësi:</strong> {userItem.tenant.name}</p>
                         )}
                         {userItem.created_at && (
-                          <p><strong>Created:</strong> {new Date(userItem.created_at).toLocaleDateString()}</p>
+                          <p><strong>Krijuar:</strong> {new Date(userItem.created_at).toLocaleDateString()}</p>
                         )}
                       </div>
                       <div className="user-card-actions">

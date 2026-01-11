@@ -36,12 +36,12 @@ const InviteUserForm = ({ tenants, defaultTenantId, onSave, onCancel }: InviteUs
       }
 
       await usersApi.inviteUser(inviteData);
-      setSuccess('Invitation sent successfully!');
+      setSuccess('Ftesa u dërgua me sukses!');
       setTimeout(() => {
         onSave();
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to send invitation');
+      setError(err.response?.data?.error || 'Dështoi dërgimi i ftesës');
     } finally {
       setLoading(false);
     }
@@ -66,7 +66,7 @@ const InviteUserForm = ({ tenants, defaultTenantId, onSave, onCancel }: InviteUs
 
   return (
     <div className="invite-user-form">
-      <h2>Invite User</h2>
+      <h2>Fto Përdorues</h2>
       <form onSubmit={handleSubmit}>
         {error && (
           <div className="error-message">
@@ -81,7 +81,7 @@ const InviteUserForm = ({ tenants, defaultTenantId, onSave, onCancel }: InviteUs
         )}
 
         <div className="form-group">
-          <label htmlFor="email">Email Address</label>
+          <label htmlFor="email">Adresa e Email-it</label>
           <input
             type="email"
             id="email"
@@ -92,7 +92,7 @@ const InviteUserForm = ({ tenants, defaultTenantId, onSave, onCancel }: InviteUs
             disabled={loading}
             placeholder="user@example.com"
           />
-          <small>An invitation email will be sent to this address</small>
+          <small>Një email ftese do të dërgohet në këtë adresë</small>
         </div>
 
         <div className="form-group">
@@ -109,13 +109,13 @@ const InviteUserForm = ({ tenants, defaultTenantId, onSave, onCancel }: InviteUs
               }}
               disabled={loading}
             />
-            <span>Admin User (can manage users)</span>
+            <span>Përdorues Menagjues (mund të menaxhojë përdoruesit)</span>
           </label>
         </div>
 
         {tenants.length > 0 && (
           <div className="form-group">
-            <label htmlFor="tenant_id">Tenant</label>
+            <label htmlFor="tenant_id">Hapësirëmarrësi</label>
             <select
               id="tenant_id"
               name="tenant_id"
@@ -123,7 +123,7 @@ const InviteUserForm = ({ tenants, defaultTenantId, onSave, onCancel }: InviteUs
               onChange={handleChange}
               disabled={loading}
             >
-              <option value="">Select Tenant</option>
+              <option value="">Zgjidh Hapësirëmarrësin</option>
               {tenants.map((tenant) => (
                 <option key={tenant.id} value={tenant.id}>
                   {tenant.name}
@@ -135,10 +135,10 @@ const InviteUserForm = ({ tenants, defaultTenantId, onSave, onCancel }: InviteUs
 
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={loading || !!success}>
-            {loading ? 'Sending...' : success ? 'Sent!' : 'Send Invitation'}
+            {loading ? 'Duke u dërguar...' : success ? 'U Dërgua!' : 'Dërgo Ftesën'}
           </button>
           <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>
-            Cancel
+            Anulo
           </button>
         </div>
       </form>

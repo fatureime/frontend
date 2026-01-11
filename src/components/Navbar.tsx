@@ -42,16 +42,16 @@ const Navbar = () => {
           {isAuthenticated ? (
             <>
               <Link to="/dashboard" className="navbar__link">
-                Dashboard
+                Paneli
               </Link>
               {user?.roles?.includes('ROLE_ADMIN') && (
                 <Link to="/users" className="navbar__link">
-                  Users
+                  Përdoruesit
                 </Link>
               )}
               {user?.tenant?.is_admin && (
                 <Link to="/tenants" className="navbar__link">
-                  Tenants
+                  Hapësirëmarrësit
                 </Link>
               )}
               <div className="navbar__user">
@@ -59,7 +59,7 @@ const Navbar = () => {
                 {user?.tenant && (
                   <span className="navbar__user-tenant">
                     {user.tenant.name}
-                    {user.tenant.is_admin && <span className="badge">Admin</span>}
+                    {user.tenant.is_admin && <span className="badge">Menagjues</span>}
                   </span>
                 )}
               </div>

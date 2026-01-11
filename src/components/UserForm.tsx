@@ -45,7 +45,7 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
       await usersApi.updateUser(user.id, updateData);
       onSave();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update user');
+      setError(err.response?.data?.error || 'Dështoi përditësimi i përdoruesit');
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
 
   return (
     <div className="user-form">
-      <h2>Edit User</h2>
+      <h2>Ndrysho Përdoruesin</h2>
       <form onSubmit={handleSubmit}>
         {error && (
           <div className="error-message">
@@ -93,7 +93,7 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="password">New Password (leave blank to keep current)</label>
+          <label htmlFor="password">Fjalëkalim i Ri (lëreni bosh për të mbajtur atë aktual)</label>
           <input
             type="password"
             id="password"
@@ -103,7 +103,7 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
             disabled={loading}
             minLength={8}
           />
-          <small>Minimum 8 characters</small>
+          <small>Minimum 8 karaktere</small>
         </div>
 
         <div className="form-group">
@@ -120,7 +120,7 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
               }}
               disabled={loading}
             />
-            <span>Admin User (can manage users)</span>
+            <span>Përdorues Menagjues (mund të menaxhojë përdoruesit)</span>
           </label>
         </div>
 
@@ -133,13 +133,13 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
               onChange={handleChange}
               disabled={loading}
             />
-            <span>Active</span>
+            <span>Aktiv</span>
           </label>
         </div>
 
         {tenants.length > 0 && (
           <div className="form-group">
-            <label htmlFor="tenant_id">Tenant</label>
+            <label htmlFor="tenant_id">Hapësirëmarrësi</label>
             <select
               id="tenant_id"
               name="tenant_id"
@@ -147,7 +147,7 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
               onChange={handleChange}
               disabled={loading}
             >
-              <option value="">Select Tenant</option>
+              <option value="">Zgjidh Hapësirëmarrësin</option>
               {tenants.map((tenant) => (
                 <option key={tenant.id} value={tenant.id}>
                   {tenant.name}
@@ -159,10 +159,10 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
 
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Saving...' : 'Save Changes'}
+            {loading ? 'Duke u ruajtur...' : 'Ruaj Ndryshimet'}
           </button>
           <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>
-            Cancel
+            Anulo
           </button>
         </div>
       </form>

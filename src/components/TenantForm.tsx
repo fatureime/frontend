@@ -26,7 +26,7 @@ const TenantForm = ({ tenant, onSave, onCancel }: TenantFormProps) => {
       await tenantsApi.updateTenant(tenant.id, formData);
       onSave();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update tenant');
+      setError(err.response?.data?.error || 'Dështoi përditësimi i hapësirëmarrësit');
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ const TenantForm = ({ tenant, onSave, onCancel }: TenantFormProps) => {
 
   return (
     <div className="tenant-form">
-      <h2>Edit Tenant</h2>
+      <h2>Ndrysho Hapësirëmarrësin</h2>
       <form onSubmit={handleSubmit}>
         {error && (
           <div className="error-message">
@@ -51,7 +51,7 @@ const TenantForm = ({ tenant, onSave, onCancel }: TenantFormProps) => {
         )}
 
         <div className="form-group">
-          <label htmlFor="name">Tenant Name</label>
+          <label htmlFor="name">Emri i Hapësirëmarrësit</label>
           <input
             type="text"
             id="name"
@@ -72,7 +72,7 @@ const TenantForm = ({ tenant, onSave, onCancel }: TenantFormProps) => {
               onChange={handleChange}
               disabled={loading}
             />
-            <span>Has Paid</span>
+            <span>Ka Paguar</span>
           </label>
         </div>
 
@@ -85,16 +85,16 @@ const TenantForm = ({ tenant, onSave, onCancel }: TenantFormProps) => {
               onChange={handleChange}
               disabled={loading}
             />
-            <span>Admin Tenant (can access all businesses)</span>
+            <span>Hapësirëmarrës Menagjuesit (mund të aksesojë të gjitha hapësirëmarrësit)</span>
           </label>
         </div>
 
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Saving...' : 'Save Changes'}
+            {loading ? 'Duke u ruajtur...' : 'Ruaj Ndryshimet'}
           </button>
           <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>
-            Cancel
+            Anulo
           </button>
         </div>
       </form>
