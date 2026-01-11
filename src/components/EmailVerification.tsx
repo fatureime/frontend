@@ -60,7 +60,7 @@ const EmailVerification = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate('/businesses');
     }
   }, [isAuthenticated, navigate]);
 

@@ -333,7 +333,7 @@ const InvoicePage = () => {
     if (businessId) {
       navigate(`/businesses/${businessId}/invoices`);
     } else {
-      navigate('/dashboard');
+      navigate('/businesses');
     }
   };
 
@@ -496,11 +496,11 @@ const InvoicePage = () => {
               <table className="invoice-table">
                 <thead>
                   <tr>
+                    <th className="col-article">Artikulli</th>
                     <th className="col-description">Përshkrimi</th>
                     <th className="col-quantity">Sasia</th>
                     <th className="col-price">Çmimi për Njësi</th>
-                    <th style={{ width: '15%' }}>Artikulli</th>
-                    <th style={{ width: '12%' }}>Tatimi</th>
+                    <th className="col-tax">Tatimi</th>
                     <th className="col-total">Totali</th>
                     <th className="col-actions"></th>
                   </tr>
@@ -508,36 +508,7 @@ const InvoicePage = () => {
                 <tbody>
                   {items.map((item) => (
                     <tr key={item.id}>
-                      <td className="col-description">
-                        <input
-                          type="text"
-                          className="table-input"
-                          value={item.description}
-                          onChange={(e) => updateItem(item.id, 'description', e.target.value)}
-                          placeholder="Përshkrimi i artikullit"
-                        />
-                      </td>
-                      <td className="col-quantity">
-                        <input
-                          type="number"
-                          className="table-input"
-                          value={item.quantity}
-                          onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
-                          min="0"
-                          step="0.01"
-                        />
-                      </td>
-                      <td className="col-price">
-                        <input
-                          type="number"
-                          className="table-input"
-                          value={item.unitPrice}
-                          onChange={(e) => updateItem(item.id, 'unitPrice', e.target.value)}
-                          min="0"
-                          step="0.01"
-                        />
-                      </td>
-                      <td>
+                      <td className="col-article" data-label="Artikulli">
                         <select
                           className="table-input"
                           value={item.articleId || ''}
@@ -551,13 +522,41 @@ const InvoicePage = () => {
                           ))}
                         </select>
                       </td>
-                      <td>
+                      <td className="col-description" data-label="Përshkrimi">
+                        <input
+                          type="text"
+                          className="table-input"
+                          value={item.description}
+                          onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                          placeholder="Përshkrimi i artikullit"
+                        />
+                      </td>
+                      <td className="col-quantity" data-label="Sasia">
+                        <input
+                          type="number"
+                          className="table-input"
+                          value={item.quantity}
+                          onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
+                          min="0"
+                          step="0.01"
+                        />
+                      </td>
+                      <td className="col-price" data-label="Çmimi për Njësi">
+                        <input
+                          type="number"
+                          className="table-input"
+                          value={item.unitPrice}
+                          onChange={(e) => updateItem(item.id, 'unitPrice', e.target.value)}
+                          min="0"
+                          step="0.01"
+                        />
+                      </td>
+                      <td className="col-tax" data-label="Tatimi">
                         <select
                           className="table-input"
                           value={item.taxId || ''}
                           onChange={(e) => updateItem(item.id, 'taxId', e.target.value ? parseInt(e.target.value) : null)}
                         >
-                          <option value="">E përjashtuar</option>
                           {taxes.map(tax => (
                             <option key={tax.id} value={tax.id}>
                               {tax.rate === null ? 'E përjashtuar' : `${tax.rate}%`}
@@ -566,7 +565,7 @@ const InvoicePage = () => {
                           ))}
                         </select>
                       </td>
-                      <td className="col-total">
+                      <td className="col-total" data-label="Totali">
                         <span className="table-total">
                           {item.total.toFixed(2)} €
                         </span>

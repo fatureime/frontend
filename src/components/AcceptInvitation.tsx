@@ -21,7 +21,7 @@ const AcceptInvitation = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate('/businesses');
     }
   }, [isAuthenticated, navigate]);
 

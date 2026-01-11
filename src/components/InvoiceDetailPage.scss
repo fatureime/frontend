@@ -407,11 +407,76 @@
       .items-section {
         .items-table-container {
           .items-table {
-            font-size: 0.8rem;
+            // Hide table header on mobile
+            thead {
+              display: none;
+            }
 
-            thead th,
-            tbody td {
-              padding: 0.5rem;
+            tbody {
+              tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                padding: 1rem;
+                background: white;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                transition: box-shadow 0.3s;
+
+                &:hover {
+                  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                  background: #f9f9f9;
+                }
+
+                &:last-child {
+                  margin-bottom: 0;
+                }
+
+                td {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  padding: 0.75rem 0;
+                  border: none;
+                  border-bottom: 1px solid #f0f0f0;
+                  color: #666;
+                  flex-wrap: wrap;
+
+                  &:last-child {
+                    border-bottom: none;
+                  }
+
+                  // Add labels using data attributes
+                  &[data-label]::before {
+                    content: attr(data-label) ':';
+                    font-weight: 600;
+                    color: #666;
+                    margin-right: 1rem;
+                    flex-shrink: 0;
+                    min-width: 130px;
+                  }
+
+                  // Value/content styling
+                  > * {
+                    flex: 1;
+                    text-align: right;
+                    word-break: break-word;
+                  }
+
+                  strong {
+                    text-align: right;
+                  }
+
+                  .article-badge {
+                    margin-left: 0.5rem;
+                    flex-shrink: 0;
+                  }
+
+                  .tax-exempt {
+                    text-align: right;
+                  }
+                }
+              }
             }
           }
         }

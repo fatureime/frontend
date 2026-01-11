@@ -29,14 +29,6 @@ function App() {
             <Route path="/verify-email" element={<EmailVerification />} />
             <Route path="/accept-invitation" element={<AcceptInvitation />} />
             <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <InvoicePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/tenants"
               element={
                 <ProtectedRoute>

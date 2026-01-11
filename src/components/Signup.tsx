@@ -16,7 +16,7 @@ const Signup = () => {
 
   // Redirect if already authenticated
   if (isAuthenticated) {
-    navigate('/dashboard');
+    navigate('/businesses');
     return null;
   }
 

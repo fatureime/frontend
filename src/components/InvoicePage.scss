@@ -136,6 +136,12 @@
 .invoice-table-container {
   overflow-x: auto;
   margin-bottom: $spacing-lg;
+
+  @include mobile {
+    overflow-x: visible;
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 .invoice-table {
@@ -164,28 +170,145 @@
   tbody tr:hover {
     background: $bg-secondary;
   }
+
+  @include mobile {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+
+    // Hide table header on mobile
+    thead {
+      display: none;
+    }
+
+    tbody {
+      display: block;
+      width: 100%;
+
+      tr {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 1rem;
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        padding: 1rem;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: box-shadow 0.3s;
+        box-sizing: border-box;
+
+        &:hover {
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          background: $bg-secondary;
+        }
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        td {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.75rem 0;
+          border: none;
+          border-bottom: 1px solid #f0f0f0;
+          color: $text-primary;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          width: 100%;
+          box-sizing: border-box;
+
+          &:last-child {
+            border-bottom: none;
+            padding-top: 1rem;
+            justify-content: flex-end;
+          }
+
+          // Add labels using data attributes
+          &[data-label]::before {
+            content: attr(data-label) ':';
+            font-weight: $font-weight-semibold;
+            color: $text-secondary;
+            flex-shrink: 0;
+            min-width: 100px;
+            max-width: 40%;
+          }
+
+          // Value/content styling - ensure inputs and selects take proper space
+          .table-input {
+            flex: 1 1 auto;
+            min-width: 0;
+            width: auto !important;
+            max-width: 100%;
+          }
+
+          .table-total {
+            flex: 1 1 auto;
+            text-align: right;
+            font-weight: $font-weight-medium;
+            white-space: nowrap;
+            min-width: 0;
+          }
+
+          // Ensure span elements take proper space
+          > span {
+            flex: 1 1 auto;
+            text-align: right;
+            min-width: 0;
+          }
+
+          // For action buttons column (no label)
+          &:not([data-label]) {
+            justify-content: flex-end;
+          }
+
+          // For action buttons
+          .btn-remove {
+            flex-shrink: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+.col-article {
+  width: 18%;
+  min-width: 120px;
 }
 
 .col-description {
-  width: 40%;
+  width: 30%;
+  min-width: 150px;
 }
 
 .col-quantity {
-  width: 15%;
+  width: 8%;
+  min-width: 80px;
 }
 
 .col-price {
-  width: 20%;
+  width: 12%;
+  min-width: 100px;
+}
+
+.col-tax {
+  width: 12%;
+  min-width: 100px;
 }
 
 .col-total {
-  width: 15%;
+  width: 12%;
+  min-width: 100px;
   text-align: right;
   font-weight: $font-weight-medium;
 }
 
 .col-actions {
-  width: 10%;
+  width: 8%;
+  min-width: 60px;
   text-align: center;
 }
 
@@ -204,6 +327,13 @@
     outline: none;
     border-color: $primary;
     box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  }
+
+  @include mobile {
+    // Override width in mobile table layout
+    .invoice-table tbody tr td & {
+      width: auto;
+    }
   }
 }
 

@@ -40,7 +40,7 @@ const TenantsPage = () => {
   useEffect(() => {
     // Redirect if user is not part of an admin tenant
     if (user && !isAdminTenant) {
-      navigate('/dashboard');
+      navigate('/businesses');
       return;
     }
     
@@ -91,8 +91,8 @@ const TenantsPage = () => {
           <div className="access-denied">
             <h2>Qasja e Refuzuar</h2>
             <p>Ju nuk keni leje për të qasur menaxhimin e hapësirëmarrësve. Vetëm përdoruesit nga hapësirëmarrësit menagjues mund ta shohin këtë faqe.</p>
-            <button onClick={() => navigate('/dashboard')} className="btn btn-primary">
-              Shko te Paneli
+            <button onClick={() => navigate('/businesses')} className="btn btn-primary">
+              Shko te Bizneset
             </button>
           </div>
         </div>

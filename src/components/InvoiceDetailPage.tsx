@@ -307,8 +307,8 @@ const InvoiceDetailPage = () => {
                       .sort((a, b) => a.sort_order - b.sort_order)
                       .map((item, index) => (
                         <tr key={item.id}>
-                          <td>{index + 1}</td>
-                          <td>
+                          <td data-label="#">{index + 1}</td>
+                          <td data-label="Përshkrimi">
                             {item.description}
                             {item.article && (
                               <span className="article-badge" title="Nga artikulli">
@@ -316,9 +316,9 @@ const InvoiceDetailPage = () => {
                               </span>
                             )}
                           </td>
-                          <td>{parseFloat(item.quantity).toFixed(2)}</td>
-                          <td>{parseFloat(item.unit_price).toFixed(2)} €</td>
-                          <td>
+                          <td data-label="Sasia">{parseFloat(item.quantity).toFixed(2)}</td>
+                          <td data-label="Çmimi për Njësi">{parseFloat(item.unit_price).toFixed(2)} €</td>
+                          <td data-label="Tatimi">
                             {item.tax ? (
                               item.tax.rate === null ? (
                                 <span className="tax-exempt">E përjashtuar</span>
@@ -329,9 +329,9 @@ const InvoiceDetailPage = () => {
                               <span className="tax-exempt">E përjashtuar</span>
                             )}
                           </td>
-                          <td>{parseFloat(item.subtotal).toFixed(2)} €</td>
-                          <td>{parseFloat(item.tax_amount).toFixed(2)} €</td>
-                          <td><strong>{parseFloat(item.total).toFixed(2)} €</strong></td>
+                          <td data-label="Nëntotali">{parseFloat(item.subtotal).toFixed(2)} €</td>
+                          <td data-label="Tatimi">{parseFloat(item.tax_amount).toFixed(2)} €</td>
+                          <td data-label="Totali"><strong>{parseFloat(item.total).toFixed(2)} €</strong></td>
                         </tr>
                       ))}
                   </tbody>

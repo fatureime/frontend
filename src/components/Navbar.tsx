@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
 import './Navbar.scss';
@@ -7,9 +7,15 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
   };
 
   const handleLogout = () => {
@@ -17,6 +23,38 @@ const Navbar = () => {
     navigate('/');
     setIsMenuOpen(false);
   };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isMenuOpen &&
+        menuRef.current &&
+        toggleRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        !toggleRef.current.contains(event.target as Node)
+      ) {
+        closeMenu();
+      }
+    };
+
+    // Close menu on escape key
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isMenuOpen) {
+        closeMenu();
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isMenuOpen]);
 
   return (
     <nav className="navbar">
@@ -28,6 +66,7 @@ const Navbar = () => {
         </div>
 
         <button
+          ref={toggleRef}
           className="navbar__toggle"
           onClick={toggleMenu}
           aria-label="Toggle menu"
@@ -38,19 +77,26 @@ const Navbar = () => {
           <span className="navbar__toggle-icon"></span>
         </button>
 
-        <div className={`navbar__menu ${isMenuOpen ? 'navbar__menu--open' : ''}`}>
+        {isMenuOpen && <div className="navbar__overlay" onClick={closeMenu} />}
+
+        <div 
+          ref={menuRef}
+          className={`navbar__menu ${isMenuOpen ? 'navbar__menu--open' : ''}`}
+        >
           {isAuthenticated ? (
             <>
-              <Link to="/dashboard" className="navbar__link">
-                Paneli
-              </Link>
-              <Link to="/businesses" className="navbar__link">
+              <Link 
+                to="/businesses" 
+                className="navbar__link"
+                onClick={closeMenu}
+              >
                 Bizneset
               </Link>
               {user?.tenant?.issuer_business_id && (
                 <Link 
                   to={`/businesses/${user.tenant.issuer_business_id}/articles`} 
                   className="navbar__link"
+                  onClick={closeMenu}
                 >
                   Artikujt
                 </Link>
@@ -59,17 +105,26 @@ const Navbar = () => {
                 <Link 
                   to={`/businesses/${user.tenant.issuer_business_id}/invoices`} 
                   className="navbar__link"
+                  onClick={closeMenu}
                 >
                   Faturat
                 </Link>
               )}
               {user?.roles?.includes('ROLE_ADMIN') && (
-                <Link to="/users" className="navbar__link">
+                <Link 
+                  to="/users" 
+                  className="navbar__link"
+                  onClick={closeMenu}
+                >
                   Përdoruesit
                 </Link>
               )}
               {user?.tenant?.is_admin && (
-                <Link to="/tenants" className="navbar__link">
+                <Link 
+                  to="/tenants" 
+                  className="navbar__link"
+                  onClick={closeMenu}
+                >
                   Hapësirëmarrësit
                 </Link>
               )}
@@ -90,7 +145,11 @@ const Navbar = () => {
               </button>
             </>
           ) : (
-            <Link to="/login" className="navbar__link navbar__link--login">
+            <Link 
+              to="/login" 
+              className="navbar__link navbar__link--login"
+              onClick={closeMenu}
+            >
               Hyrje
             </Link>
           )}

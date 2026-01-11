@@ -47,7 +47,7 @@ const UsersPage = () => {
   useEffect(() => {
     // Redirect if user is not admin
     if (user && !isAdmin) {
-      navigate('/dashboard');
+      navigate('/businesses');
       return;
     }
     
@@ -114,8 +114,8 @@ const UsersPage = () => {
           <div className="access-denied">
             <h2>Qasja e Refuzuar</h2>
             <p>Ju nuk keni leje për të aksesuar menaxhimin e përdoruesve. Vetëm përdoruesit menagjerial mund ta shohin këtë faqe.</p>
-            <button onClick={() => navigate('/dashboard')} className="btn btn-primary">
-              Shko te Paneli
+            <button onClick={() => navigate('/businesses')} className="btn btn-primary">
+              Shko te Bizneset
             </button>
           </div>
         </div>

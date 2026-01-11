@@ -56,6 +56,27 @@
     padding: $spacing-sm;
     z-index: 1001;
 
+    @include mobile {
+      position: fixed;
+      bottom: $spacing-lg;
+      right: $spacing-lg;
+      background-color: $primary;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      padding: $spacing-md;
+      box-shadow: $shadow-lg;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+
+      .navbar__toggle-icon {
+        background-color: white;
+        width: 24px;
+        height: 3px;
+      }
+    }
+
     @include tablet {
       display: none;
     }
@@ -74,6 +95,22 @@
     transition: all $transition-fast;
   }
 
+  &__overlay {
+    display: none;
+
+    @include mobile {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      animation: fadeIn $transition-base;
+    }
+  }
+
   &__menu {
     display: flex;
     align-items: center;
@@ -81,20 +118,33 @@
 
     @include mobile {
       position: fixed;
-      top: 64px;
+      bottom: 0;
       left: 0;
       right: 0;
       background-color: $bg-primary;
       flex-direction: column;
       padding: $spacing-lg;
-      box-shadow: $shadow-lg;
-      transform: translateX(-100%);
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      transform: translateY(100%);
       transition: transform $transition-base;
       border-top: 1px solid $border-color;
+      border-radius: 16px 16px 0 0;
+      max-height: 80vh;
+      overflow-y: auto;
+      z-index: 1000;
 
       &--open {
-        transform: translateX(0);
+        transform: translateY(0);
       }
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
     }
   }
 

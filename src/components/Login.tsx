@@ -16,7 +16,7 @@ const Login = () => {
 
   // Redirect if already authenticated
   if (isAuthenticated) {
-    navigate('/dashboard');
+    navigate('/businesses');
     return null;
   }
 
@@ -31,7 +31,8 @@ const Login = () => {
         password,
         remember_me: rememberMe,
       });
-      navigate('/dashboard');
+      // Redirect to businesses page after successful login
+      navigate('/businesses');
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
       setError(

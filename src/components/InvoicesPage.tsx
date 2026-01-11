@@ -414,11 +414,11 @@ const InvoicesPage = () => {
                 <tbody>
                   {filteredInvoices.map((invoice) => (
                     <tr key={invoice.id}>
-                      <td>{invoice.invoice_number}</td>
-                      <td>{new Date(invoice.invoice_date).toLocaleDateString()}</td>
-                      <td>{new Date(invoice.due_date).toLocaleDateString()}</td>
-                      <td>{invoice.receiver?.business_name || 'N/A'}</td>
-                      <td>
+                      <td data-label="Numri i Faturës">{invoice.invoice_number}</td>
+                      <td data-label="Data">{new Date(invoice.invoice_date).toLocaleDateString()}</td>
+                      <td data-label="Data e Maturimit">{new Date(invoice.due_date).toLocaleDateString()}</td>
+                      <td data-label="Marrësi">{invoice.receiver?.business_name || 'N/A'}</td>
+                      <td data-label="Statusi">
                         <select
                           value={invoice.status}
                           onChange={(e) => handleStatusChange(invoice.id, e.target.value as InvoiceStatus)}
@@ -431,7 +431,7 @@ const InvoicesPage = () => {
                           <option value="cancelled">Anuluar</option>
                         </select>
                       </td>
-                      <td>{parseFloat(invoice.total).toFixed(2)} €</td>
+                      <td data-label="Totali">{parseFloat(invoice.total).toFixed(2)} €</td>
                       <td>
                         <div className="action-buttons">
                           <button
