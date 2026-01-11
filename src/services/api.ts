@@ -610,6 +610,17 @@ export const invoicesApi = {
     const response = await api.delete(`/businesses/${businessId}/invoices/${id}`);
     return response.data;
   },
+
+  /**
+   * Download invoice as PDF
+   */
+  async downloadInvoicePdf(businessId: number, invoiceId: number): Promise<Blob> {
+    const response = await api.get(
+      `/businesses/${businessId}/invoices/${invoiceId}/pdf`,
+      { responseType: 'blob' }
+    );
+    return response.data;
+  },
 };
 
 // InvoiceItem API methods

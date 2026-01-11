@@ -11,6 +11,7 @@ const InvoiceDetailPage = () => {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   const loadInvoice = useCallback(async () => {
     if (!businessId || !id) return;
@@ -68,6 +69,33 @@ const InvoiceDetailPage = () => {
   const handleBack = () => {
     if (businessId) {
       navigate(`/businesses/${businessId}/invoices`);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!businessId || !id || !invoice) return;
+
+    try {
+      setDownloading(true);
+      setError(null);
+      const blob = await invoicesApi.downloadInvoicePdf(
+        parseInt(businessId),
+        parseInt(id)
+      );
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${invoice.invoice_number}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Dështoi shkarkimi i PDF-së');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -166,6 +194,13 @@ const InvoiceDetailPage = () => {
               <option value="overdue">Vonuar</option>
               <option value="cancelled">Anuluar</option>
             </select>
+            <button
+              onClick={handleDownloadPdf}
+              className="btn btn-primary"
+              disabled={downloading}
+            >
+              {downloading ? 'Duke u shkarkuar...' : '📄 Shkarko PDF'}
+            </button>
             <button onClick={handleEdit} className="btn btn-primary">
               Ndrysho
             </button>

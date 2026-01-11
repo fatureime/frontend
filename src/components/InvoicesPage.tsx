@@ -22,6 +22,7 @@ const InvoicesPage = () => {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [downloadingIds, setDownloadingIds] = useState<Set<number>>(new Set());
 
   // Stabilize isAdminTenant to prevent unnecessary callback recreations
   const isAdminTenant = useMemo(() => user?.tenant?.is_admin === true, [user?.tenant?.is_admin]);
@@ -220,6 +221,38 @@ const InvoicesPage = () => {
     }
   };
 
+  const handleDownloadPdf = async (invoiceId: number, invoiceNumber: string) => {
+    const targetBusinessId = selectedBusinessId || businessId;
+    if (!targetBusinessId) return;
+
+    try {
+      setDownloadingIds(prev => new Set(prev).add(invoiceId));
+      setError(null);
+      const blob = await invoicesApi.downloadInvoicePdf(
+        parseInt(targetBusinessId.toString()),
+        invoiceId
+      );
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${invoiceNumber}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Dështoi shkarkimi i PDF-së');
+    } finally {
+      setDownloadingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(invoiceId);
+        return newSet;
+      });
+    }
+  };
+
   const getStatusBadgeClass = (status: InvoiceStatus): string => {
     switch (status) {
       case 'draft':
@@ -407,6 +440,14 @@ const InvoicesPage = () => {
                             title="Shiko"
                           >
                             Shiko
+                          </button>
+                          <button
+                            onClick={() => handleDownloadPdf(invoice.id, invoice.invoice_number)}
+                            className="btn btn-sm btn-secondary"
+                            title="Shkarko PDF"
+                            disabled={downloadingIds.has(invoice.id)}
+                          >
+                            {downloadingIds.has(invoice.id) ? '...' : '📄'}
                           </button>
                           <button
                             onClick={() => handleEdit(invoice.id)}
