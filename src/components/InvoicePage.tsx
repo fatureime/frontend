@@ -77,23 +77,25 @@ const InvoicePage = () => {
       const data = await businessesApi.getBusinesses();
       setBusinesses(data);
       
-      // Set default issuer: for admin tenants, first business; for normal tenants, their tenant's business
+      // Set default issuer: for admin tenants, first business; for normal tenants, their tenant's issuer business
       if (data.length > 0) {
         if (isAdminTenant) {
           setIssuerId(data[0].id);
         } else {
-          const tenantBusiness = data.find(b => b.tenant_id === user?.tenant?.id);
-          if (tenantBusiness) {
-            setIssuerId(tenantBusiness.id);
-          } else if (data.length > 0) {
-            setIssuerId(data[0].id);
+          // For non-admin tenants, use their tenant's issuer business
+          const issuerBusinessId = user?.tenant?.issuer_business_id;
+          if (issuerBusinessId) {
+            const issuerBusiness = data.find(b => b.id === issuerBusinessId);
+            if (issuerBusiness) {
+              setIssuerId(issuerBusiness.id);
+            }
           }
         }
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi ngarkimi i bizneseve');
     }
-  }, [isAdminTenant, user?.tenant?.id]);
+  }, [isAdminTenant, user?.tenant?.id, user?.tenant?.issuer_business_id]);
 
   const loadArticles = useCallback(async () => {
     if (!issuerId) return;
@@ -337,9 +339,10 @@ const InvoicePage = () => {
 
 
   // Filter businesses for issuer selection
+  // For non-admin tenants, only show their tenant's issuer business
   const availableIssuerBusinesses = isAdminTenant 
     ? businesses 
-    : businesses.filter(b => b.tenant_id === user?.tenant?.id);
+    : businesses.filter(b => b.id === user?.tenant?.issuer_business_id);
 
   if (loading) {
     return (
