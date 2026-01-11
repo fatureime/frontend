@@ -237,16 +237,6 @@ const InvoicesPage = () => {
     }
   };
 
-  const getStatusLabel = (status: InvoiceStatus): string => {
-    const labels: Record<InvoiceStatus, string> = {
-      draft: 'Draft',
-      sent: 'Dërguar',
-      paid: 'Paguar',
-      overdue: 'Vonuar',
-      cancelled: 'Anuluar',
-    };
-    return labels[status];
-  };
 
   if (!businessId && !isAdminTenant) {
     return (

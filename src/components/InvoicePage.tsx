@@ -38,7 +38,6 @@ const InvoicePage = () => {
   const isAdminTenant = user?.tenant?.is_admin === true;
 
   // State
-  const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const [dueDate, setDueDate] = useState(() => {
@@ -121,7 +120,6 @@ const InvoicePage = () => {
       setLoading(true);
       setError(null);
       const data = await invoicesApi.getInvoice(parseInt(businessId), parseInt(id));
-      setInvoice(data);
       setInvoiceNumber(data.invoice_number);
       setInvoiceDate(data.invoice_date.split('T')[0]);
       setDueDate(data.due_date.split('T')[0]);
@@ -130,7 +128,7 @@ const InvoicePage = () => {
       setReceiverId(data.receiver_id);
       
       if (data.items && data.items.length > 0) {
-        setItems(data.items.map((item, index) => ({
+        setItems(data.items.map((item) => ({
           id: item.id.toString(),
           description: item.description,
           quantity: parseFloat(item.quantity),
@@ -337,29 +335,6 @@ const InvoicePage = () => {
     }
   };
 
-  const handleClear = () => {
-    if (window.confirm('Jeni të sigurt që dëshironi të pastroni të gjitha të dhënat?')) {
-      setInvoiceDate(new Date().toISOString().split('T')[0]);
-      const date = new Date();
-      date.setDate(date.getDate() + 30);
-      setDueDate(date.toISOString().split('T')[0]);
-      setStatus('draft');
-      setReceiverId(null);
-      setItems([{
-        id: '1',
-        description: '',
-        quantity: 1,
-        unitPrice: 0,
-        articleId: null,
-        taxId: null,
-        sortOrder: 0,
-        subtotal: 0,
-        taxAmount: 0,
-        total: 0,
-      }]);
-      setError(null);
-    }
-  };
 
   // Filter businesses for issuer selection
   const availableIssuerBusinesses = isAdminTenant 
