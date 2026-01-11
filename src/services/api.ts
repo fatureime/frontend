@@ -195,6 +195,71 @@ export interface CreateArticleData {
 
 export interface UpdateArticleData extends Partial<CreateArticleData> {}
 
+export interface Tax {
+  id: number;
+  rate: string | null; // null for exempted
+  name: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface InvoiceItem {
+  id: number;
+  invoice_id: number;
+  article_id?: number | null;
+  tax_id?: number | null;
+  description: string;
+  quantity: string;
+  unit_price: string;
+  subtotal: string;
+  tax_amount: string;
+  total: string;
+  sort_order: number;
+  created_at?: string;
+  updated_at?: string;
+  article?: Article | null;
+  tax?: Tax | null;
+}
+
+export interface Invoice {
+  id: number;
+  invoice_number: string;
+  invoice_date: string;
+  due_date: string;
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  subtotal: string;
+  total: string;
+  issuer_id: number;
+  receiver_id: number;
+  created_at?: string;
+  updated_at?: string;
+  issuer?: Business;
+  receiver?: Business;
+  items?: InvoiceItem[];
+}
+
+export interface CreateInvoiceData {
+  receiver_id: number;
+  invoice_date: string;
+  due_date: string;
+  status?: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  items: CreateInvoiceItemData[];
+}
+
+export interface CreateInvoiceItemData {
+  description: string;
+  quantity: number | string;
+  unit_price: number | string;
+  article_id?: number | null;
+  tax_id?: number | null;
+  tax_rate?: number | null; // Alternative to tax_id
+  sort_order?: number;
+}
+
+export interface UpdateInvoiceData extends Partial<CreateInvoiceData> {
+  items?: CreateInvoiceItemData[];
+}
+
 // API methods
 export const authApi = {
   /**
@@ -449,6 +514,151 @@ export const articlesApi = {
    */
   async deleteArticle(businessId: number, id: number): Promise<{ message: string }> {
     const response = await api.delete(`/businesses/${businessId}/articles/${id}`);
+    return response.data;
+  },
+};
+
+// Tax API methods
+export const taxesApi = {
+  /**
+   * Get all taxes (all authenticated users)
+   */
+  async getTaxes(): Promise<Tax[]> {
+    const response = await api.get('/taxes');
+    return response.data;
+  },
+
+  /**
+   * Get a single tax by ID
+   */
+  async getTax(id: number): Promise<Tax> {
+    const response = await api.get(`/taxes/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Create a new tax (only admins of admin tenants)
+   */
+  async createTax(data: { rate: number | null; name?: string }): Promise<Tax> {
+    const response = await api.post('/taxes', data);
+    return response.data;
+  },
+
+  /**
+   * Update a tax (only admins of admin tenants)
+   */
+  async updateTax(id: number, data: { rate?: number | null; name?: string }): Promise<Tax> {
+    const response = await api.put(`/taxes/${id}`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete a tax (only admins of admin tenants)
+   */
+  async deleteTax(id: number): Promise<{ message: string }> {
+    const response = await api.delete(`/taxes/${id}`);
+    return response.data;
+  },
+};
+
+// Invoice API methods
+export const invoicesApi = {
+  /**
+   * Get all invoices for a business (as issuer)
+   */
+  async getInvoices(businessId: number): Promise<Invoice[]> {
+    const response = await api.get(`/businesses/${businessId}/invoices`);
+    return response.data;
+  },
+
+  /**
+   * Get all invoices (admin tenants only)
+   */
+  async getAllInvoices(): Promise<Invoice[]> {
+    const response = await api.get('/invoices');
+    return response.data;
+  },
+
+  /**
+   * Get a single invoice by ID
+   */
+  async getInvoice(businessId: number, id: number): Promise<Invoice> {
+    const response = await api.get(`/businesses/${businessId}/invoices/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Create a new invoice with items
+   */
+  async createInvoice(businessId: number, data: CreateInvoiceData): Promise<Invoice> {
+    const response = await api.post(`/businesses/${businessId}/invoices`, data);
+    return response.data;
+  },
+
+  /**
+   * Update an invoice and its items
+   */
+  async updateInvoice(businessId: number, id: number, data: UpdateInvoiceData): Promise<Invoice> {
+    const response = await api.put(`/businesses/${businessId}/invoices/${id}`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete an invoice (cascades to items)
+   */
+  async deleteInvoice(businessId: number, id: number): Promise<{ message: string }> {
+    const response = await api.delete(`/businesses/${businessId}/invoices/${id}`);
+    return response.data;
+  },
+};
+
+// InvoiceItem API methods
+export const invoiceItemsApi = {
+  /**
+   * Get all items for an invoice
+   */
+  async getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]> {
+    const response = await api.get(`/invoices/${invoiceId}/items`);
+    return response.data;
+  },
+
+  /**
+   * Get a single invoice item by ID
+   */
+  async getInvoiceItem(invoiceId: number, id: number): Promise<InvoiceItem> {
+    const response = await api.get(`/invoices/${invoiceId}/items/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Create a new invoice item
+   */
+  async createInvoiceItem(invoiceId: number, data: CreateInvoiceItemData): Promise<InvoiceItem> {
+    const response = await api.post(`/invoices/${invoiceId}/items`, data);
+    return response.data;
+  },
+
+  /**
+   * Update an invoice item
+   */
+  async updateInvoiceItem(invoiceId: number, id: number, data: Partial<CreateInvoiceItemData>): Promise<InvoiceItem> {
+    const response = await api.put(`/invoices/${invoiceId}/items/${id}`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete an invoice item
+   */
+  async deleteInvoiceItem(invoiceId: number, id: number): Promise<{ message: string }> {
+    const response = await api.delete(`/invoices/${invoiceId}/items/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Reorder invoice items
+   */
+  async reorderItems(invoiceId: number, itemIds: number[]): Promise<{ message: string }> {
+    const response = await api.post(`/invoices/${invoiceId}/items/reorder`, { item_ids: itemIds });
     return response.data;
   },
 };

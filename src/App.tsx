@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import Navbar from './components/Navbar'
 import LandingPage from './components/LandingPage'
@@ -8,6 +8,8 @@ import EmailVerification from './components/EmailVerification'
 import AcceptInvitation from './components/AcceptInvitation'
 import ProtectedRoute from './components/ProtectedRoute'
 import InvoicePage from './components/InvoicePage'
+import InvoicesPage from './components/InvoicesPage'
+import InvoiceDetailPage from './components/InvoiceDetailPage'
 import TenantsPage from './components/TenantsPage'
 import UsersPage from './components/UsersPage'
 import BusinessesPage from './components/BusinessesPage'
@@ -63,6 +65,44 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ArticlesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/businesses/:businessId/invoices"
+              element={
+                <ProtectedRoute>
+                  <InvoicesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/businesses/:businessId/invoices/create"
+              element={
+                <ProtectedRoute>
+                  <InvoicePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/businesses/:businessId/invoices/new"
+              element={
+                <Navigate to="../create" replace />
+              }
+            />
+            <Route
+              path="/businesses/:businessId/invoices/:id"
+              element={
+                <ProtectedRoute>
+                  <InvoiceDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/businesses/:businessId/invoices/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <InvoicePage />
                 </ProtectedRoute>
               }
             />

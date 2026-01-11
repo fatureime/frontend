@@ -55,6 +55,14 @@ const Navbar = () => {
                   Artikujt
                 </Link>
               )}
+              {user?.tenant?.issuer_business_id && (
+                <Link 
+                  to={`/businesses/${user.tenant.issuer_business_id}/invoices`} 
+                  className="navbar__link"
+                >
+                  Faturat
+                </Link>
+              )}
               {user?.roles?.includes('ROLE_ADMIN') && (
                 <Link to="/users" className="navbar__link">
                   Përdoruesit
