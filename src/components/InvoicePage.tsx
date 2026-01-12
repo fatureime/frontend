@@ -461,7 +461,7 @@ const InvoicePage = () => {
                 )}
               </div>
               <div className="info-group">
-                <label className="info-label">Fatura Prej *</label>
+                <label className="info-label">Fatura Për *</label>
                 <select
                   className="info-input"
                   value={receiverId || ''}

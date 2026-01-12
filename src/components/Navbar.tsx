@@ -169,7 +169,7 @@ const Navbar = () => {
         {showLogoutModal && (
           <div className="modal-overlay" onClick={handleLogoutCancel}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h3>Konfirmo Diljen</h3>
+              <h3>Konfirmo Daljen</h3>
               <p>Jeni të sigurt që dëshironi të dilni?</p>
               <div className="modal-actions">
                 <button

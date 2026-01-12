@@ -371,25 +371,51 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
           />
         </div>
 
-        <div className="form-group">
+        <div className="form-group form-group-logo">
           <label htmlFor="logo">Logo</label>
-          <input
-            type="file"
-            id="logo"
-            name="logo"
-            accept="image/jpeg,image/png,image/gif,image/svg+xml,image/webp"
-            onChange={handleLogoChange}
-            disabled={loading}
-          />
-          {logoPreview && (
-            <div style={{ marginTop: '10px' }}>
-              <img 
-                src={logoPreview} 
-                alt="Logo preview" 
-                style={{ maxWidth: '200px', maxHeight: '100px', objectFit: 'contain' }}
+          <div className="logo-upload-container">
+            <label htmlFor="logo" className="logo-upload-label">
+              <input
+                type="file"
+                id="logo"
+                name="logo"
+                accept="image/jpeg,image/png,image/gif,image/svg+xml,image/webp"
+                onChange={handleLogoChange}
+                disabled={loading}
+                className="logo-input"
               />
-            </div>
-          )}
+              <div className="logo-upload-area">
+                {logoPreview ? (
+                  <div className="logo-preview-container">
+                    <img 
+                      src={logoPreview} 
+                      alt="Logo preview" 
+                      className="logo-preview"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLogoFile(null);
+                        setLogoPreview(null);
+                        const fileInput = document.getElementById('logo') as HTMLInputElement;
+                        if (fileInput) fileInput.value = '';
+                      }}
+                      className="logo-remove-btn"
+                      disabled={loading}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ) : (
+                  <div className="logo-upload-placeholder">
+                    <span className="logo-upload-icon">📷</span>
+                    <span className="logo-upload-text">Kliko për të zgjedhur logo</span>
+                    <span className="logo-upload-hint">JPG, PNG, GIF, SVG ose WEBP (max 5MB)</span>
+                  </div>
+                )}
+              </div>
+            </label>
+          </div>
         </div>
 
         <div className="form-group">

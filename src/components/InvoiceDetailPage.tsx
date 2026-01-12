@@ -314,7 +314,7 @@ const InvoiceDetailPage = () => {
             </div>
 
             <div className="business-card">
-              <h3>Fatura Prej</h3>
+              <h3>Fatura Për</h3>
               {invoice.receiver?.logo && (
                 <img 
                   src={invoice.receiver.logo} 
