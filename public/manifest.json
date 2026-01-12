@@ -4,6 +4,7 @@
   "description": "Sistem për menaxhimin e faturave",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
   "background_color": "#1a1a1a",
   "theme_color": "#3b82f6",
   "orientation": "portrait-primary",
