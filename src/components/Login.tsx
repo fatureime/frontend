@@ -1,7 +1,8 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AxiosError } from 'axios';
 import { useAuth } from '../contexts/useAuth';
+import { businessesApi } from '../services/api';
 import './Login.scss';
 
 const Login = () => {
@@ -10,14 +11,52 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already authenticated
+  useEffect(() => {
+    const redirectToInvoices = async () => {
+      if (isAuthenticated && !isRedirecting) {
+        setIsRedirecting(true);
+        try {
+          // Try to use issuer business first, otherwise get first business
+          const issuerBusinessId = user?.tenant?.issuer_business_id;
+          if (issuerBusinessId) {
+            navigate(`/businesses/${issuerBusinessId}/invoices`);
+            return;
+          }
+
+          // Fetch businesses to get the first one
+          const businesses = await businessesApi.getBusinesses();
+          if (businesses.length > 0) {
+            navigate(`/businesses/${businesses[0].id}/invoices`);
+          } else {
+            // No businesses, redirect to businesses page to create one
+            navigate('/businesses');
+          }
+        } catch (err) {
+          // If fetching fails, redirect to businesses page
+          navigate('/businesses');
+        }
+      }
+    };
+
+    redirectToInvoices();
+  }, [isAuthenticated, user, navigate]);
+
   if (isAuthenticated) {
-    navigate('/businesses');
-    return null;
+    return (
+      <div className="login-page">
+        <div className="login-container">
+          <div className="login-card">
+            <div className="loading">Duke u ridrejtuar...</div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const handleSubmit = async (e: FormEvent) => {
@@ -31,8 +70,8 @@ const Login = () => {
         password,
         remember_me: rememberMe,
       });
-      // Redirect to businesses page after successful login
-      navigate('/businesses');
+      // The useEffect will handle redirect to invoices page after login
+      // when isAuthenticated becomes true
     } catch (err) {
       const axiosError = err as AxiosError<{ error?: string }>;
       setError(
