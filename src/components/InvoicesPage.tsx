@@ -401,6 +401,7 @@ const InvoicesPage = () => {
                     <th onClick={() => handleSort('due_date')} className="sortable">
                       Data e Maturimit {sortField === 'due_date' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </th>
+                    <th>Lëshuesi</th>
                     <th>Marrësi</th>
                     <th onClick={() => handleSort('status')} className="sortable">
                       Statusi {sortField === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
@@ -417,6 +418,7 @@ const InvoicesPage = () => {
                       <td data-label="Numri i Faturës">{invoice.invoice_number}</td>
                       <td data-label="Data">{new Date(invoice.invoice_date).toLocaleDateString()}</td>
                       <td data-label="Data e Maturimit">{new Date(invoice.due_date).toLocaleDateString()}</td>
+                      <td data-label="Lëshuesi">{invoice.issuer?.business_name || 'N/A'}</td>
                       <td data-label="Marrësi">{invoice.receiver?.business_name || 'N/A'}</td>
                       <td data-label="Statusi">
                         <select
