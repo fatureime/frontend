@@ -65,7 +65,7 @@ const ArticleForm = ({ businessId, article, businesses, currentBusiness, isAdmin
 
       const targetBusinessId = isAdminTenant ? selectedBusinessId : (businessId || selectedBusinessId);
       if (!targetBusinessId) {
-        setError('Ju lutem zgjidhni një biznes');
+        setError('Ju lutem zgjidhni një subjekt');
         setLoading(false);
         return;
       }
@@ -109,7 +109,7 @@ const ArticleForm = ({ businessId, article, businesses, currentBusiness, isAdmin
 
         {businesses.length > 0 && (
           <div className="form-group">
-            <label htmlFor="business">Biznesi</label>
+            <label htmlFor="business">Subjekti</label>
             {isAdminTenant ? (
               <select
                 id="business"
@@ -137,7 +137,7 @@ const ArticleForm = ({ businessId, article, businesses, currentBusiness, isAdmin
               />
             )}
             <small className="form-hint">
-              {isAdminTenant ? 'Zgjidhni biznesin për të cilin dëshironi të krijoni artikullin' : 'Biznesi aktual i hapësirëmarrësit tuaj'}
+              {isAdminTenant ? 'Zgjidhni subjektin për të cilin dëshironi të krijoni artikullin' : 'Subjekti aktual i hapësirëmarrësit tuaj'}
             </small>
           </div>
         )}

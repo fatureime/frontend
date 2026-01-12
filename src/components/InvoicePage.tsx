@@ -436,10 +436,10 @@ const InvoicePage = () => {
 
           {/* Business Selection */}
           <div className="invoice-section">
-            <h2 className="section-title">Bizneset</h2>
+            <h2 className="section-title">Subjektet</h2>
             <div className="invoice-info-grid">
               <div className="info-group">
-                <label className="info-label">Lëshuesi *</label>
+                <label className="info-label">Fatura Nga *</label>
                 <select
                   className="info-input"
                   value={issuerId || ''}
@@ -456,12 +456,12 @@ const InvoicePage = () => {
                 </select>
                 {!isAdminTenant && (
                   <small style={{ color: '#666', fontSize: '0.875rem' }}>
-                    Lëshuesi është biznesi i tenantit tuaj
+                    Fatura Nga është subjekti i tenantit tuaj
                   </small>
                 )}
               </div>
               <div className="info-group">
-                <label className="info-label">Marrësi *</label>
+                <label className="info-label">Fatura Prej *</label>
                 <select
                   className="info-input"
                   value={receiverId || ''}

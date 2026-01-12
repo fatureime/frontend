@@ -115,7 +115,7 @@ const UsersPage = () => {
             <h2>Qasja e Refuzuar</h2>
             <p>Ju nuk keni leje për të aksesuar menaxhimin e përdoruesve. Vetëm përdoruesit menagjerial mund ta shohin këtë faqe.</p>
             <button onClick={() => navigate('/businesses')} className="btn btn-primary">
-              Shko te Bizneset
+              Shko te Subjektet
             </button>
           </div>
         </div>

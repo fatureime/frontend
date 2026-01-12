@@ -55,6 +55,9 @@
     cursor: pointer;
     padding: $spacing-sm;
     z-index: 1001;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 
     @include mobile {
       position: fixed;
@@ -69,11 +72,14 @@
       align-items: center;
       justify-content: center;
       gap: 5px;
+      min-width: 56px;
+      min-height: 56px;
 
       .navbar__toggle-icon {
         background-color: white;
         width: 24px;
         height: 3px;
+        pointer-events: none;
       }
     }
 
@@ -84,6 +90,10 @@
     &:focus {
       outline: 2px solid $primary;
       outline-offset: 2px;
+    }
+
+    * {
+      pointer-events: none;
     }
   }
 
@@ -123,7 +133,7 @@
       right: 0;
       background-color: $bg-primary;
       flex-direction: column;
-      padding: $spacing-lg;
+      padding: 0;
       box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
       transform: translateY(100%);
       transition: transform $transition-base;
@@ -132,6 +142,7 @@
       max-height: 80vh;
       overflow-y: auto;
       z-index: 1000;
+      width: 100%;
 
       &--open {
         transform: translateY(0);
@@ -161,6 +172,19 @@
     cursor: pointer;
     font-family: inherit;
 
+    @include mobile {
+      width: 100%;
+      text-align: left;
+      padding: $spacing-md $spacing-lg;
+      border-bottom: 1px solid $border-color;
+      border-radius: 0;
+      display: block;
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
     &:hover {
       color: $primary;
       background-color: $bg-secondary;
@@ -170,6 +194,10 @@
       background-color: $primary;
       color: white;
       padding: $spacing-sm $spacing-lg;
+
+      @include mobile {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      }
 
       &:hover {
         background-color: $primary-dark;
@@ -181,6 +209,10 @@
       background-color: #fee2e2;
       color: #dc2626;
       padding: $spacing-sm $spacing-lg;
+
+      @include mobile {
+        border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+      }
 
       &:hover {
         background-color: #fecaca;
@@ -198,6 +230,9 @@
 
     @include mobile {
       align-items: flex-start;
+      width: 100%;
+      padding: $spacing-md $spacing-lg;
+      border-bottom: 1px solid $border-color;
     }
   }
 
@@ -226,5 +261,87 @@
       font-size: 0.625rem;
       font-weight: 600;
     }
+  }
+}
+
+// Logout Modal
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.2s ease-in-out;
+
+  h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    color: #333;
+  }
+
+  p {
+    margin: 0 0 1.5rem 0;
+    color: #666;
+    font-size: 1rem;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &.btn-primary {
+        background-color: #dc2626;
+        color: white;
+
+        &:hover {
+          background-color: #b91c1c;
+        }
+      }
+
+      &.btn-secondary {
+        background-color: #f3f4f6;
+        color: #333;
+
+        &:hover {
+          background-color: #e5e7eb;
+        }
+      }
+    }
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }

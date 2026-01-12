@@ -360,6 +360,18 @@
           font-size: 1rem;
         }
 
+        &.total-tax {
+          border-top: 1px solid #e0e0e0;
+          margin-top: 0.5rem;
+          padding-top: 0.5rem;
+          justify-content: flex-end;
+
+          .tax-breakdown {
+            width: 100%;
+            text-align: right;
+          }
+        }
+
         &.total-final {
           border-top: 2px solid #333;
           margin-top: 0.5rem;
@@ -369,6 +381,43 @@
           .total-value {
             font-size: 1.25rem;
             font-weight: 700;
+          }
+        }
+      }
+
+      .tax-subtable {
+        width: 100%;
+        margin-top: 0.5rem;
+        border-collapse: collapse;
+
+        tbody tr {
+          border-bottom: none;
+        }
+
+        td {
+          padding: 0.25rem 0;
+          font-size: 0.875rem;
+        }
+
+        .tax-rate-label {
+          text-align: left;
+          color: #666;
+          padding-left: 1rem;
+        }
+
+        .tax-rate-value {
+          text-align: right;
+          color: #333;
+        }
+
+        .tax-total-row {
+          border-top: 1px solid #e0e0e0;
+          margin-top: 0.25rem;
+          padding-top: 0.25rem;
+
+          .tax-rate-label,
+          .tax-rate-value {
+            font-weight: 600;
           }
         }
       }

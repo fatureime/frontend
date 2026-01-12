@@ -318,7 +318,7 @@ const InvoicesPage = () => {
         <div className="invoices-filters">
           {isAdminTenant && (
             <div className="filter-group">
-              <label htmlFor="business-select">Biznesi:</label>
+              <label htmlFor="business-select">Subjekti:</label>
               <select
                 id="business-select"
                 value={selectedBusinessId || businessId || ''}
@@ -401,8 +401,8 @@ const InvoicesPage = () => {
                     <th onClick={() => handleSort('due_date')} className="sortable">
                       Data e Maturimit {sortField === 'due_date' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </th>
-                    <th>Lëshuesi</th>
-                    <th>Marrësi</th>
+                    <th>Fatura Nga</th>
+                    <th>Fatura Prej</th>
                     <th onClick={() => handleSort('status')} className="sortable">
                       Statusi {sortField === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
                     </th>
@@ -418,8 +418,8 @@ const InvoicesPage = () => {
                       <td data-label="Numri i Faturës">{invoice.invoice_number}</td>
                       <td data-label="Data">{new Date(invoice.invoice_date).toLocaleDateString()}</td>
                       <td data-label="Data e Maturimit">{new Date(invoice.due_date).toLocaleDateString()}</td>
-                      <td data-label="Lëshuesi">{invoice.issuer?.business_name || 'N/A'}</td>
-                      <td data-label="Marrësi">{invoice.receiver?.business_name || 'N/A'}</td>
+                      <td data-label="Fatura Nga">{invoice.issuer?.business_name || 'N/A'}</td>
+                      <td data-label="Fatura Prej">{invoice.receiver?.business_name || 'N/A'}</td>
                       <td data-label="Statusi">
                         <select
                           value={invoice.status}
@@ -446,10 +446,10 @@ const InvoicesPage = () => {
                           <button
                             onClick={() => handleDownloadPdf(invoice.id, invoice.invoice_number)}
                             className="btn btn-sm btn-secondary"
-                            title="Shkarko PDF"
+                            title="Shkarko"
                             disabled={downloadingIds.has(invoice.id)}
                           >
-                            {downloadingIds.has(invoice.id) ? '...' : '📄'}
+                            {downloadingIds.has(invoice.id) ? 'Duke u shkarkuar...' : 'Shkarko'}
                           </button>
                           <button
                             onClick={() => handleEdit(invoice.id)}

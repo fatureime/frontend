@@ -6,6 +6,9 @@
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   .invoices-header {
@@ -83,16 +86,23 @@
     padding: 1rem;
     background: #f5f5f5;
     border-radius: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
 
     .filter-group {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+      flex: 0 1 auto;
+      min-width: 0;
+      max-width: 100%;
 
       label {
         font-weight: 500;
         color: #333;
         white-space: nowrap;
+        flex-shrink: 0;
       }
 
       select {
@@ -102,6 +112,9 @@
         font-size: 0.9rem;
         background: white;
         cursor: pointer;
+        min-width: 0;
+        flex: 1;
+        max-width: 100%;
 
         &:focus {
           outline: none;
@@ -290,13 +303,29 @@
     .invoices-filters {
       flex-direction: column;
       align-items: stretch;
+      width: 100%;
+      max-width: 100%;
+      overflow: visible;
+      padding: 1rem;
+      box-sizing: border-box;
 
       .filter-group {
         flex-direction: column;
         align-items: stretch;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
 
         label {
           margin-bottom: 0.25rem;
+          white-space: normal;
+          word-break: break-word;
+        }
+
+        select {
+          width: 100%;
+          max-width: 100%;
+          box-sizing: border-box;
         }
       }
     }

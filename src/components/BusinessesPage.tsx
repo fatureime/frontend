@@ -58,11 +58,11 @@ const BusinessesPage = () => {
   const handleDelete = async (businessId: number) => {
     // Check if this is the issuer business
     if (user?.tenant?.issuer_business_id === businessId) {
-      setError('Nuk mund të fshihet biznesi emetues. Ky biznes përdoret për krijimin e faturave.');
+      setError('Nuk mund të fshihet subjekti emetues. Ky subjekt përdoret për krijimin e faturave.');
       return;
     }
 
-    if (!window.confirm('Jeni të sigurt që dëshironi të fshini këtë biznes? Ky veprim nuk mund të zhbëhet.')) {
+    if (!window.confirm('Jeni të sigurt që dëshironi të fshini këtë subjekt? Ky veprim nuk mund të zhbëhet.')) {
       return;
     }
 
@@ -82,7 +82,7 @@ const BusinessesPage = () => {
     return (
       <div className="businesses-page">
         <div className="container">
-          <div className="loading">Duke u ngarkuar bizneset...</div>
+          <div className="loading">Duke u ngarkuar subjektet...</div>
         </div>
       </div>
     );
@@ -92,9 +92,9 @@ const BusinessesPage = () => {
     <div className="businesses-page">
       <div className="container">
         <div className="businesses-header">
-          <h1>Menaxhimi i Bizneseve</h1>
+          <h1>Menaxhimi i Subjekteve</h1>
           <button onClick={handleCreate} className="btn btn-primary">
-            Krijo Biznes
+            Krijo Subjekt
           </button>
         </div>
 
@@ -114,9 +114,9 @@ const BusinessesPage = () => {
         ) : (
           <div className="businesses-content">
             <div className="businesses-list">
-              <h2>Bizneset</h2>
+              <h2>Subjektet</h2>
               {businesses.length === 0 ? (
-                <p className="no-businesses">Nuk u gjetën biznese.</p>
+                <p className="no-businesses">Nuk u gjetën subjekte.</p>
               ) : (
                 <div className="business-cards">
                   {businesses.map((business) => {
@@ -124,6 +124,14 @@ const BusinessesPage = () => {
                     return (
                     <div key={business.id} className="business-card">
                       <div className="business-card-header">
+                        {business.logo && (
+                          <img 
+                            src={business.logo} 
+                            alt={`${business.business_name} logo`}
+                            className="business-logo"
+                            style={{ maxWidth: '100px', maxHeight: '60px', marginBottom: '10px', objectFit: 'contain' }}
+                          />
+                        )}
                         <h3>{business.business_name}</h3>
                         {isIssuer && (
                           <span className="badge issuer">Biznesi Lëshues</span>
@@ -134,10 +142,13 @@ const BusinessesPage = () => {
                           <p><strong>Emri tregtar:</strong> {business.trade_name}</p>
                         )}
                         {business.business_type && (
-                          <p><strong>Lloji biznesit:</strong> {business.business_type}</p>
+                          <p><strong>Lloji i subjektit:</strong> {business.business_type}</p>
                         )}
                         {business.fiscal_number && (
                           <p><strong>Numri Fiskal:</strong> {business.fiscal_number}</p>
+                        )}
+                        {business.vat_number && (
+                          <p><strong>Numri i TVSH-së:</strong> {business.vat_number}</p>
                         )}
                         {business.business_number && (
                           <p><strong>Numri i biznesit:</strong> {business.business_number}</p>
@@ -172,7 +183,7 @@ const BusinessesPage = () => {
                           onClick={() => handleDelete(business.id)}
                           className="btn btn-danger"
                           disabled={isIssuer}
-                          title={isIssuer ? 'Nuk mund të fshihet biznesi lëshues' : ''}
+                          title={isIssuer ? 'Nuk mund të fshihet subjekti lëshues' : ''}
                         >
                           Fshi
                         </button>

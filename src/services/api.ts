@@ -138,6 +138,8 @@ export interface Business {
   email?: string;
   capital?: string;
   arbk_status?: string;
+  logo?: string;
+  vat_number?: string;
   created_by_id: number;
   tenant_id: number;
   created_at?: string;
@@ -167,6 +169,7 @@ export interface CreateBusinessData {
   email?: string;
   capital?: string;
   arbk_status?: string;
+  vat_number?: string;
 }
 
 export interface UpdateBusinessData extends Partial<CreateBusinessData> {}
@@ -453,16 +456,52 @@ export const businessesApi = {
   /**
    * Create a new business
    */
-  async createBusiness(data: CreateBusinessData): Promise<Business> {
-    const response = await api.post('/businesses', data);
+  async createBusiness(data: CreateBusinessData, logoFile?: File): Promise<Business> {
+    const formData = new FormData();
+    
+    // Add all fields to FormData
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value.toString());
+      }
+    });
+    
+    // Add logo file if provided
+    if (logoFile) {
+      formData.append('logo', logoFile);
+    }
+    
+    const response = await api.post('/businesses', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 
   /**
    * Update a business
    */
-  async updateBusiness(id: number, data: UpdateBusinessData): Promise<Business> {
-    const response = await api.put(`/businesses/${id}`, data);
+  async updateBusiness(id: number, data: UpdateBusinessData, logoFile?: File): Promise<Business> {
+    const formData = new FormData();
+    
+    // Add all fields to FormData
+    Object.entries(data).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value.toString());
+      }
+    });
+    
+    // Add logo file if provided
+    if (logoFile) {
+      formData.append('logo', logoFile);
+    }
+    
+    const response = await api.put(`/businesses/${id}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 

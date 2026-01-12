@@ -26,11 +26,14 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
     email: business?.email || '',
     capital: business?.capital || '',
     arbk_status: business?.arbk_status || '',
+    vat_number: business?.vat_number || '',
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bulkInput, setBulkInput] = useState('');
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(business?.logo || null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,17 +57,18 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
         email: formData.email?.trim() || undefined,
         capital: formData.capital?.trim() || undefined,
         arbk_status: formData.arbk_status?.trim() || undefined,
+        vat_number: formData.vat_number?.trim() || undefined,
       };
 
       if (isEditMode && business) {
-        await businessesApi.updateBusiness(business.id, cleanedData);
+        await businessesApi.updateBusiness(business.id, cleanedData, logoFile || undefined);
       } else {
-        await businessesApi.createBusiness(cleanedData);
+        await businessesApi.createBusiness(cleanedData, logoFile || undefined);
       }
       onSave();
     } catch (err: unknown) {
       const errorMessage = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
-      setError(errorMessage || (isEditMode ? 'Dështoi përditësimi i biznesit' : 'Dështoi krijimi i biznesit'));
+      setError(errorMessage || (isEditMode ? 'Dështoi përditësimi i subjektit' : 'Dështoi krijimi i subjektit'));
     } finally {
       setLoading(false);
     }
@@ -88,6 +92,34 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
     });
   };
 
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        setError('Format i pavlefshëm i skedarit. Ju lutem zgjidhni një imazh (jpg, png, gif, svg, webp).');
+        return;
+      }
+      
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Skedari është shumë i madh. Madhësia maksimale është 5MB.');
+        return;
+      }
+      
+      setLogoFile(file);
+      setError(null);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const parseBulkInput = () => {
     if (!bulkInput.trim()) {
       setError('Ju lutem vendosni të dhënat për të analizuar');
@@ -100,9 +132,9 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
 
       // Mapping of Albanian field names to form field names
       const fieldMapping: { [key: string]: keyof CreateBusinessData } = {
-        'Emri i biznesit': 'business_name',
+        'Emri i subjektit': 'business_name',
         'Emri tregtar': 'trade_name',
-        'Lloji biznesit': 'business_type',
+        'Lloji i subjektit': 'business_type',
         'Numri unik identifikues': 'unique_identifier_number',
         'Numri i biznesit': 'business_number',
         'Numri Fiskal': 'fiscal_number',
@@ -114,6 +146,8 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
         'E-mail': 'email',
         'Kapitali': 'capital',
         'Statusi në ARBK': 'arbk_status',
+        'Numri i TVSH-së': 'vat_number',
+        'VAT Number': 'vat_number',
       };
 
       let parsedCount = 0;
@@ -214,7 +248,7 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
 
   return (
     <div className="business-form">
-      <h2>{isEditMode ? 'Ndrysho Biznesin' : 'Krijo Biznes'}</h2>
+      <h2>{isEditMode ? 'Ndrysho Subjektin' : 'Krijo Subjekt'}</h2>
       <form onSubmit={handleSubmit}>
         {error && (
           <div className="error-message">
@@ -231,7 +265,7 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
 
         {!isEditMode && (
           <div className="form-group bulk-input-group">
-            <label htmlFor="bulk_input">Vendos të dhënat e biznesit (kopjo-ngjis formatin e plotë)</label>
+            <label htmlFor="bulk_input">Vendos të dhënat e subjektit (kopjo-ngjis formatin e plotë)</label>
             <textarea
               id="bulk_input"
               name="bulk_input"
@@ -278,7 +312,7 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="business_type">Lloji biznesit</label>
+          <label htmlFor="business_type">Lloji i subjektit</label>
           <input
             type="text"
             id="business_type"
@@ -302,7 +336,7 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="business_number">Numri i biznesit</label>
+          <label htmlFor="business_number">Numri i subjektit</label>
           <input
             type="text"
             id="business_number"
@@ -323,6 +357,39 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
             onChange={handleChange}
             disabled={loading}
           />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="vat_number">Numri i TVSH-së</label>
+          <input
+            type="text"
+            id="vat_number"
+            name="vat_number"
+            value={formData.vat_number || ''}
+            onChange={handleChange}
+            disabled={loading}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="logo">Logo</label>
+          <input
+            type="file"
+            id="logo"
+            name="logo"
+            accept="image/jpeg,image/png,image/gif,image/svg+xml,image/webp"
+            onChange={handleLogoChange}
+            disabled={loading}
+          />
+          {logoPreview && (
+            <div style={{ marginTop: '10px' }}>
+              <img 
+                src={logoPreview} 
+                alt="Logo preview" 
+                style={{ maxWidth: '200px', maxHeight: '100px', objectFit: 'contain' }}
+              />
+            </div>
+          )}
         </div>
 
         <div className="form-group">

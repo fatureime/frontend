@@ -92,7 +92,7 @@ const TenantsPage = () => {
             <h2>Qasja e Refuzuar</h2>
             <p>Ju nuk keni leje për të qasur menaxhimin e hapësirëmarrësve. Vetëm përdoruesit nga hapësirëmarrësit menagjues mund ta shohin këtë faqe.</p>
             <button onClick={() => navigate('/businesses')} className="btn btn-primary">
-              Shko te Bizneset
+              Shko te Subjektet
             </button>
           </div>
         </div>
@@ -157,7 +157,7 @@ const TenantsPage = () => {
                       <div className="tenant-card-body">
                         <p><strong>ID:</strong> {tenant.id}</p>
                         {tenant.issuer_business && (
-                          <p><strong>Biznesi Lëshues:</strong> {tenant.issuer_business.business_name}</p>
+                          <p><strong>Subjekti Lëshues:</strong> {tenant.issuer_business.business_name}</p>
                         )}
                         {tenant.users && (
                           <p><strong>Përdoruesit:</strong> {tenant.users.length}</p>

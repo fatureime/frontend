@@ -5,6 +5,7 @@ import './Navbar.scss';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -18,10 +19,19 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+    setIsMenuOpen(false);
+  };
+
+  const handleLogoutConfirm = () => {
     logout();
     navigate('/');
-    setIsMenuOpen(false);
+    setShowLogoutModal(false);
+  };
+
+  const handleLogoutCancel = () => {
+    setShowLogoutModal(false);
   };
 
   // Close menu when clicking outside
@@ -85,12 +95,21 @@ const Navbar = () => {
         >
           {isAuthenticated ? (
             <>
+              <div className="navbar__user">
+                <span className="navbar__user-email">{user?.email}</span>
+                {user?.tenant && (
+                  <span className="navbar__user-tenant">
+                    {user.tenant.name}
+                    {user.tenant.is_admin && <span className="badge">Menagjues</span>}
+                  </span>
+                )}
+              </div>
               <Link 
                 to="/businesses" 
                 className="navbar__link"
                 onClick={closeMenu}
               >
-                Bizneset
+                Subjektet
               </Link>
               {user?.tenant?.issuer_business_id && (
                 <Link 
@@ -128,17 +147,8 @@ const Navbar = () => {
                   Hapësirëmarrësit
                 </Link>
               )}
-              <div className="navbar__user">
-                <span className="navbar__user-email">{user?.email}</span>
-                {user?.tenant && (
-                  <span className="navbar__user-tenant">
-                    {user.tenant.name}
-                    {user.tenant.is_admin && <span className="badge">Menagjues</span>}
-                  </span>
-                )}
-              </div>
               <button
-                onClick={handleLogout}
+                onClick={handleLogoutClick}
                 className="navbar__link navbar__link--logout"
               >
                 Dil
@@ -154,6 +164,30 @@ const Navbar = () => {
             </Link>
           )}
         </div>
+
+        {/* Logout Confirmation Modal */}
+        {showLogoutModal && (
+          <div className="modal-overlay" onClick={handleLogoutCancel}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <h3>Konfirmo Diljen</h3>
+              <p>Jeni të sigurt që dëshironi të dilni?</p>
+              <div className="modal-actions">
+                <button
+                  onClick={handleLogoutConfirm}
+                  className="btn btn-primary"
+                >
+                  Po, Dil
+                </button>
+                <button
+                  onClick={handleLogoutCancel}
+                  className="btn btn-secondary"
+                >
+                  Anulo
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

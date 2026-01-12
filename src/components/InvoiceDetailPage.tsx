@@ -116,6 +116,45 @@ const InvoiceDetailPage = () => {
     }
   };
 
+  // Calculate tax groups from invoice items
+  const calculateTaxGroups = () => {
+    if (!invoice?.items) return {};
+
+    const taxGroups: Record<string, { label: string; rate: string | null; total: number }> = {};
+
+    invoice.items.forEach((item) => {
+      const tax = item.tax;
+      const taxRate = tax?.rate ?? null;
+      const key = taxRate === null ? 'exempt' : taxRate;
+      const label = taxRate === null ? 'E përjashtuar' : `TVSH ${taxRate}%`;
+
+      if (!taxGroups[key]) {
+        taxGroups[key] = {
+          label,
+          rate: taxRate,
+          total: 0,
+        };
+      }
+
+      const taxAmount = parseFloat(item.tax_amount || '0');
+      taxGroups[key].total += taxAmount;
+    });
+
+    // Sort by rate (exempt last)
+    const sortedKeys = Object.keys(taxGroups).sort((a, b) => {
+      if (a === 'exempt') return 1;
+      if (b === 'exempt') return -1;
+      return parseFloat(a) - parseFloat(b);
+    });
+
+    const sortedGroups: Record<string, { label: string; rate: string | null; total: number }> = {};
+    sortedKeys.forEach((key) => {
+      sortedGroups[key] = taxGroups[key];
+    });
+
+    return sortedGroups;
+  };
+
   const getStatusLabel = (status: InvoiceStatus): string => {
     const labels: Record<InvoiceStatus, string> = {
       draft: 'Draft',
@@ -199,7 +238,7 @@ const InvoiceDetailPage = () => {
               className="btn btn-primary"
               disabled={downloading}
             >
-              {downloading ? 'Duke u shkarkuar...' : '📄 Shkarko PDF'}
+              {downloading ? 'Duke u shkarkuar...' : 'Shkarko'}
             </button>
             <button onClick={handleEdit} className="btn btn-primary">
               Ndrysho
@@ -246,11 +285,21 @@ const InvoiceDetailPage = () => {
           {/* Issuer and Receiver */}
           <div className="businesses-section">
             <div className="business-card">
-              <h3>Lëshuesi</h3>
+              <h3>Fatura Nga</h3>
+              {invoice.issuer?.logo && (
+                <img 
+                  src={invoice.issuer.logo} 
+                  alt={`${invoice.issuer.business_name} logo`}
+                  style={{ maxWidth: '150px', maxHeight: '80px', marginBottom: '10px', objectFit: 'contain' }}
+                />
+              )}
               <div className="business-details">
                 <p><strong>Emri:</strong> {invoice.issuer?.business_name || 'N/A'}</p>
                 {invoice.issuer?.fiscal_number && (
                   <p><strong>Numri Fiskal:</strong> {invoice.issuer.fiscal_number}</p>
+                )}
+                {invoice.issuer?.vat_number && (
+                  <p><strong>Numri i TVSH-së:</strong> {invoice.issuer.vat_number}</p>
                 )}
                 {invoice.issuer?.address && (
                   <p><strong>Adresa:</strong> {invoice.issuer.address}</p>
@@ -265,11 +314,21 @@ const InvoiceDetailPage = () => {
             </div>
 
             <div className="business-card">
-              <h3>Marrësi</h3>
+              <h3>Fatura Prej</h3>
+              {invoice.receiver?.logo && (
+                <img 
+                  src={invoice.receiver.logo} 
+                  alt={`${invoice.receiver.business_name} logo`}
+                  style={{ maxWidth: '150px', maxHeight: '80px', marginBottom: '10px', objectFit: 'contain' }}
+                />
+              )}
               <div className="business-details">
                 <p><strong>Emri:</strong> {invoice.receiver?.business_name || 'N/A'}</p>
                 {invoice.receiver?.fiscal_number && (
                   <p><strong>Numri Fiskal:</strong> {invoice.receiver.fiscal_number}</p>
+                )}
+                {invoice.receiver?.vat_number && (
+                  <p><strong>Numri i TVSH-së:</strong> {invoice.receiver.vat_number}</p>
                 )}
                 {invoice.receiver?.address && (
                   <p><strong>Adresa:</strong> {invoice.receiver.address}</p>
@@ -346,8 +405,47 @@ const InvoiceDetailPage = () => {
           <div className="totals-section">
             <div className="totals-card">
               <div className="total-row">
-                <span className="total-label">Nëntotali:</span>
+                <span className="total-label">Vlera pa TVSH:</span>
                 <span className="total-value">{parseFloat(invoice.subtotal).toFixed(2)} €</span>
+              </div>
+              <div className="total-row total-tax">
+                <div className="tax-breakdown">
+                  {(() => {
+                    const taxGroups = calculateTaxGroups();
+                    const taxGroupKeys = Object.keys(taxGroups);
+                    const hasTaxGroups = taxGroupKeys.length > 0 && taxGroupKeys.some(key => taxGroups[key].total > 0);
+                    
+                    if (hasTaxGroups) {
+                      return (
+                        <table className="tax-subtable">
+                          <tbody>
+                            {taxGroupKeys.map((key) => {
+                              const group = taxGroups[key];
+                              if (group.total > 0) {
+                                return (
+                                  <tr key={key}>
+                                    <td className="tax-rate-label">{group.label}</td>
+                                    <td className="tax-rate-value">{group.total.toFixed(2)} €</td>
+                                  </tr>
+                                );
+                              }
+                              return null;
+                            })}
+                            <tr className="tax-total-row">
+                              <td className="tax-rate-label">Totali TVSH:</td>
+                              <td className="tax-rate-value">
+                                {(parseFloat(invoice.total) - parseFloat(invoice.subtotal)).toFixed(2)} €
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      );
+                    } else {
+                      const taxTotal = parseFloat(invoice.total) - parseFloat(invoice.subtotal);
+                      return <span>{taxTotal.toFixed(2)} €</span>;
+                    }
+                  })()}
+                </div>
               </div>
               <div className="total-row total-final">
                 <span className="total-label">Totali:</span>
