@@ -500,7 +500,7 @@ const InvoicePage = () => {
                     <th className="col-description">Përshkrimi</th>
                     <th className="col-quantity">Sasia</th>
                     <th className="col-price">Çmimi për Njësi</th>
-                    <th className="col-tax">Tatimi</th>
+                    <th className="col-tax">Vlera e TVSH</th>
                     <th className="col-total">Totali</th>
                     <th className="col-actions"></th>
                   </tr>
@@ -551,7 +551,7 @@ const InvoicePage = () => {
                           step="0.01"
                         />
                       </td>
-                      <td className="col-tax" data-label="Tatimi">
+                      <td className="col-tax" data-label="Vlera e TVSH">
                         <select
                           className="table-input"
                           value={item.taxId || ''}
@@ -591,11 +591,11 @@ const InvoicePage = () => {
             {/* Totals */}
             <div className="invoice-totals">
               <div className="totals-row">
-                <span className="totals-label">Nëntotali:</span>
+                <span className="totals-label">Vlera pa TVSH:</span>
                 <span className="totals-value">{calculateSubtotal().toFixed(2)} €</span>
               </div>
               <div className="totals-row">
-                <span className="totals-label">Tatimi Total:</span>
+                <span className="totals-label">Vlera e TVSH:</span>
                 <span className="totals-value">{calculateTaxTotal().toFixed(2)} €</span>
               </div>
               <div className="totals-row totals-row--total">

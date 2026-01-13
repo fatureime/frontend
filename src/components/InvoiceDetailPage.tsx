@@ -355,9 +355,9 @@ const InvoiceDetailPage = () => {
                       <th>Përshkrimi</th>
                       <th>Sasia</th>
                       <th>Çmimi për Njësi</th>
-                      <th>Tatimi</th>
-                      <th>Nëntotali</th>
-                      <th>Tatimi</th>
+                      <th>Vlera e TVSH</th>
+                      <th>Vlera pa TVSH</th>
+                      <th>Vlera e TVSH</th>
                       <th>Totali</th>
                     </tr>
                   </thead>
@@ -377,7 +377,7 @@ const InvoiceDetailPage = () => {
                           </td>
                           <td data-label="Sasia">{parseFloat(item.quantity).toFixed(2)}</td>
                           <td data-label="Çmimi për Njësi">{parseFloat(item.unit_price).toFixed(2)} €</td>
-                          <td data-label="Tatimi">
+                          <td data-label="Vlera e TVSH">
                             {item.tax ? (
                               item.tax.rate === null ? (
                                 <span className="tax-exempt">E përjashtuar</span>
@@ -388,8 +388,8 @@ const InvoiceDetailPage = () => {
                               <span className="tax-exempt">E përjashtuar</span>
                             )}
                           </td>
-                          <td data-label="Nëntotali">{parseFloat(item.subtotal).toFixed(2)} €</td>
-                          <td data-label="Tatimi">{parseFloat(item.tax_amount).toFixed(2)} €</td>
+                          <td data-label="Vlera pa TVSH">{parseFloat(item.subtotal).toFixed(2)} €</td>
+                          <td data-label="Vlera e TVSH">{parseFloat(item.tax_amount).toFixed(2)} €</td>
                           <td data-label="Totali"><strong>{parseFloat(item.total).toFixed(2)} €</strong></td>
                         </tr>
                       ))}
