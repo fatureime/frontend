@@ -23,6 +23,7 @@ const InvoicesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingIds, setDownloadingIds] = useState<Set<number>>(new Set());
+  const [exportingExcel, setExportingExcel] = useState(false);
 
   // Stabilize isAdminTenant to prevent unnecessary callback recreations
   const isAdminTenant = useMemo(() => user?.tenant?.is_admin === true, [user?.tenant?.is_admin]);
@@ -253,6 +254,45 @@ const InvoicesPage = () => {
     }
   };
 
+  const handleExportToExcel = async () => {
+    try {
+      setExportingExcel(true);
+      setError(null);
+
+      let blob: Blob;
+      const statusParam = statusFilter !== 'all' ? statusFilter : undefined;
+
+      if (isAdminTenant) {
+        // Admin tenants can export all invoices or filter by business
+        const targetBusinessId = selectedBusinessId !== null ? selectedBusinessId : undefined;
+        blob = await invoicesApi.downloadAllInvoicesExcel(targetBusinessId || undefined, statusParam);
+      } else {
+        // Normal tenants export invoices for their business
+        const targetBusinessId = selectedBusinessId || businessId;
+        if (!targetBusinessId) {
+          setError('ID e biznesit nuk u gjet.');
+          return;
+        }
+        blob = await invoicesApi.downloadInvoicesExcel(parseInt(targetBusinessId.toString()), statusParam);
+      }
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      link.download = `faturat-${timestamp}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Dështoi eksportimi në Excel');
+    } finally {
+      setExportingExcel(false);
+    }
+  };
+
   const getStatusBadgeClass = (status: InvoiceStatus): string => {
     switch (status) {
       case 'draft':
@@ -303,9 +343,19 @@ const InvoicesPage = () => {
               <p className="business-name">{currentBusiness.business_name}</p>
             )}
           </div>
-          <button onClick={handleCreate} className="btn btn-primary">
-            Krijo Faturë
-          </button>
+          <div className="header-actions">
+            <button 
+              onClick={handleExportToExcel} 
+              className="btn btn-secondary"
+              disabled={exportingExcel || filteredInvoices.length === 0}
+              title="Eksporto në Excel"
+            >
+              {exportingExcel ? 'Duke u eksportuar...' : 'Eksporto në Excel'}
+            </button>
+            <button onClick={handleCreate} className="btn btn-primary">
+              Krijo Faturë
+            </button>
+          </div>
         </div>
 
         {error && (

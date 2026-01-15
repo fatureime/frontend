@@ -727,6 +727,45 @@ export const invoicesApi = {
     );
     return response.data;
   },
+
+  /**
+   * Download invoices as Excel (for a business)
+   */
+  async downloadInvoicesExcel(businessId: number, status?: string): Promise<Blob> {
+    const params: any = {};
+    if (status && status !== 'all') {
+      params.status = status;
+    }
+    const response = await api.get(
+      `/businesses/${businessId}/invoices/export/excel`,
+      { 
+        responseType: 'blob',
+        params
+      }
+    );
+    return response.data;
+  },
+
+  /**
+   * Download all invoices as Excel (admin tenants only)
+   */
+  async downloadAllInvoicesExcel(businessId?: number, status?: string): Promise<Blob> {
+    const params: any = {};
+    if (businessId) {
+      params.businessId = businessId;
+    }
+    if (status && status !== 'all') {
+      params.status = status;
+    }
+    const response = await api.get(
+      '/invoices/export/excel',
+      { 
+        responseType: 'blob',
+        params
+      }
+    );
+    return response.data;
+  },
 };
 
 // InvoiceItem API methods
