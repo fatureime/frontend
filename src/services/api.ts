@@ -198,6 +198,30 @@ export interface CreateArticleData {
 
 export interface UpdateArticleData extends Partial<CreateArticleData> {}
 
+export interface BankAccount {
+  id: number;
+  swift?: string;
+  iban?: string;
+  bank_account_number?: string;
+  bank_name?: string;
+  business_id: number;
+  created_at?: string;
+  updated_at?: string;
+  business?: {
+    id: number;
+    business_name: string;
+  };
+}
+
+export interface CreateBankAccountData {
+  swift?: string;
+  iban?: string;
+  bank_account_number?: string;
+  bank_name?: string;
+}
+
+export interface UpdateBankAccountData extends Partial<CreateBankAccountData> {}
+
 export interface Tax {
   id: number;
   rate: string | null; // null for exempted
@@ -553,6 +577,49 @@ export const articlesApi = {
    */
   async deleteArticle(businessId: number, id: number): Promise<{ message: string }> {
     const response = await api.delete(`/businesses/${businessId}/articles/${id}`);
+    return response.data;
+  },
+};
+
+// Bank Account API methods
+export const bankAccountsApi = {
+  /**
+   * Get all bank accounts for a business
+   */
+  async getBankAccounts(businessId: number): Promise<BankAccount[]> {
+    const response = await api.get(`/businesses/${businessId}/bank-accounts`);
+    return response.data;
+  },
+
+  /**
+   * Get a single bank account by ID
+   */
+  async getBankAccount(businessId: number, id: number): Promise<BankAccount> {
+    const response = await api.get(`/businesses/${businessId}/bank-accounts/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Create a new bank account
+   */
+  async createBankAccount(businessId: number, data: CreateBankAccountData): Promise<BankAccount> {
+    const response = await api.post(`/businesses/${businessId}/bank-accounts`, data);
+    return response.data;
+  },
+
+  /**
+   * Update a bank account
+   */
+  async updateBankAccount(businessId: number, id: number, data: UpdateBankAccountData): Promise<BankAccount> {
+    const response = await api.put(`/businesses/${businessId}/bank-accounts/${id}`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete a bank account
+   */
+  async deleteBankAccount(businessId: number, id: number): Promise<{ message: string }> {
+    const response = await api.delete(`/businesses/${businessId}/bank-accounts/${id}`);
     return response.data;
   },
 };

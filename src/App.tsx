@@ -14,6 +14,7 @@ import TenantsPage from './components/TenantsPage'
 import UsersPage from './components/UsersPage'
 import BusinessesPage from './components/BusinessesPage'
 import ArticlesPage from './components/ArticlesPage'
+import BankAccountsPage from './components/BankAccountsPage'
 import './styles/main.scss'
 
 function App() {
@@ -95,6 +96,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <InvoicePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/bank-accounts"
+              element={
+                <ProtectedRoute>
+                  <BankAccountsPage />
                 </ProtectedRoute>
               }
             />

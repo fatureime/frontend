@@ -129,6 +129,13 @@ const Navbar = () => {
                   Faturat
                 </Link>
               )}
+              <Link 
+                to="/bank-accounts" 
+                className="navbar__link"
+                onClick={closeMenu}
+              >
+                Llogaritë Bankare
+              </Link>
               {user?.roles?.includes('ROLE_ADMIN') && (
                 <Link 
                   to="/users" 
