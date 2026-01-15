@@ -104,6 +104,15 @@ const Navbar = () => {
                   </span>
                 )}
               </div>
+              {user?.tenant?.issuer_business_id && (
+                <Link 
+                  to={`/businesses/${user.tenant.issuer_business_id}/invoices`} 
+                  className="navbar__link"
+                  onClick={closeMenu}
+                >
+                  Faturat
+                </Link>
+              )}
               <Link 
                 to="/businesses" 
                 className="navbar__link"
@@ -118,15 +127,6 @@ const Navbar = () => {
                   onClick={closeMenu}
                 >
                   Artikujt
-                </Link>
-              )}
-              {user?.tenant?.issuer_business_id && (
-                <Link 
-                  to={`/businesses/${user.tenant.issuer_business_id}/invoices`} 
-                  className="navbar__link"
-                  onClick={closeMenu}
-                >
-                  Faturat
                 </Link>
               )}
               <Link 

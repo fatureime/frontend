@@ -344,6 +344,9 @@ const InvoicesPage = () => {
             )}
           </div>
           <div className="header-actions">
+            <button onClick={handleCreate} className="btn btn-primary">
+              Krijo Faturë
+            </button>
             <button 
               onClick={handleExportToExcel} 
               className="btn btn-secondary"
@@ -351,9 +354,6 @@ const InvoicesPage = () => {
               title="Eksporto në Excel"
             >
               {exportingExcel ? 'Duke u eksportuar...' : 'Eksporto në Excel'}
-            </button>
-            <button onClick={handleCreate} className="btn btn-primary">
-              Krijo Faturë
             </button>
           </div>
         </div>
