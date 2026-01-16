@@ -143,7 +143,6 @@ const BankAccountsPage = () => {
     <div className="bank-accounts-page">
       <div className="container">
         <div className="bank-accounts-header">
-          <h1>Menaxhimi i Llogarive Bankare</h1>
           {businesses.length > 0 && (
             <button onClick={handleCreate} className="btn btn-primary">
               Krijo Llogari Bankare
@@ -169,7 +168,6 @@ const BankAccountsPage = () => {
         ) : (
           <div className="bank-accounts-content">
             <div className="bank-accounts-list">
-              <h2>Llogaritë Bankare</h2>
               {bankAccounts.length === 0 ? (
                 <p className="no-bank-accounts">
                   {businesses.length === 0 

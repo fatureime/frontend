@@ -359,12 +359,6 @@ const InvoicePage = () => {
   return (
     <div className="invoice-page">
       <div className="invoice-container">
-        <div className="invoice-header">
-          <h1 className="invoice-title">
-            {isEditMode ? 'Ndrysho Faturë' : 'Krijo Faturë'}
-          </h1>
-        </div>
-
         <div className="invoice-content">
           {error && (
             <div className="error-message" style={{ 

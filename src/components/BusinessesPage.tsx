@@ -92,7 +92,6 @@ const BusinessesPage = () => {
     <div className="businesses-page">
       <div className="container">
         <div className="businesses-header">
-          <h1>Menaxhimi i Subjekteve</h1>
           <button onClick={handleCreate} className="btn btn-primary">
             Krijo Subjekt
           </button>

@@ -82,8 +82,6 @@ const EmailVerification = () => {
     <div className="verify-page">
       <div className="verify-container">
         <div className="verify-card">
-          <h1 className="verify-title">Verifikimi i Email-it</h1>
-          
           {signupMessage && (
             <div className="verify-info">
               <p>{signupMessage}</p>

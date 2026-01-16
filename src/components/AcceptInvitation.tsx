@@ -89,8 +89,6 @@ const AcceptInvitation = () => {
     <div className="accept-invitation-page">
       <div className="accept-invitation-container">
         <div className="accept-invitation-card">
-          <h1 className="accept-invitation-title">Prano Ftesën</h1>
-          
           {success && (
             <div className="accept-invitation-success">
               <svg

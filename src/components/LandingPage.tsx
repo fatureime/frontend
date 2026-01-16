@@ -27,15 +27,12 @@ const LandingPage = () => {
       <section className="landing__hero">
         <div className="container">
           <div className="landing__hero-content">
-            <h1 className="landing__hero-title">
-              Krijo Fatura Profesionale me Lehtësi
-            </h1>
             <p className="landing__hero-subtitle">
               Platforma më e thjeshtë për krijimin dhe menaxhimin e faturave. 
               Krijo fatura profesionale në pak minuta dhe fokusohu në biznesin tënd.
             </p>
             <div className="landing__hero-cta">
-              <Link to="/login" className="btn btn--primary">
+              <Link to="/" className="btn btn--primary">
                 Fillo Tani
               </Link>
               <a href="#features" className="btn btn--secondary">
@@ -91,7 +88,7 @@ const LandingPage = () => {
             <p className="landing__cta-subtitle">
               Krijo faturën tënde të parë sot dhe përjetoni lehtësinë e menaxhimit të faturave.
             </p>
-            <Link to="/login" className="btn btn--primary btn--large">
+            <Link to="/" className="btn btn--primary btn--large">
               Krijo Faturë Tani
             </Link>
           </div>

@@ -137,7 +137,6 @@ const UsersPage = () => {
     <div className="users-page">
       <div className="container">
         <div className="users-header">
-          <h1>Menaxhimi i Përdoruesve</h1>
           <div className="users-header-actions">
             {user?.tenant && (
               <div className="current-tenant-info">

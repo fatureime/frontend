@@ -157,7 +157,6 @@ const ArticlesPage = () => {
       <div className="container">
         <div className="articles-header">
           <div>
-            <h1>Menaxhimi i Artikujve</h1>
             {business && (
               <p className="business-name">{business.business_name}</p>
             )}

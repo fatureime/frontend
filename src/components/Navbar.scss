@@ -105,6 +105,40 @@
     transition: all $transition-fast;
   }
 
+  &__toggle--open {
+    .navbar__toggle-icon {
+      &:nth-child(1) {
+        transform: rotate(45deg) translate(8px, 8px);
+      }
+
+      &:nth-child(2) {
+        opacity: 0;
+      }
+
+      &:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -7px);
+      }
+    }
+
+    @include mobile {
+      .navbar__toggle-icon {
+        background-color: white;
+
+        &:nth-child(1) {
+          transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        &:nth-child(2) {
+          opacity: 0;
+        }
+
+        &:nth-child(3) {
+          transform: rotate(-45deg) translate(6px, -6px);
+        }
+      }
+    }
+  }
+
   &__overlay {
     display: none;
 
@@ -218,6 +252,72 @@
         background-color: #fecaca;
         color: #b91c1c;
       }
+    }
+
+    &--admin-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+
+      @include mobile {
+        width: 100%;
+      }
+
+      span {
+        flex: 1;
+      }
+    }
+
+    &--submenu {
+      padding-left: $spacing-xl;
+      font-size: $font-size-sm;
+      color: $text-secondary;
+
+      @include mobile {
+        padding-left: $spacing-2xl;
+      }
+
+      &:hover {
+        color: $primary;
+        background-color: $bg-secondary;
+      }
+    }
+  }
+
+  &__admin-menu {
+    width: 100%;
+
+    @include mobile {
+      width: 100%;
+    }
+  }
+
+  &__admin-chevron {
+    transition: transform $transition-fast;
+    flex-shrink: 0;
+    margin-left: $spacing-sm;
+
+    &--open {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__admin-submenu {
+    display: flex;
+    flex-direction: column;
+    background-color: $bg-secondary;
+    border-radius: $border-radius;
+    margin-top: $spacing-xs;
+    overflow: hidden;
+    animation: slideDown $transition-base;
+
+    @include mobile {
+      margin-top: 0;
+      border-radius: 0;
+      background-color: transparent;
+      border-left: 2px solid $border-color;
+      margin-left: $spacing-md;
     }
   }
 
@@ -342,6 +442,17 @@
   }
   to {
     transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 200px;
     opacity: 1;
   }
 }

@@ -338,7 +338,6 @@ const InvoicesPage = () => {
       <div className="container">
         <div className="invoices-header">
           <div>
-            <h1>Menaxhimi i Faturave</h1>
             {currentBusiness && (
               <p className="business-name">{currentBusiness.business_name}</p>
             )}

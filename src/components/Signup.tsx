@@ -65,7 +65,6 @@ const Signup = () => {
     <div className="signup-page">
       <div className="signup-container">
         <div className="signup-card">
-          <h1 className="signup-title">Regjistrim</h1>
           <p className="signup-subtitle">Krijoni një llogari të re për të filluar</p>
 
           {error && (

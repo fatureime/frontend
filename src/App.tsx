@@ -24,8 +24,9 @@ function App() {
         <div className="App">
           <Navbar />
           <Routes>
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<Login />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/about" element={<LandingPage />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/verify-email" element={<EmailVerification />} />
             <Route path="/accept-invitation" element={<AcceptInvitation />} />

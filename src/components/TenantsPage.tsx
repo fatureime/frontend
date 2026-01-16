@@ -114,7 +114,6 @@ const TenantsPage = () => {
     <div className="tenants-page">
       <div className="container">
         <div className="tenants-header">
-          <h1>Menaxhimi i Hapësirëmarrësve</h1>
           {user?.tenant && (
             <div className="current-tenant-info">
               <span>Hapësirëmarrësi Aktual: <strong>{user.tenant.name}</strong></span>

@@ -219,7 +219,6 @@ const InvoiceDetailPage = () => {
             <button onClick={handleBack} className="btn btn-secondary">
               ← Kthehu
             </button>
-            <h1>Fatura #{invoice.invoice_number}</h1>
           </div>
           <div className="header-actions">
             <select

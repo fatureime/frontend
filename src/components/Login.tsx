@@ -87,7 +87,6 @@ const Login = () => {
     <div className="login-page">
       <div className="login-container">
         <div className="login-card">
-          <h1 className="login-title">Hyrje</h1>
           <p className="login-subtitle">Hyni në llogarinë tuaj për të vazhduar</p>
 
           {error && (

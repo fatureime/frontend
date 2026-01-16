@@ -1,15 +1,70 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
 import './Navbar.scss';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const menuRef = useRef<HTMLDivElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const adminMenuRef = useRef<HTMLDivElement>(null);
+
+  const getPageTitle = (pathname: string): string => {
+    // Remove query params and hash
+    const path = pathname.split('?')[0].split('#')[0];
+    
+    // Match routes in order of specificity
+    if (path === '/' || path === '/login') {
+      return 'Hyrje';
+    }
+    if (path === '/about') {
+      return 'Rreth Nesh';
+    }
+    if (path === '/signup') {
+      return 'Regjistrohuni';
+    }
+    if (path === '/verify-email') {
+      return 'Verifikimi i Email';
+    }
+    if (path === '/accept-invitation') {
+      return 'Pranimi i Ftesës';
+    }
+    if (path.match(/^\/businesses\/\d+\/invoices\/\d+\/edit$/)) {
+      return 'Ndrysho Faturë';
+    }
+    if (path.match(/^\/businesses\/\d+\/invoices\/create$/)) {
+      return 'Krijo Faturë';
+    }
+    if (path.match(/^\/businesses\/\d+\/invoices\/\d+$/)) {
+      return 'Detajet e Faturës';
+    }
+    if (path.match(/^\/businesses\/\d+\/invoices$/)) {
+      return 'Faturat';
+    }
+    if (path.match(/^\/businesses\/\d+\/articles$/)) {
+      return 'Artikujt';
+    }
+    if (path === '/businesses') {
+      return 'Subjektet';
+    }
+    if (path === '/bank-accounts') {
+      return 'Llogaritë Bankare';
+    }
+    if (path === '/users') {
+      return 'Përdoruesit';
+    }
+    if (path === '/tenants') {
+      return 'Hapësirëmarrësit';
+    }
+    
+    // Default fallback
+    return 'Faturëime';
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -17,6 +72,11 @@ const Navbar = () => {
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+    setIsAdminMenuOpen(false);
+  };
+
+  const toggleAdminMenu = () => {
+    setIsAdminMenuOpen(!isAdminMenuOpen);
   };
 
   const handleLogoutClick = () => {
@@ -42,7 +102,8 @@ const Navbar = () => {
         menuRef.current &&
         toggleRef.current &&
         !menuRef.current.contains(event.target as Node) &&
-        !toggleRef.current.contains(event.target as Node)
+        !toggleRef.current.contains(event.target as Node) &&
+        !adminMenuRef.current?.contains(event.target as Node)
       ) {
         closeMenu();
       }
@@ -71,13 +132,13 @@ const Navbar = () => {
       <div className="navbar__container">
         <div className="navbar__brand">
           <Link to="/" className="navbar__logo">
-            Faturëime
+            {getPageTitle(location.pathname)}
           </Link>
         </div>
 
         <button
           ref={toggleRef}
-          className="navbar__toggle"
+          className={`navbar__toggle ${isMenuOpen ? 'navbar__toggle--open' : ''}`}
           onClick={toggleMenu}
           aria-label="Toggle menu"
           aria-expanded={isMenuOpen}
@@ -137,15 +198,52 @@ const Navbar = () => {
                 Llogaritë Bankare
               </Link>
               {user?.roles?.includes('ROLE_ADMIN') && (
-                <Link 
-                  to="/users" 
-                  className="navbar__link"
-                  onClick={closeMenu}
-                >
-                  Përdoruesit
-                </Link>
+                <div ref={adminMenuRef} className="navbar__admin-menu">
+                  <button
+                    className="navbar__link navbar__link--admin-toggle"
+                    onClick={toggleAdminMenu}
+                  >
+                    <span>Admin Panel</span>
+                    <svg
+                      className={`navbar__admin-chevron ${isAdminMenuOpen ? 'navbar__admin-chevron--open' : ''}`}
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M4 6L8 10L12 6"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  {isAdminMenuOpen && (
+                    <div className="navbar__admin-submenu">
+                      <Link 
+                        to="/users" 
+                        className="navbar__link navbar__link--submenu"
+                        onClick={closeMenu}
+                      >
+                        Përdoruesit
+                      </Link>
+                      {user?.tenant?.is_admin && (
+                        <Link 
+                          to="/tenants" 
+                          className="navbar__link navbar__link--submenu"
+                          onClick={closeMenu}
+                        >
+                          Hapësirëmarrësit
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
-              {user?.tenant?.is_admin && (
+              {!user?.roles?.includes('ROLE_ADMIN') && user?.tenant?.is_admin && (
                 <Link 
                   to="/tenants" 
                   className="navbar__link"
@@ -163,7 +261,7 @@ const Navbar = () => {
             </>
           ) : (
             <Link 
-              to="/login" 
+              to="/" 
               className="navbar__link navbar__link--login"
               onClick={closeMenu}
             >
