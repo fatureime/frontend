@@ -429,7 +429,7 @@ const InvoicePage = () => {
                 <select
                   className="info-input"
                   value={status}
-                  onChange={(e) => setStatus(e.target.value)}
+                  onChange={(e) => setStatus(e.target.value as 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled')}
                 >
                   {invoiceStatuses.map((invoiceStatus) => {
                     const statusLabels: Record<string, string> = {
