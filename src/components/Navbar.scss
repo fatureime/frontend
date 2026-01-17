@@ -9,6 +9,14 @@
   box-shadow: $shadow-sm;
   border-bottom: 1px solid $border-color;
 
+  @include desktop {
+    position: relative;
+    height: 100vh;
+    border-bottom: none;
+    border-right: 1px solid $border-color;
+    box-shadow: none;
+  }
+
   &__container {
     width: 100%;
     margin: 0 auto;
@@ -24,14 +32,26 @@
     }
 
     @include desktop {
-      max-width: $desktop;
-      padding: $spacing-md $spacing-xl;
+      max-width: none;
+      padding: $spacing-lg $spacing-md;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      height: 100%;
+      min-height: 100vh;
     }
   }
 
   &__brand {
     display: flex;
     align-items: center;
+
+    @include desktop {
+      width: 100%;
+      padding-bottom: $spacing-lg;
+      border-bottom: 1px solid $border-color;
+      margin-bottom: $spacing-lg;
+    }
   }
 
   &__logo {
@@ -40,6 +60,12 @@
     color: $primary;
     text-decoration: none;
     transition: color $transition-fast;
+
+    @include desktop {
+      font-size: $font-size-xl;
+      width: 100%;
+      text-align: center;
+    }
 
     &:hover {
       color: $primary-dark;
@@ -153,12 +179,28 @@
       z-index: 999;
       animation: fadeIn $transition-base;
     }
+
+    @include desktop {
+      display: none;
+    }
   }
 
   &__menu {
     display: flex;
     align-items: center;
-    gap: $spacing-lg;
+    gap: 0;
+
+    @include desktop {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      width: 100%;
+      flex: 1;
+      overflow-y: auto;
+      position: relative;
+      transform: none;
+      justify-content: flex-start;
+    }
 
     @include mobile {
       position: fixed;
@@ -198,7 +240,7 @@
     text-decoration: none;
     font-size: $font-size-base;
     font-weight: $font-weight-medium;
-    padding: $spacing-sm $spacing-md;
+    padding: 19px 24px;
     border-radius: $border-radius;
     transition: all $transition-fast;
     border: none;
@@ -206,10 +248,18 @@
     cursor: pointer;
     font-family: inherit;
 
+    @include desktop {
+      width: 100%;
+      text-align: left;
+      padding: 19px 24px;
+      border-radius: $border-radius;
+      display: block;
+    }
+
     @include mobile {
       width: 100%;
       text-align: left;
-      padding: $spacing-md $spacing-lg;
+      padding: 19px 24px;
       border-bottom: 1px solid $border-color;
       border-radius: 0;
       display: block;
@@ -227,7 +277,7 @@
     &--login {
       background-color: $primary;
       color: white;
-      padding: $spacing-sm $spacing-lg;
+      padding: 19px 24px;
 
       @include mobile {
         border-bottom: 1px solid rgba(255, 255, 255, 0.2);
@@ -242,7 +292,12 @@
     &--logout {
       background-color: #fee2e2;
       color: #dc2626;
-      padding: $spacing-sm $spacing-lg;
+      padding: 19px 24px;
+      order: 999;
+
+      @include desktop {
+        align-self: stretch;
+      }
 
       @include mobile {
         border-bottom: 1px solid rgba(220, 38, 38, 0.2);
@@ -288,6 +343,10 @@
   &__admin-menu {
     width: 100%;
 
+    @include desktop {
+      width: 100%;
+    }
+
     @include mobile {
       width: 100%;
     }
@@ -312,6 +371,14 @@
     overflow: hidden;
     animation: slideDown $transition-base;
 
+    @include desktop {
+      margin-top: $spacing-xs;
+      border-radius: $border-radius;
+      background-color: $bg-secondary;
+      border-left: none;
+      margin-left: 0;
+    }
+
     @include mobile {
       margin-top: 0;
       border-radius: 0;
@@ -327,6 +394,17 @@
     align-items: flex-end;
     padding: $spacing-sm $spacing-md;
     gap: 0.25rem;
+
+    @include desktop {
+      align-items: flex-start;
+      align-self: stretch;
+      width: 100%;
+      padding: $spacing-md $spacing-lg;
+      border-top: 1px solid $border-color;
+      border-bottom: none;
+      order: 998;
+      margin-top: auto;
+    }
 
     @include mobile {
       align-items: flex-start;

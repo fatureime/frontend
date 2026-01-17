@@ -371,7 +371,6 @@ const InvoiceDetailPage = () => {
 
           {/* Invoice Items */}
           <div className="items-section">
-            <h2>Artikujt</h2>
             {invoice.items && invoice.items.length > 0 ? (
               <Box sx={{ width: '100%' }}>
                 <DataGrid

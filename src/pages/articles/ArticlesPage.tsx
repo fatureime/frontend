@@ -182,7 +182,6 @@ const ArticlesPage = () => {
         ) : (
           <div className="articles-content">
             <div className="articles-list">
-              <h2>Artikujt</h2>
               {articles.length === 0 ? (
                 <p className="no-articles">Nuk u gjetën artikuj.</p>
               ) : (

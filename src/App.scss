@@ -1,0 +1,25 @@
+@import './styles/variables';
+@import './styles/responsive';
+
+.App {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "navbar"
+    "content";
+
+  @include desktop {
+    grid-template-columns: 260px 1fr;
+    grid-template-areas: "navbar content";
+  }
+
+  &__navbar {
+    grid-area: navbar;
+  }
+
+  &__content {
+    grid-area: content;
+    min-height: 100vh;
+  }
+}

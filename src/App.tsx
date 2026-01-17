@@ -18,6 +18,7 @@ import ArticlesPage from './pages/articles/ArticlesPage'
 import BankAccountsPage from './pages/bank-accounts/BankAccountsPage'
 import InvoiceStatusesPage from './pages/invoice-statuses/InvoiceStatusesPage'
 import './styles/main.scss'
+import './App.scss'
 
 const theme = createTheme({
   palette: {
@@ -31,8 +32,11 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <div className="App">
-            <Navbar />
-            <Routes>
+            <div className="App__navbar">
+              <Navbar />
+            </div>
+            <div className="App__content">
+              <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/login" element={<Login />} />
             <Route path="/about" element={<LandingPage />} />
@@ -124,9 +128,10 @@ function App() {
                   <InvoiceStatusesPage />
                 </ProtectedRoute>
               }
-            />
-          </Routes>
-        </div>
+              />
+              </Routes>
+            </div>
+          </div>
       </AuthProvider>
     </BrowserRouter>
     </ThemeProvider>

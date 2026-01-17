@@ -113,7 +113,6 @@ const BusinessesPage = () => {
         ) : (
           <div className="businesses-content">
             <div className="businesses-list">
-              <h2>Subjektet</h2>
               {businesses.length === 0 ? (
                 <p className="no-businesses">Nuk u gjetën subjekte.</p>
               ) : (
