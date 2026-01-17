@@ -47,6 +47,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Skip requests from unsupported schemes (chrome-extension, moz-extension, etc.)
+  const url = new URL(event.request.url);
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
   // Skip API requests - always fetch from network
   if (event.request.url.includes('/api/')) {
     return;
@@ -68,9 +74,16 @@ self.addEventListener('fetch', (event) => {
           // Clone the response
           const responseToCache = response.clone();
 
-          caches.open(RUNTIME_CACHE).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+          // Only cache if the request URL is from a supported scheme
+          const requestUrl = new URL(event.request.url);
+          if (requestUrl.protocol.startsWith('http')) {
+            caches.open(RUNTIME_CACHE).then((cache) => {
+              cache.put(event.request, responseToCache).catch((err) => {
+                // Silently fail if caching is not supported for this request
+                console.log('Cache put failed:', err);
+              });
+            });
+          }
 
           return response;
         })

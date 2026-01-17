@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import { Button, Select, MenuItem, Box, IconButton, Menu, Checkbox } from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { invoicesApi, Invoice, businessesApi, invoiceStatusesApi, InvoiceStatus } from '../../services/api';
+import { invoicesApi, Invoice, invoiceStatusesApi, InvoiceStatus } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
 import './InvoicePage.scss';
 
@@ -13,10 +13,8 @@ type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
 const InvoicePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const businessId = user?.tenant?.issuer_business_id || null;
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [invoiceStatuses, setInvoiceStatuses] = useState<InvoiceStatus[]>([]);
-  const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(businessId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingIds, setDownloadingIds] = useState<Set<number>>(new Set());
@@ -24,12 +22,8 @@ const InvoicePage = () => {
   const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<number[]>([]);
   const [menuAnchor, setMenuAnchor] = useState<{ [key: number]: HTMLElement | null }>({});
 
-  // Stabilize isAdminTenant to prevent unnecessary callback recreations
-  const isAdminTenant = useMemo(() => user?.tenant?.is_admin === true, [user?.tenant?.is_admin]);
 
   // Refs to prevent concurrent API calls
-  const loadingBusinessesRef = useRef(false);
-  const loadingBusinessRef = useRef(false);
   const loadingInvoicesRef = useRef(false);
 
   // Status label mapping (Albanian)
@@ -50,34 +44,6 @@ const InvoicePage = () => {
     }
   }, []);
 
-  const loadBusinesses = useCallback(async () => {
-    if (loadingBusinessesRef.current) return; // Prevent concurrent calls
-    loadingBusinessesRef.current = true;
-    try {
-      const data = await businessesApi.getBusinesses();
-      // Use functional update to avoid dependency on selectedBusinessId
-      setSelectedBusinessId(prev => prev || (data.length > 0 ? data[0].id : null));
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Dështoi ngarkimi i bizneseve');
-    } finally {
-      loadingBusinessesRef.current = false;
-    }
-  }, []); // Remove selectedBusinessId from dependencies
-
-  const loadBusiness = useCallback(async () => {
-    if (!businessId) return;
-    if (loadingBusinessRef.current) return; // Prevent concurrent calls
-    loadingBusinessRef.current = true;
-    try {
-      const data = await businessesApi.getBusiness(businessId);
-      setSelectedBusinessId(data.id);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Dështoi ngarkimi i biznesit');
-    } finally {
-      loadingBusinessRef.current = false;
-    }
-  }, [businessId]);
-
   const loadInvoices = useCallback(async () => {
     if (loadingInvoicesRef.current) return; // Prevent concurrent calls
     loadingInvoicesRef.current = true;
@@ -85,50 +51,23 @@ const InvoicePage = () => {
       setLoading(true);
       setError(null);
       
-      // Admin tenants can see all invoices, or filter by selected business
-      if (isAdminTenant) {
-        // If selectedBusinessId is explicitly null (user selected "All"), show all
-        const targetBusinessId = selectedBusinessId !== null ? (selectedBusinessId || businessId) : null;
-        if (targetBusinessId) {
-          // Filter by selected business
-          const data = await invoicesApi.getInvoices(targetBusinessId);
-          setInvoices(data);
-        } else {
-          // Show all invoices
-          const data = await invoicesApi.getAllInvoices();
-          setInvoices(data);
-        }
-      } else {
-        // Normal tenants see only invoices for their business
-        const targetBusinessId = selectedBusinessId || businessId;
-        if (!targetBusinessId) {
-          loadingInvoicesRef.current = false;
-          return;
-        }
-        const data = await invoicesApi.getInvoices(targetBusinessId);
-        setInvoices(data);
-      }
+      // Always show all invoices
+      const data = await invoicesApi.getAllInvoices();
+      setInvoices(data);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi ngarkimi i faturave');
     } finally {
       setLoading(false);
       loadingInvoicesRef.current = false;
     }
-  }, [isAdminTenant, selectedBusinessId, businessId]);
+  }, []);
 
   useEffect(() => {
     loadInvoiceStatuses();
-    if (isAdminTenant) {
-      loadBusinesses();
-    } else if (businessId) {
-      loadBusiness();
-    }
-    // loadBusinesses and loadBusiness are stable (empty deps or only businessId), safe to include
-  }, [isAdminTenant, businessId, loadBusinesses, loadBusiness, loadInvoiceStatuses]);
+  }, [loadInvoiceStatuses]);
 
   useEffect(() => {
     loadInvoices();
-    // loadInvoices dependencies are stable: isAdminTenant (memoized), selectedBusinessId, businessId
   }, [loadInvoices]);
 
   const handleCreate = () => {
@@ -136,29 +75,26 @@ const InvoicePage = () => {
   };
 
   const handleView = (invoiceId: number) => {
-    const targetBusinessId = selectedBusinessId || businessId;
-    if (targetBusinessId) {
-      navigate(`/invoices/${invoiceId}`);
-    }
+    navigate(`/invoices/${invoiceId}`);
   };
 
   const handleEdit = (invoiceId: number) => {
-    const targetBusinessId = selectedBusinessId || businessId;
-    if (targetBusinessId) {
-      navigate(`/invoices/${invoiceId}/edit`);
-    }
+    navigate(`/invoices/${invoiceId}/edit`);
   };
 
   const handleDelete = async (invoiceId: number) => {
-    const targetBusinessId = selectedBusinessId || businessId;
-    if (!targetBusinessId) return;
-
     if (!window.confirm('Jeni të sigurt që dëshironi të fshini këtë faturë? Ky veprim nuk mund të zhbëhet.')) {
       return;
     }
 
     try {
-      await invoicesApi.deleteInvoice(targetBusinessId, invoiceId);
+      // Get business ID from the invoice
+      const invoice = invoices.find(inv => inv.id === invoiceId);
+      if (!invoice || !invoice.issuer?.id) {
+        setError('Nuk mund të gjej biznesin e faturës');
+        return;
+      }
+      await invoicesApi.deleteInvoice(invoice.issuer.id, invoiceId);
       await loadInvoices();
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi fshirja e faturës');
@@ -166,11 +102,14 @@ const InvoicePage = () => {
   };
 
   const handleStatusChange = async (invoiceId: number, newStatus: InvoiceStatusCode) => {
-    const targetBusinessId = selectedBusinessId || businessId;
-    if (!targetBusinessId) return;
-
     try {
-      await invoicesApi.updateInvoice(parseInt(targetBusinessId.toString()), invoiceId, {
+      // Get business ID from the invoice
+      const invoice = invoices.find(inv => inv.id === invoiceId);
+      if (!invoice || !invoice.issuer?.id) {
+        setError('Nuk mund të gjej biznesin e faturës');
+        return;
+      }
+      await invoicesApi.updateInvoice(invoice.issuer.id, invoiceId, {
         status: newStatus,
       });
       await loadInvoices();
@@ -181,14 +120,18 @@ const InvoicePage = () => {
 
 
   const handleDownloadPdf = async (invoiceId: number, invoiceNumber: string) => {
-    const targetBusinessId = selectedBusinessId || businessId;
-    if (!targetBusinessId) return;
-
     try {
+      // Get business ID from the invoice
+      const invoice = invoices.find(inv => inv.id === invoiceId);
+      if (!invoice || !invoice.issuer?.id) {
+        setError('Nuk mund të gjej biznesin e faturës');
+        return;
+      }
+      
       setDownloadingIds(prev => new Set(prev).add(invoiceId));
       setError(null);
       const blob = await invoicesApi.downloadInvoicePdf(
-        parseInt(targetBusinessId.toString()),
+        invoice.issuer.id,
         invoiceId
       );
 
@@ -217,21 +160,8 @@ const InvoicePage = () => {
       setExportingExcel(true);
       setError(null);
 
-      let blob: Blob;
-
-      if (isAdminTenant) {
-        // Admin tenants can export all invoices or filter by business
-        const targetBusinessId = selectedBusinessId !== null ? selectedBusinessId : undefined;
-        blob = await invoicesApi.downloadAllInvoicesExcel(targetBusinessId || undefined);
-      } else {
-        // Normal tenants export invoices for their business
-        const targetBusinessId = selectedBusinessId || businessId;
-        if (!targetBusinessId) {
-          setError('ID e biznesit nuk u gjet.');
-          return;
-        }
-        blob = await invoicesApi.downloadInvoicesExcel(parseInt(targetBusinessId.toString()));
-      }
+      // Export all invoices
+      const blob = await invoicesApi.downloadAllInvoicesExcel();
 
       // Create download link
       const url = window.URL.createObjectURL(blob);
@@ -250,15 +180,6 @@ const InvoicePage = () => {
     }
   };
 
-  if (!businessId && !isAdminTenant) {
-    return (
-      <div className="invoice-page">
-        <div className="container">
-          <div className="error-message">ID e biznesit nuk u gjet.</div>
-        </div>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
@@ -281,11 +202,13 @@ const InvoicePage = () => {
                   if (!window.confirm(`Jeni të sigurt që dëshironi të fshini ${selectedInvoiceIds.length} fatura? Ky veprim nuk mund të zhbëhet.`)) {
                     return;
                   }
-                  const targetBusinessId = selectedBusinessId || businessId;
-                  if (!targetBusinessId) return;
                   try {
                     for (const invoiceId of selectedInvoiceIds) {
-                      await invoicesApi.deleteInvoice(targetBusinessId, invoiceId);
+                      // Get business ID from the invoice
+                      const invoice = invoices.find(inv => inv.id === invoiceId);
+                      if (invoice && invoice.issuer?.id) {
+                        await invoicesApi.deleteInvoice(invoice.issuer.id, invoiceId);
+                      }
                     }
                     setSelectedInvoiceIds([]);
                     await loadInvoices();
