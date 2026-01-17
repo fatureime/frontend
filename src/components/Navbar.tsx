@@ -61,6 +61,9 @@ const Navbar = () => {
     if (path === '/tenants') {
       return 'Hapësirëmarrësit';
     }
+    if (path === '/invoice-statuses') {
+      return 'Gjendjet e Faturave';
+    }
     
     // Default fallback
     return 'Faturëime';
@@ -237,6 +240,15 @@ const Navbar = () => {
                           onClick={closeMenu}
                         >
                           Hapësirëmarrësit
+                        </Link>
+                      )}
+                      {user?.tenant?.is_admin && (
+                        <Link 
+                          to="/invoice-statuses" 
+                          className="navbar__link navbar__link--submenu"
+                          onClick={closeMenu}
+                        >
+                          Gjendjet e Faturave
                         </Link>
                       )}
                     </div>

@@ -233,6 +233,7 @@ export interface Tax {
 export interface InvoiceStatus {
   id: number;
   code: string;
+  label?: string; // Frontend-only, not sent to backend
 }
 
 export interface InvoiceItem {
@@ -679,6 +680,38 @@ export const invoiceStatusesApi = {
    */
   async getInvoiceStatuses(): Promise<InvoiceStatus[]> {
     const response = await api.get('/invoice-statuses');
+    return response.data;
+  },
+
+  /**
+   * Get a single invoice status by ID
+   */
+  async getInvoiceStatus(id: number): Promise<InvoiceStatus> {
+    const response = await api.get(`/invoice-statuses/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Create a new invoice status
+   */
+  async createInvoiceStatus(data: { code: string }): Promise<InvoiceStatus> {
+    const response = await api.post('/invoice-statuses', data);
+    return response.data;
+  },
+
+  /**
+   * Update an invoice status
+   */
+  async updateInvoiceStatus(id: number, data: { code: string }): Promise<InvoiceStatus> {
+    const response = await api.put(`/invoice-statuses/${id}`, data);
+    return response.data;
+  },
+
+  /**
+   * Delete an invoice status
+   */
+  async deleteInvoiceStatus(id: number): Promise<{ message: string }> {
+    const response = await api.delete(`/invoice-statuses/${id}`);
     return response.data;
   },
 };

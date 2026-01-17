@@ -156,11 +156,6 @@ const ArticlesPage = () => {
     <div className="articles-page">
       <div className="container">
         <div className="articles-header">
-          <div>
-            {business && (
-              <p className="business-name">{business.business_name}</p>
-            )}
-          </div>
           <button onClick={handleCreate} className="btn btn-primary">
             Krijo Artikull
           </button>

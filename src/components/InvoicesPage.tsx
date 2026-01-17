@@ -5,22 +5,16 @@ import { useAuth } from '../contexts/useAuth';
 import './InvoicesPage.scss';
 
 type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
-type SortField = 'invoice_date' | 'due_date' | 'invoice_number' | 'total' | 'status';
-type SortDirection = 'asc' | 'desc';
 
 const InvoicesPage = () => {
   const { businessId } = useParams<{ businessId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([]);
   const [business, setBusiness] = useState<Business | null>(null);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [invoiceStatuses, setInvoiceStatuses] = useState<InvoiceStatus[]>([]);
   const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(null);
-  const [statusFilter, setStatusFilter] = useState<InvoiceStatusCode | 'all'>('all');
-  const [sortField, setSortField] = useState<SortField>('invoice_date');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingIds, setDownloadingIds] = useState<Set<number>>(new Set());
@@ -135,53 +129,6 @@ const InvoicesPage = () => {
     // loadInvoices dependencies are stable: isAdminTenant (memoized), selectedBusinessId, businessId
   }, [loadInvoices]);
 
-  // Filter and sort invoices
-  useEffect(() => {
-    let filtered = [...invoices];
-
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(inv => inv.status === statusFilter);
-    }
-
-    // Apply sorting
-    filtered.sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-
-      switch (sortField) {
-        case 'invoice_date':
-          aValue = new Date(a.invoice_date).getTime();
-          bValue = new Date(b.invoice_date).getTime();
-          break;
-        case 'due_date':
-          aValue = new Date(a.due_date).getTime();
-          bValue = new Date(b.due_date).getTime();
-          break;
-        case 'invoice_number':
-          aValue = a.invoice_number;
-          bValue = b.invoice_number;
-          break;
-        case 'total':
-          aValue = parseFloat(a.total);
-          bValue = parseFloat(b.total);
-          break;
-        case 'status':
-          aValue = a.status;
-          bValue = b.status;
-          break;
-        default:
-          return 0;
-      }
-
-      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-
-    setFilteredInvoices(filtered);
-  }, [invoices, statusFilter, sortField, sortDirection]);
-
   const handleCreate = () => {
     const targetBusinessId = selectedBusinessId || businessId;
     if (targetBusinessId) {
@@ -233,14 +180,6 @@ const InvoicesPage = () => {
     }
   };
 
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
-  };
 
   const handleDownloadPdf = async (invoiceId: number, invoiceNumber: string) => {
     const targetBusinessId = selectedBusinessId || businessId;
@@ -280,12 +219,11 @@ const InvoicesPage = () => {
       setError(null);
 
       let blob: Blob;
-      const statusParam = statusFilter !== 'all' ? statusFilter : undefined;
 
       if (isAdminTenant) {
         // Admin tenants can export all invoices or filter by business
         const targetBusinessId = selectedBusinessId !== null ? selectedBusinessId : undefined;
-        blob = await invoicesApi.downloadAllInvoicesExcel(targetBusinessId || undefined, statusParam);
+        blob = await invoicesApi.downloadAllInvoicesExcel(targetBusinessId || undefined);
       } else {
         // Normal tenants export invoices for their business
         const targetBusinessId = selectedBusinessId || businessId;
@@ -293,7 +231,7 @@ const InvoicesPage = () => {
           setError('ID e biznesit nuk u gjet.');
           return;
         }
-        blob = await invoicesApi.downloadInvoicesExcel(parseInt(targetBusinessId.toString()), statusParam);
+        blob = await invoicesApi.downloadInvoicesExcel(parseInt(targetBusinessId.toString()));
       }
 
       // Create download link
@@ -351,17 +289,10 @@ const InvoicesPage = () => {
     );
   }
 
-  const currentBusiness = business || businesses.find(b => b.id === selectedBusinessId);
-
   return (
     <div className="invoices-page">
       <div className="container">
         <div className="invoices-header">
-          <div>
-            {currentBusiness && (
-              <p className="business-name">{currentBusiness.business_name}</p>
-            )}
-          </div>
           <div className="header-actions">
             <button onClick={handleCreate} className="btn btn-primary">
               Krijo Faturë
@@ -369,7 +300,7 @@ const InvoicesPage = () => {
             <button 
               onClick={handleExportToExcel} 
               className="btn btn-secondary"
-              disabled={exportingExcel || filteredInvoices.length === 0}
+              disabled={exportingExcel || invoices.length === 0}
               title="Eksporto në Excel"
             >
               {exportingExcel ? 'Duke u eksportuar...' : 'Eksporto në Excel'}
@@ -384,105 +315,26 @@ const InvoicesPage = () => {
           </div>
         )}
 
-        <div className="invoices-filters">
-          {isAdminTenant && (
-            <div className="filter-group">
-              <label htmlFor="business-select">Subjekti:</label>
-              <select
-                id="business-select"
-                value={selectedBusinessId || businessId || ''}
-                onChange={(e) => {
-                  const newBusinessId = e.target.value ? parseInt(e.target.value) : null;
-                  setSelectedBusinessId(newBusinessId);
-                  if (newBusinessId) {
-                    navigate(`/businesses/${newBusinessId}/invoices`);
-                  } else {
-                    // Show all invoices - clear selection and reload
-                    setSelectedBusinessId(null);
-                    // If we're on a business-specific route, navigate to a general route
-                    // For now, just reload with null businessId
-                  }
-                }}
-              >
-                <option value="">Të gjitha faturat</option>
-                {businesses.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.business_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <div className="filter-group">
-            <label htmlFor="status-filter">Statusi:</label>
-            <select
-              id="status-filter"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as InvoiceStatusCode | 'all')}
-            >
-              <option value="all">Të gjitha</option>
-              {invoiceStatuses.map((status) => (
-                <option key={status.id} value={status.code}>
-                  {statusLabels[status.code] || status.code}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label htmlFor="sort-field">Rendit sipas:</label>
-            <select
-              id="sort-field"
-              value={sortField}
-              onChange={(e) => setSortField(e.target.value as SortField)}
-            >
-              <option value="invoice_date">Data e faturës</option>
-              <option value="due_date">Data e maturimit</option>
-              <option value="invoice_number">Numri i faturës</option>
-              <option value="total">Shuma</option>
-              <option value="status">Statusi</option>
-            </select>
-            <button
-              onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
-              className="sort-direction-btn"
-              title={sortDirection === 'asc' ? 'Rritje' : 'Zbritje'}
-            >
-              {sortDirection === 'asc' ? '↑' : '↓'}
-            </button>
-          </div>
-        </div>
-
         <div className="invoices-content">
-          {filteredInvoices.length === 0 ? (
+          {invoices.length === 0 ? (
             <p className="no-invoices">Nuk u gjetën fatura.</p>
           ) : (
             <div className="invoices-table-container">
               <table className="invoices-table">
                 <thead>
                   <tr>
-                    <th onClick={() => handleSort('invoice_number')} className="sortable">
-                      Numri i Faturës {sortField === 'invoice_number' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </th>
-                    <th onClick={() => handleSort('invoice_date')} className="sortable">
-                      Data {sortField === 'invoice_date' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </th>
-                    <th onClick={() => handleSort('due_date')} className="sortable">
-                      Data e Maturimit {sortField === 'due_date' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </th>
+                    <th>Numri i Faturës</th>
+                    <th>Data</th>
+                    <th>Data e Maturimit</th>
                     <th>Fatura Nga</th>
                     <th>Fatura Për</th>
-                    <th onClick={() => handleSort('status')} className="sortable">
-                      Statusi {sortField === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </th>
-                    <th onClick={() => handleSort('total')} className="sortable">
-                      Totali {sortField === 'total' && (sortDirection === 'asc' ? '↑' : '↓')}
-                    </th>
+                    <th>Statusi</th>
+                    <th>Totali</th>
                     <th>Veprimet</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredInvoices.map((invoice) => (
+                  {invoices.map((invoice) => (
                     <tr key={invoice.id}>
                       <td data-label="Numri i Faturës">{invoice.invoice_number}</td>
                       <td data-label="Data">{new Date(invoice.invoice_date).toLocaleDateString()}</td>

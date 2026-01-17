@@ -15,6 +15,7 @@ import UsersPage from './components/UsersPage'
 import BusinessesPage from './components/BusinessesPage'
 import ArticlesPage from './components/ArticlesPage'
 import BankAccountsPage from './components/BankAccountsPage'
+import InvoiceStatusesPage from './components/InvoiceStatusesPage'
 import './styles/main.scss'
 
 function App() {
@@ -105,6 +106,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <BankAccountsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/invoice-statuses"
+              element={
+                <ProtectedRoute>
+                  <InvoiceStatusesPage />
                 </ProtectedRoute>
               }
             />
