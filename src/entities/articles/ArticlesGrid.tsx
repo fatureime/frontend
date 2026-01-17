@@ -40,43 +40,36 @@ const ArticlesGrid = ({
               {
                 field: 'id',
                 headerName: 'ID',
-                width: 80,
               },
               {
                 field: 'name',
                 headerName: 'Emri',
                 flex: 1,
-                minWidth: 200,
               },
               {
                 field: 'description',
                 headerName: 'Përshkrimi',
                 flex: 1,
-                minWidth: 200,
               },
               {
                 field: 'unit_price',
                 headerName: 'Çmimi për njësi',
-                width: 150,
                 valueGetter: (_value: unknown, row: Article) => 
                   `${parseFloat(row.unit_price).toFixed(2)} €`,
               },
               {
                 field: 'unit',
                 headerName: 'Njësia',
-                width: 120,
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
-                width: 150,
                 valueGetter: (_value: unknown, row: Article) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
-                width: 250,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Article>) => (

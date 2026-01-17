@@ -96,3 +96,13 @@
     }
   }
 }
+
+@media (max-width: 768px) {
+  .article-details-body {
+    .detail-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+}

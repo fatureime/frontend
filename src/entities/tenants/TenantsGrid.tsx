@@ -42,18 +42,15 @@ const TenantsGrid = ({
               {
                 field: 'id',
                 headerName: 'ID',
-                width: 80,
               },
               {
                 field: 'name',
                 headerName: 'Emri',
                 flex: 1,
-                minWidth: 200,
               },
               {
                 field: 'is_admin',
                 headerName: 'Menagjues',
-                width: 120,
                 renderCell: (params: GridRenderCellParams<Tenant>) => (
                   params.row.is_admin ? (
                     <Chip label="Po" color="success" size="small" />
@@ -65,7 +62,6 @@ const TenantsGrid = ({
               {
                 field: 'has_paid',
                 headerName: 'I Paguar',
-                width: 120,
                 renderCell: (params: GridRenderCellParams<Tenant>) => (
                   params.row.has_paid ? (
                     <Chip label="Po" color="success" size="small" />
@@ -78,28 +74,24 @@ const TenantsGrid = ({
                 field: 'issuer_business',
                 headerName: 'Subjekti Lëshues',
                 flex: 1,
-                minWidth: 200,
                 valueGetter: (_value: unknown, row: Tenant) => 
                   row.issuer_business?.business_name || 'N/A',
               },
               {
                 field: 'users',
                 headerName: 'Përdoruesit',
-                width: 120,
                 valueGetter: (_value: unknown, row: Tenant) => 
                   row.users?.length || 0,
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
-                width: 150,
                 valueGetter: (_value: unknown, row: Tenant) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
-                width: canDelete ? 250 : 200,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Tenant>) => (

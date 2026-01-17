@@ -42,57 +42,47 @@ const BusinessesGrid = ({
               {
                 field: 'id',
                 headerName: 'ID',
-                width: 80,
               },
               {
                 field: 'business_name',
                 headerName: 'Emri i Biznesit',
                 flex: 1,
-                minWidth: 200,
               },
               {
                 field: 'trade_name',
                 headerName: 'Emri Tregtar',
                 flex: 1,
-                minWidth: 150,
               },
               {
                 field: 'business_type',
                 headerName: 'Lloji',
-                width: 150,
               },
               {
                 field: 'fiscal_number',
                 headerName: 'Numri Fiskal',
-                width: 150,
               },
               {
                 field: 'vat_number',
                 headerName: 'Numri TVSH',
-                width: 150,
               },
               {
                 field: 'email',
                 headerName: 'E-mail',
                 flex: 1,
-                minWidth: 200,
               },
               {
                 field: 'phone',
                 headerName: 'Telefoni',
-                width: 150,
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
-                width: 150,
                 valueGetter: (_value: unknown, row: Business) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
               },
               {
                 field: 'issuer',
                 headerName: 'Lëshues',
-                width: 120,
                 renderCell: (params: GridRenderCellParams<Business>) => {
                   const isIssuer = issuerBusinessId === params.row.id;
                   return isIssuer ? (
@@ -103,7 +93,6 @@ const BusinessesGrid = ({
               {
                 field: 'actions',
                 headerName: 'Veprimet',
-                width: 250,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Business>) => {

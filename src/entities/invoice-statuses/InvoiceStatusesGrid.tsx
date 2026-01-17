@@ -47,12 +47,10 @@ const InvoiceStatusesGrid = ({
               {
                 field: 'id',
                 headerName: 'ID',
-                width: 80,
               },
               {
                 field: 'code',
                 headerName: 'Kodi',
-                width: 200,
                 renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
                   <strong>{params.value}</strong>
                 ),
@@ -60,7 +58,6 @@ const InvoiceStatusesGrid = ({
               {
                 field: 'label',
                 headerName: 'Etiketa',
-                width: 250,
                 valueGetter: (_value: unknown, row: InvoiceStatus) => 
                   labels[row.code] || getStatusLabel(row.code),
                 flex: 1,
@@ -68,7 +65,6 @@ const InvoiceStatusesGrid = ({
               {
                 field: 'view',
                 headerName: 'Shiko',
-                width: 100,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
@@ -85,7 +81,6 @@ const InvoiceStatusesGrid = ({
               ...(canEdit ? [{
                 field: 'actions',
                 headerName: 'Veprimet',
-                width: 400,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (

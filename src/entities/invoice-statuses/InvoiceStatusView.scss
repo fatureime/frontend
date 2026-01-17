@@ -91,3 +91,13 @@
     }
   }
 }
+
+@media (max-width: 768px) {
+  .invoice-status-details-body {
+    .detail-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+}

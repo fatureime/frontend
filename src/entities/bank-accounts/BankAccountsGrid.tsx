@@ -44,13 +44,11 @@ const BankAccountsGrid = ({
               {
                 field: 'id',
                 headerName: 'ID',
-                width: 80,
               },
               {
                 field: 'business',
                 headerName: 'Subjekti',
                 flex: 1,
-                minWidth: 200,
                 valueGetter: (_value: unknown, row: BankAccountWithBusiness) => 
                   row.business?.business_name || `Subjekti #${row.business_id}`,
               },
@@ -58,36 +56,30 @@ const BankAccountsGrid = ({
                 field: 'bank_name',
                 headerName: 'Emri i Bankës',
                 flex: 1,
-                minWidth: 150,
               },
               {
                 field: 'iban',
                 headerName: 'IBAN',
                 flex: 1,
-                minWidth: 200,
               },
               {
                 field: 'swift',
                 headerName: 'SWIFT',
-                width: 120,
               },
               {
                 field: 'bank_account_number',
                 headerName: 'Numri i Llogarisë',
                 flex: 1,
-                minWidth: 150,
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
-                width: 150,
                 valueGetter: (_value: unknown, row: BankAccountWithBusiness) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
-                width: 250,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<BankAccountWithBusiness>) => (

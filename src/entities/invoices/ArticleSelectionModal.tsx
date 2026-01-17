@@ -156,30 +156,25 @@ const ArticleSelectionModal = ({
                   field: 'name',
                   headerName: 'Emri',
                   flex: 1,
-                  minWidth: 200,
                 },
                 {
                   field: 'description',
                   headerName: 'Përshkrimi',
                   flex: 1,
-                  minWidth: 200,
                 },
                 {
                   field: 'unit_price',
                   headerName: 'Çmimi për njësi',
-                  width: 150,
                   valueGetter: (_value: unknown, row: Article) => 
                     `${parseFloat(row.unit_price).toFixed(2)} €`,
                 },
                 {
                   field: 'unit',
                   headerName: 'Njësia',
-                  width: 120,
                 },
                 {
                   field: 'actions',
                   headerName: 'Veprimet',
-                  width: 120,
                   sortable: false,
                   filterable: false,
                   renderCell: (params: GridRenderCellParams<Article>) => (

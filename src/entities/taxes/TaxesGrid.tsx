@@ -47,31 +47,26 @@ const TaxesGrid = ({
               {
                 field: 'id',
                 headerName: 'ID',
-                width: 80,
               },
               {
                 field: 'rate',
                 headerName: 'Norma',
-                width: 150,
                 valueGetter: (_value: unknown, row: Tax) => formatRate(row.rate),
               },
               {
                 field: 'name',
                 headerName: 'Emri',
-                width: 200,
                 flex: 1,
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
-                width: 150,
                 valueGetter: (_value: unknown, row: Tax) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
               },
               {
                 field: 'view',
                 headerName: 'Shiko',
-                width: 100,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Tax>) => (
@@ -88,7 +83,6 @@ const TaxesGrid = ({
               ...(canEdit ? [{
                 field: 'actions',
                 headerName: 'Veprimet',
-                width: 200,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Tax>) => (

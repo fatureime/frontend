@@ -16,7 +16,6 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
-    padding-left: 100px; // Space for view-toggle on left
 
     h1 {
       margin: 0;
@@ -165,7 +164,6 @@
     .invoice-header {
       flex-direction: column;
       align-items: flex-start;
-      padding-left: 90px; // Less space on mobile
 
       .header-actions {
         width: 100%;

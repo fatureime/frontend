@@ -42,25 +42,21 @@ const UsersGrid = ({
               {
                 field: 'id',
                 headerName: 'ID',
-                width: 80,
               },
               {
                 field: 'email',
                 headerName: 'E-mail',
                 flex: 1,
-                minWidth: 200,
               },
               {
                 field: 'roles',
                 headerName: 'Rolet',
-                width: 200,
                 valueGetter: (_value: unknown, row: User) => 
                   row.roles?.join(', ') || 'ROLE_USER',
               },
               {
                 field: 'is_active',
                 headerName: 'Statusi',
-                width: 120,
                 renderCell: (params: GridRenderCellParams<User>) => (
                   <Chip
                     label={params.row.is_active ? 'Aktiv' : 'Jo Aktiv'}
@@ -72,7 +68,6 @@ const UsersGrid = ({
               {
                 field: 'email_verified',
                 headerName: 'Verifikuar',
-                width: 120,
                 renderCell: (params: GridRenderCellParams<User>) => (
                   params.row.email_verified ? (
                     <Chip label="Po" color="success" size="small" />
@@ -85,21 +80,18 @@ const UsersGrid = ({
                 field: 'tenant',
                 headerName: 'Hapësirëmarrësi',
                 flex: 1,
-                minWidth: 150,
                 valueGetter: (_value: unknown, row: User) => 
                   row.tenant?.name || 'N/A',
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
-                width: 150,
                 valueGetter: (_value: unknown, row: User) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
-                width: 250,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<User>) => {
