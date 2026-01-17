@@ -89,7 +89,7 @@ const InvoiceView = () => {
     if (!businessId || !id || !invoice) return;
 
     try {
-      const updated = await invoicesApi.updateInvoice(parseInt(businessId), parseInt(id), {
+      const updated = await invoicesApi.updateInvoice(businessId, parseInt(id), {
         status: newStatus as InvoiceStatusCode,
       });
       setInvoice(updated);
@@ -109,7 +109,7 @@ const InvoiceView = () => {
       setDownloading(true);
       setError(null);
       const blob = await invoicesApi.downloadInvoicePdf(
-        parseInt(businessId),
+        businessId,
         parseInt(id)
       );
 

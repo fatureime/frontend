@@ -10,7 +10,7 @@ const UserForm = () => {
   const { user: currentUser } = useAuth();
   const isEditMode = !!id;
 
-  const [user, setUser] = useState<User | null>(null);
+  const [, setUser] = useState<User | null>(null);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [formData, setFormData] = useState({
     email: '',

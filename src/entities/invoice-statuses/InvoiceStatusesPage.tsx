@@ -115,7 +115,7 @@ const InvoiceStatusesPage = () => {
       await loadStatuses();
       if (selectedStatus?.id === statusId) {
         setSelectedStatus(null);
-        setIsEditing(false);
+        setIsEditingLabel(false);
       }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };

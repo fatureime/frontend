@@ -1,18 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
-import { Button, Select, MenuItem, Box, IconButton, Menu, Checkbox } from '@mui/material';
+import { Select, MenuItem, Box, IconButton, Menu } from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { invoicesApi, Invoice, invoiceStatusesApi, InvoiceStatus } from '../../services/api';
-import { useAuth } from '../../contexts/useAuth';
 import './InvoicePage.scss';
 
 type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
 
 const InvoicePage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [invoiceStatuses, setInvoiceStatuses] = useState<InvoiceStatus[]>([]);
   const [loading, setLoading] = useState(true);

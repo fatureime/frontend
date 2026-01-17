@@ -12,7 +12,7 @@ const ArticleForm = () => {
   const businessId = user?.tenant?.issuer_business_id;
   const isEditMode = !!id;
 
-  const [article, setArticle] = useState<Article | null>(null);
+  const [, setArticle] = useState<Article | null>(null);
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [currentBusiness, setCurrentBusiness] = useState<Business | null>(null);
 

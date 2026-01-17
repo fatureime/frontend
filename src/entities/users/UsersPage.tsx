@@ -13,7 +13,6 @@ const UsersPage = () => {
 
   // Check if user is admin
   const isAdmin = user?.roles?.includes('ROLE_ADMIN') === true;
-  const isAdminTenant = user?.tenant?.is_admin === true;
 
   const loadUsers = useCallback(async () => {
     try {

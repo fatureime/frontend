@@ -10,8 +10,8 @@ const ArticlesPage = () => {
   const isAdminTenant = user?.tenant?.is_admin === true;
   const currentBusinessId = user?.tenant?.issuer_business_id || null;
   const [articles, setArticles] = useState<Article[]>([]);
-  const [business, setBusiness] = useState<Business | null>(null);
-  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [, setBusiness] = useState<Business | null>(null);
+  const [, setBusinesses] = useState<Business[]>([]);
   const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(currentBusinessId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,14 +81,7 @@ const ArticlesPage = () => {
     }
   }, [selectedBusinessId, currentBusinessId, loadBusiness, loadArticles]);
 
-  const handleBusinessChange = (newBusinessId: number) => {
-    // For admin tenants, they can switch businesses
-    setSelectedBusinessId(newBusinessId);
-    const foundBusiness = businesses.find(b => b.id === newBusinessId);
-    if (foundBusiness) {
-      setBusiness(foundBusiness);
-    }
-  };
+  // Removed unused handleBusinessChange function
 
   const handleCreate = () => {
     navigate('/articles/create');

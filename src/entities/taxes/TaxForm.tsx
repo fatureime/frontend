@@ -13,7 +13,7 @@ const TaxForm = () => {
   const canEdit = isAdminTenant && isAdmin;
   const isEditMode = !!id;
 
-  const [tax, setTax] = useState<Tax | null>(null);
+  const [, setTax] = useState<Tax | null>(null);
   const [formData, setFormData] = useState({
     rate: '' as string | null,
     name: '',
@@ -63,7 +63,7 @@ const TaxForm = () => {
     if (formData.rate === 'null' || formData.rate === '') {
       rateValue = null;
     } else {
-      const parsedRate = parseFloat(formData.rate);
+      const parsedRate = parseFloat(formData.rate || '');
       if (isNaN(parsedRate)) {
         setError('Norma e taksës duhet të jetë një numër i vlefshëm');
         setLoading(false);
@@ -159,7 +159,7 @@ const TaxForm = () => {
               type="number"
               id="rate"
               name="rate"
-              value={formData.rate === 'null' ? '' : formData.rate}
+              value={formData.rate === 'null' || formData.rate === null ? '' : formData.rate}
               onChange={(e) => {
                 const value = e.target.value;
                 setFormData(prev => ({

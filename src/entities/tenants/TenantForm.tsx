@@ -8,7 +8,7 @@ const TenantForm = () => {
   const navigate = useNavigate();
   const isEditMode = !!id;
 
-  const [tenant, setTenant] = useState<Tenant | null>(null);
+  const [, setTenant] = useState<Tenant | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     has_paid: false,
