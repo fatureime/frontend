@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { DataGrid, GridRenderCellParams, GridRenderEditCellParams } from '@mui/x-data-grid';
-import { Select, MenuItem, TextField, Box, IconButton } from '@mui/material';
+import { Select, MenuItem, TextField, Box, IconButton, Button, Card, CardContent, Typography } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import GridViewIcon from '@mui/icons-material/GridView';
 import { 
   invoicesApi, 
   Invoice, 
@@ -17,6 +20,7 @@ import {
   CreateInvoiceItemData
 } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import ArticleSelectionModal from './ArticleSelectionModal';
 import './InvoiceForm.scss';
 
 interface InvoiceItemForm {
@@ -77,6 +81,12 @@ const InvoiceForm = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [articleModalOpen, setArticleModalOpen] = useState(false);
+  const [selectedItemIdForArticle, setSelectedItemIdForArticle] = useState<string | null>(null);
+  const [itemsViewMode, setItemsViewMode] = useState<'list' | 'grid'>(() => {
+    const saved = localStorage.getItem('invoice-form-items-view-mode');
+    return (saved === 'list' || saved === 'grid') ? saved : 'grid';
+  });
 
   // Load data
   const loadBusinesses = useCallback(async () => {
@@ -230,6 +240,20 @@ const InvoiceForm = () => {
       }
       return item;
     }));
+  };
+
+  // Handle article selection from modal
+  const handleArticleSelect = (article: Article) => {
+    if (selectedItemIdForArticle) {
+      updateItem(selectedItemIdForArticle, 'articleId', article.id);
+      setSelectedItemIdForArticle(null);
+    }
+  };
+
+  // Open article modal for a specific item
+  const handleOpenArticleModal = (itemId: string) => {
+    setSelectedItemIdForArticle(itemId);
+    setArticleModalOpen(true);
   };
 
   // Add item
@@ -492,7 +516,49 @@ const InvoiceForm = () => {
           {/* Items Section */}
           <div className="invoice-section">
             <div className="section-header">
-              <h2 className="section-title">Artikujt</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <h2 className="section-title" style={{ margin: 0 }}>Artikujt</h2>
+                {items.length > 0 && (
+                  <Box sx={{ display: 'flex', gap: 0.5, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setItemsViewMode('list');
+                        localStorage.setItem('invoice-form-items-view-mode', 'list');
+                      }}
+                      sx={{
+                        borderRadius: 0,
+                        bgcolor: itemsViewMode === 'list' ? 'primary.main' : 'transparent',
+                        color: itemsViewMode === 'list' ? 'white' : 'inherit',
+                        '&:hover': {
+                          bgcolor: itemsViewMode === 'list' ? 'primary.dark' : 'rgba(0,0,0,0.04)',
+                        },
+                      }}
+                      title="Lista"
+                    >
+                      <GridViewIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setItemsViewMode('grid');
+                        localStorage.setItem('invoice-form-items-view-mode', 'grid');
+                      }}
+                      sx={{
+                        borderRadius: 0,
+                        bgcolor: itemsViewMode === 'grid' ? 'primary.main' : 'transparent',
+                        color: itemsViewMode === 'grid' ? 'white' : 'inherit',
+                        '&:hover': {
+                          bgcolor: itemsViewMode === 'grid' ? 'primary.dark' : 'rgba(0,0,0,0.04)',
+                        },
+                      }}
+                      title="Tabelë"
+                    >
+                      <ViewListIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                )}
+              </div>
               <button
                 type="button"
                 className="btn btn--secondary btn--small"
@@ -502,175 +568,347 @@ const InvoiceForm = () => {
               </button>
             </div>
 
-            <Box sx={{ height: 500, width: '100%', mb: 2 }}>
-              <DataGrid
-                rows={items}
-                columns={[
-                  {
-                    field: 'articleId',
-                    headerName: 'Artikulli',
-                    width: 200,
-                    editable: true,
-                    renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
-                      <Select
-                        value={params.value || ''}
-                        onChange={(e: { target: { value: string } }) => {
-                          const newValue = e.target.value ? parseInt(e.target.value) : null;
-                          params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue });
-                          updateItem(params.id.toString(), 'articleId', newValue);
-                        }}
-                        fullWidth
-                        size="small"
-                        sx={{ height: '100%' }}
-                      >
-                        <MenuItem value="">Zgjidhni artikull</MenuItem>
-                        {articles.map(article => (
-                          <MenuItem key={article.id} value={article.id}>
-                            {article.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    ),
-                    renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => {
-                      const article = articles.find(a => a.id === params.value);
-                      return article ? article.name : '';
-                    },
-                  },
-                  {
-                    field: 'description',
-                    headerName: 'Përshkrimi',
-                    width: 250,
-                    editable: true,
-                    flex: 1,
-                    renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
-                      <TextField
-                        value={params.value || ''}
-                        onChange={(e: { target: { value: string } }) => {
-                          params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value });
-                          updateItem(params.id.toString(), 'description', e.target.value);
-                        }}
-                        fullWidth
-                        size="small"
-                        placeholder="Përshkrimi i artikullit"
-                      />
-                    ),
-                  },
-                  {
-                    field: 'quantity',
-                    headerName: 'Sasia',
-                    width: 120,
-                    editable: true,
-                    type: 'number',
-                    renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
-                      <TextField
-                        type="number"
-                        value={params.value || 0}
-                        onChange={(e: { target: { value: string } }) => {
-                          const newValue = e.target.value;
-                          params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue });
-                          updateItem(params.id.toString(), 'quantity', newValue);
-                        }}
-                        fullWidth
-                        size="small"
-                        inputProps={{ min: 0, step: 0.01 }}
-                      />
-                    ),
-                  },
-                  {
-                    field: 'unitPrice',
-                    headerName: 'Çmimi për Njësi',
-                    width: 150,
-                    editable: true,
-                    type: 'number',
-                    renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
-                      <TextField
-                        type="number"
-                        value={params.value || 0}
-                        onChange={(e: { target: { value: string } }) => {
-                          const newValue = e.target.value;
-                          params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue });
-                          updateItem(params.id.toString(), 'unitPrice', newValue);
-                        }}
-                        fullWidth
-                        size="small"
-                        inputProps={{ min: 0, step: 0.01 }}
-                      />
-                    ),
-                  },
-                  {
-                    field: 'taxId',
-                    headerName: 'Vlera e TVSH',
-                    width: 180,
-                    editable: true,
-                    renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
-                      <Select
-                        value={params.value || ''}
-                        onChange={(e: { target: { value: string } }) => {
-                          const newValue = e.target.value ? parseInt(e.target.value) : null;
-                          params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue });
-                          updateItem(params.id.toString(), 'taxId', newValue);
-                        }}
-                        fullWidth
-                        size="small"
-                        sx={{ height: '100%' }}
-                      >
-                        {taxes.map(tax => (
-                          <MenuItem key={tax.id} value={tax.id}>
-                            {tax.rate === null ? 'E përjashtuar' : `${tax.rate}%`}
-                            {tax.name && ` - ${tax.name}`}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    ),
-                    renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => {
-                      const tax = taxes.find(t => t.id === params.value);
-                      return tax ? (tax.rate === null ? 'E përjashtuar' : `${tax.rate}%`) : '';
-                    },
-                  },
-                  {
-                    field: 'total',
-                    headerName: 'Totali',
-                    width: 120,
-                    valueFormatter: (value: number) => `${value.toFixed(2)} €`,
-                    renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => (
-                      <strong>{(params.value as number).toFixed(2)} €</strong>
-                    ),
-                  },
-                  {
-                    field: 'actions',
-                    headerName: '',
-                    width: 80,
-                    sortable: false,
-                    filterable: false,
-                    renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => (
-                      items.length > 1 ? (
-                        <IconButton
+            {itemsViewMode === 'grid' ? (
+              <Box sx={{ height: 500, width: '100%', mb: 2 }}>
+                <DataGrid
+                  rows={items}
+                  columns={[
+                    {
+                      field: 'articleId',
+                      headerName: 'Artikulli',
+                      width: 250,
+                      editable: true,
+                      renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', height: '100%', width: '100%' }}>
+                        <Select
+                          value={params.value || ''}
+                          onChange={(e: { target: { value: string } }) => {
+                            const newValue = e.target.value ? parseInt(e.target.value) : null;
+                            params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue });
+                            updateItem(params.id.toString(), 'articleId', newValue);
+                          }}
+                          fullWidth
                           size="small"
-                          onClick={() => removeItem(params.row.id)}
-                          color="error"
-                          sx={{ fontSize: '1.2rem' }}
+                            sx={{ flex: 1 }}
                         >
-                          ×
-                        </IconButton>
-                      ) : null
-                    ),
-                  },
-                ]}
-                getRowId={(row: InvoiceItemForm) => row.id}
-                disableRowSelectionOnClick
-                hideFooter
-                processRowUpdate={(newRow: InvoiceItemForm) => {
-                  const updated = calculateItemTotals(newRow);
-                  setItems(items.map(item => item.id === updated.id ? updated : item));
-                  return updated;
-                }}
-                sx={{
-                  '& .MuiDataGrid-cell': {
-                    borderBottom: '1px solid rgba(224, 224, 224, 1)',
-                  },
-                }}
-              />
-            </Box>
+                          <MenuItem value="">Zgjidhni artikull</MenuItem>
+                          {articles.map(article => (
+                            <MenuItem key={article.id} value={article.id}>
+                              {article.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleOpenArticleModal(params.id.toString())}
+                            title="Shiko artikujt në listë/tabelë"
+                            sx={{ border: '1px solid #e0e0e0' }}
+                          >
+                            <SearchIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      ),
+                      renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => {
+                        const article = articles.find(a => a.id === params.value);
+                        return (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <span>{article ? article.name : ''}</span>
+                            {!params.value && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleOpenArticleModal(params.row.id.toString())}
+                                title="Shiko artikujt në listë/tabelë"
+                                sx={{ ml: 1 }}
+                              >
+                                <SearchIcon fontSize="small" />
+                              </IconButton>
+                            )}
+                          </Box>
+                        );
+                      },
+                    },
+                    {
+                      field: 'description',
+                      headerName: 'Përshkrimi',
+                      width: 250,
+                      editable: true,
+                      flex: 1,
+                      renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
+                        <TextField
+                          value={params.value || ''}
+                          onChange={(e: { target: { value: string } }) => {
+                            params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value });
+                            updateItem(params.id.toString(), 'description', e.target.value);
+                          }}
+                          fullWidth
+                          size="small"
+                          placeholder="Përshkrimi i artikullit"
+                        />
+                      ),
+                    },
+                    {
+                      field: 'quantity',
+                      headerName: 'Sasia',
+                      width: 120,
+                      editable: true,
+                      type: 'number',
+                      renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
+                        <TextField
+                          type="number"
+                          value={params.value || 0}
+                          onChange={(e: { target: { value: string } }) => {
+                            const newValue = e.target.value;
+                            params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue });
+                            updateItem(params.id.toString(), 'quantity', newValue);
+                          }}
+                          fullWidth
+                          size="small"
+                          inputProps={{ min: 0, step: 0.01 }}
+                        />
+                      ),
+                    },
+                    {
+                      field: 'unitPrice',
+                      headerName: 'Çmimi për Njësi',
+                      width: 150,
+                      editable: true,
+                      type: 'number',
+                      renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
+                        <TextField
+                          type="number"
+                          value={params.value || 0}
+                          onChange={(e: { target: { value: string } }) => {
+                            const newValue = e.target.value;
+                            params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue });
+                            updateItem(params.id.toString(), 'unitPrice', newValue);
+                          }}
+                          fullWidth
+                          size="small"
+                          inputProps={{ min: 0, step: 0.01 }}
+                        />
+                      ),
+                    },
+                    {
+                      field: 'taxId',
+                      headerName: 'Vlera e TVSH',
+                      width: 180,
+                      editable: true,
+                      renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
+                        <Select
+                          value={params.value || ''}
+                          onChange={(e: { target: { value: string } }) => {
+                            const newValue = e.target.value ? parseInt(e.target.value) : null;
+                            params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue });
+                            updateItem(params.id.toString(), 'taxId', newValue);
+                          }}
+                          fullWidth
+                          size="small"
+                          sx={{ height: '100%' }}
+                        >
+                          {taxes.map(tax => (
+                            <MenuItem key={tax.id} value={tax.id}>
+                              {tax.rate === null ? 'E përjashtuar' : `${tax.rate}%`}
+                              {tax.name && ` - ${tax.name}`}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      ),
+                      renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => {
+                        const tax = taxes.find(t => t.id === params.value);
+                        return tax ? (tax.rate === null ? 'E përjashtuar' : `${tax.rate}%`) : '';
+                      },
+                    },
+                    {
+                      field: 'total',
+                      headerName: 'Totali',
+                      width: 120,
+                      valueFormatter: (value: number) => `${value.toFixed(2)} €`,
+                      renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => (
+                        <strong>{(params.value as number).toFixed(2)} €</strong>
+                      ),
+                    },
+                    {
+                      field: 'actions',
+                      headerName: '',
+                      width: 80,
+                      sortable: false,
+                      filterable: false,
+                      renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => (
+                        items.length > 1 ? (
+                          <IconButton
+                            size="small"
+                            onClick={() => removeItem(params.row.id)}
+                            color="error"
+                            sx={{ fontSize: '1.2rem' }}
+                          >
+                            ×
+                          </IconButton>
+                        ) : null
+                      ),
+                    },
+                  ]}
+                  getRowId={(row: InvoiceItemForm) => row.id}
+                  disableRowSelectionOnClick
+                  hideFooter
+                  processRowUpdate={(newRow: InvoiceItemForm) => {
+                    const updated = calculateItemTotals(newRow);
+                    setItems(items.map(item => item.id === updated.id ? updated : item));
+                    return updated;
+                  }}
+                  sx={{
+                    '& .MuiDataGrid-cell': {
+                      borderBottom: '1px solid rgba(224, 224, 224, 1)',
+                    },
+                  }}
+                />
+              </Box>
+            ) : (
+              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2, mb: 2 }}>
+                {items.map((item, index) => {
+                  const article = articles.find(a => a.id === item.articleId);
+                  const tax = taxes.find(t => t.id === item.taxId);
+                  return (
+                    <Card key={item.id} sx={{ display: 'flex', flexDirection: 'column' }}>
+                      <CardContent>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
+                          <Typography variant="h6" component="h3" sx={{ margin: 0 }}>
+                            #{index + 1} {item.description || 'Artikull i ri'}
+                            {article && <span title="Nga artikulli" style={{ marginLeft: '0.5rem' }}>📦</span>}
+                          </Typography>
+                          {items.length > 1 && (
+                            <IconButton
+                              size="small"
+                              onClick={() => removeItem(item.id)}
+                              color="error"
+                              sx={{ fontSize: '1.2rem' }}
+                            >
+                              ×
+                            </IconButton>
+                          )}
+                        </Box>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                          {/* Article Selection */}
+                          <Box>
+                            <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}>
+                              Artikulli
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                              <Select
+                                value={item.articleId || ''}
+                                onChange={(e) => {
+                                  const newValue = e.target.value ? parseInt(e.target.value) : null;
+                                  updateItem(item.id, 'articleId', newValue);
+                                }}
+                                fullWidth
+                                size="small"
+                                sx={{ flex: 1 }}
+                              >
+                                <MenuItem value="">Zgjidhni artikull</MenuItem>
+                                {articles.map(art => (
+                                  <MenuItem key={art.id} value={art.id}>
+                                    {art.name}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                              <IconButton
+                                size="small"
+                                onClick={() => handleOpenArticleModal(item.id)}
+                                title="Shiko artikujt në listë/tabelë"
+                                sx={{ border: '1px solid #e0e0e0' }}
+                              >
+                                <SearchIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          </Box>
+
+                          {/* Description */}
+                          <Box>
+                            <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}>
+                              Përshkrimi
+                            </Typography>
+                            <TextField
+                              value={item.description || ''}
+                              onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                              fullWidth
+                              size="small"
+                              placeholder="Përshkrimi i artikullit"
+                            />
+                          </Box>
+
+                          {/* Quantity and Unit Price */}
+                          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                            <Box>
+                              <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}>
+                                Sasia
+                              </Typography>
+                              <TextField
+                                type="number"
+                                value={item.quantity || 0}
+                                onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
+                                fullWidth
+                                size="small"
+                                inputProps={{ min: 0, step: 0.01 }}
+                              />
+                            </Box>
+                            <Box>
+                              <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}>
+                                Çmimi për Njësi
+                              </Typography>
+                              <TextField
+                                type="number"
+                                value={item.unitPrice || 0}
+                                onChange={(e) => updateItem(item.id, 'unitPrice', e.target.value)}
+                                fullWidth
+                                size="small"
+                                inputProps={{ min: 0, step: 0.01 }}
+                              />
+                            </Box>
+                          </Box>
+
+                          {/* Tax */}
+                          <Box>
+                            <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontWeight: 600 }}>
+                              Vlera e TVSH
+                            </Typography>
+                            <Select
+                              value={item.taxId || ''}
+                              onChange={(e) => {
+                                const newValue = e.target.value ? parseInt(e.target.value) : null;
+                                updateItem(item.id, 'taxId', newValue);
+                              }}
+                              fullWidth
+                              size="small"
+                            >
+                              {taxes.map(t => (
+                                <MenuItem key={t.id} value={t.id}>
+                                  {t.rate === null ? 'E përjashtuar' : `${t.rate}%`}
+                                  {t.name && ` - ${t.name}`}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </Box>
+
+                          {/* Totals */}
+                          <Box sx={{ mt: 1, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                              <Typography variant="body2">
+                                <strong>Vlera pa TVSH:</strong> {item.subtotal.toFixed(2)} €
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Vlera e TVSH:</strong> {item.taxAmount.toFixed(2)} €
+                              </Typography>
+                              <Typography variant="body1" sx={{ mt: 1, pt: 1, borderTop: 1, borderColor: 'divider', fontWeight: 600 }}>
+                                <strong>Totali:</strong> {item.total.toFixed(2)} €
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </Box>
+            )}
 
             {/* Totals */}
             <div className="invoice-totals">
@@ -719,6 +957,18 @@ const InvoiceForm = () => {
           </div>
         </div>
       </div>
+
+      {/* Article Selection Modal */}
+      <ArticleSelectionModal
+        open={articleModalOpen}
+        onClose={() => {
+          setArticleModalOpen(false);
+          setSelectedItemIdForArticle(null);
+        }}
+        articles={articles}
+        loading={false}
+        onSelect={handleArticleSelect}
+      />
     </div>
   );
 };
