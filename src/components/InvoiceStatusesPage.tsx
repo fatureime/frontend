@@ -62,14 +62,6 @@ const InvoiceStatusesPage = () => {
     };
   }, [user, isAdminTenant, navigate, loadStatuses]);
 
-  const handleCreate = () => {
-    setSelectedStatus(null);
-    setCode('');
-    setLabel('');
-    setIsCreating(true);
-    setIsEditing(false);
-  };
-
   const handleEdit = (status: InvoiceStatus) => {
     setSelectedStatus(status);
     setCode(status.code);

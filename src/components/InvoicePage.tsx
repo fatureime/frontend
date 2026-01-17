@@ -47,7 +47,7 @@ const InvoicePage = () => {
     date.setDate(date.getDate() + 30);
     return date.toISOString().split('T')[0];
   });
-  const [status, setStatus] = useState<string>('draft');
+  const [status, setStatus] = useState<'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'>('draft');
   const [issuerId, setIssuerId] = useState<number | null>(null);
   const [receiverId, setReceiverId] = useState<number | null>(null);
   const [items, setItems] = useState<InvoiceItemForm[]>([
@@ -297,7 +297,7 @@ const InvoicePage = () => {
         receiver_id: receiverId,
         invoice_date: invoiceDate,
         due_date: dueDate,
-        status: saveAsDraft ? 'draft' : status,
+        status: (saveAsDraft ? 'draft' : status) as 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled',
         items: invoiceItems,
       };
 

@@ -72,7 +72,7 @@ const InvoiceDetailPage = () => {
 
     try {
       const updated = await invoicesApi.updateInvoice(parseInt(businessId), parseInt(id), {
-        status: newStatus,
+        status: newStatus as InvoiceStatusCode,
       });
       setInvoice(updated);
     } catch (err: any) {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { invoicesApi, Invoice, businessesApi, Business, invoiceStatusesApi, InvoiceStatus } from '../services/api';
+import { invoicesApi, Invoice, businessesApi, invoiceStatusesApi, InvoiceStatus } from '../services/api';
 import { useAuth } from '../contexts/useAuth';
 import './InvoicesPage.scss';
 
@@ -11,8 +11,6 @@ const InvoicesPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [business, setBusiness] = useState<Business | null>(null);
-  const [businesses, setBusinesses] = useState<Business[]>([]);
   const [invoiceStatuses, setInvoiceStatuses] = useState<InvoiceStatus[]>([]);
   const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,7 +49,6 @@ const InvoicesPage = () => {
     loadingBusinessesRef.current = true;
     try {
       const data = await businessesApi.getBusinesses();
-      setBusinesses(data);
       // Use functional update to avoid dependency on selectedBusinessId
       setSelectedBusinessId(prev => prev || (data.length > 0 ? data[0].id : null));
     } catch (err: any) {
@@ -67,7 +64,6 @@ const InvoicesPage = () => {
     loadingBusinessRef.current = true;
     try {
       const data = await businessesApi.getBusiness(parseInt(businessId));
-      setBusiness(data);
       setSelectedBusinessId(data.id);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi ngarkimi i biznesit');
