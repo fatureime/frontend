@@ -1,8 +1,8 @@
-@import '../styles/variables';
-@import '../styles/responsive';
+@import '../../styles/variables';
+@import '../../styles/responsive';
 
-.login-page {
-  min-height: calc(100vh - 80px); // Subtract navbar height
+.accept-invitation-page {
+  min-height: calc(100vh - 80px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,18 +11,16 @@
 
   @include mobile {
     padding: $spacing-md;
-    padding-top: 50px;
-    align-items: self-start;
     min-height: calc(100vh - 60px);
   }
 }
 
-.login-container {
+.accept-invitation-container {
   width: 100%;
-  max-width: 450px;
+  max-width: 500px;
 }
 
-.login-card {
+.accept-invitation-card {
   background: $bg-primary;
   border-radius: $border-radius;
   padding: $spacing-2xl;
@@ -33,22 +31,37 @@
   }
 }
 
-.login-title {
+.accept-invitation-title {
   font-size: $font-size-3xl;
   font-weight: $font-weight-bold;
   color: $text-primary;
-  margin-bottom: $spacing-sm;
+  margin-bottom: $spacing-lg;
   text-align: center;
 }
 
-.login-subtitle {
-  font-size: $font-size-base;
+.accept-invitation-success {
+  text-align: center;
+  padding: $spacing-xl 0;
+
+  .accept-invitation-icon {
+    color: $accent;
+    margin-bottom: $spacing-md;
+  }
+
+  p {
+    font-size: $font-size-base;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+  }
+}
+
+.accept-invitation-redirect {
+  font-size: $font-size-sm;
   color: $text-secondary;
-  margin-bottom: $spacing-xl;
-  text-align: center;
+  margin-top: $spacing-md;
 }
 
-.login-error {
+.accept-invitation-error {
   background-color: #fee2e2;
   color: #dc2626;
   padding: $spacing-md;
@@ -58,7 +71,18 @@
   border: 1px solid #fecaca;
 }
 
-.login-form {
+.accept-invitation-form-container {
+  margin-top: $spacing-lg;
+}
+
+.accept-invitation-description {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  margin-bottom: $spacing-lg;
+  text-align: center;
+}
+
+.accept-invitation-form {
   display: flex;
   flex-direction: column;
   gap: $spacing-lg;
@@ -68,12 +92,6 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-sm;
-
-  &--checkbox {
-    flex-direction: row;
-    align-items: center;
-    gap: $spacing-sm;
-  }
 }
 
 .form-label {
@@ -108,29 +126,10 @@
   }
 }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  cursor: pointer;
-  user-select: none;
-}
-
-.checkbox-input {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  accent-color: $primary;
-
-  &:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-}
-
-.checkbox-text {
-  font-size: $font-size-sm;
+.form-hint {
+  font-size: $font-size-xs;
   color: $text-secondary;
+  margin-top: -$spacing-xs;
 }
 
 .btn {
@@ -171,17 +170,42 @@
   }
 }
 
-.login-footer {
+.accept-invitation-loading {
+  text-align: center;
+  padding: $spacing-xl 0;
+
+  .spinner {
+    border: 3px solid $bg-secondary;
+    border-top: 3px solid $primary;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto $spacing-md;
+  }
+
+  p {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.accept-invitation-footer {
   margin-top: $spacing-xl;
   text-align: center;
 }
 
-.login-footer-text {
+.accept-invitation-footer-text {
   font-size: $font-size-sm;
   color: $text-secondary;
 }
 
-.login-footer-link {
+.accept-invitation-footer-link {
   color: $primary;
   text-decoration: none;
   font-weight: $font-weight-medium;

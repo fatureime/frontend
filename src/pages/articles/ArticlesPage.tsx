@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { articlesApi, Article, businessesApi, Business } from '../services/api';
-import { useAuth } from '../contexts/useAuth';
+import { articlesApi, Article, businessesApi, Business } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import ArticleForm from './ArticleForm';
 import './ArticlesPage.scss';
 

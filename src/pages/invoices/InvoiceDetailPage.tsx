@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import { Box } from '@mui/material';
-import { invoicesApi, Invoice, invoiceStatusesApi, InvoiceStatus, InvoiceItem } from '../services/api';
+import { invoicesApi, Invoice, invoiceStatusesApi, InvoiceStatus, InvoiceItem } from '../../services/api';
 import './InvoiceDetailPage.scss';
 
 type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { businessesApi, Business } from '../services/api';
-import { useAuth } from '../contexts/useAuth';
+import { businessesApi, Business } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import BusinessForm from './BusinessForm';
 import './BusinessesPage.scss';
 

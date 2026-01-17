@@ -1,8 +1,8 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AxiosError } from 'axios';
-import { useAuth } from '../contexts/useAuth';
-import { businessesApi } from '../services/api';
+import { useAuth } from '../../contexts/useAuth';
+import { businessesApi } from '../../services/api';
 import './Login.scss';
 
 const Login = () => {

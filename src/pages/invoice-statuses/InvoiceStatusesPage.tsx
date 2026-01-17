@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import { Button, Box } from '@mui/material';
-import { invoiceStatusesApi, InvoiceStatus } from '../services/api';
-import { useAuth } from '../contexts/useAuth';
-import { getStatusLabels, getStatusLabel, setStatusLabel } from '../utils/invoiceStatusLabels';
+import { invoiceStatusesApi, InvoiceStatus } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
+import { getStatusLabels, getStatusLabel, setStatusLabel } from '../../utils/invoiceStatusLabels';
 import './InvoiceStatusesPage.scss';
 
 const InvoiceStatusesPage = () => {

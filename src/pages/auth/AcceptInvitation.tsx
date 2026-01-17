@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { AxiosError } from 'axios';
-import { usersApi } from '../services/api';
-import { useAuth } from '../contexts/useAuth';
+import { usersApi } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import './AcceptInvitation.scss';
 
 const AcceptInvitation = () => {

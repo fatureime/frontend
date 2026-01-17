@@ -4,8 +4,8 @@ import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import { Button, Select, MenuItem, Box, IconButton, Menu, Checkbox } from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { invoicesApi, Invoice, businessesApi, invoiceStatusesApi, InvoiceStatus } from '../services/api';
-import { useAuth } from '../contexts/useAuth';
+import { invoicesApi, Invoice, businessesApi, invoiceStatusesApi, InvoiceStatus } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import './InvoicesPage.scss';
 
 type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';

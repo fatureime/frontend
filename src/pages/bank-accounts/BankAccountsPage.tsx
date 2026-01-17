@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { bankAccountsApi, businessesApi, BankAccount, Business } from '../services/api';
-import { useAuth } from '../contexts/useAuth';
+import { bankAccountsApi, businessesApi, BankAccount, Business } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import BankAccountForm from './BankAccountForm';
 import './BankAccountsPage.scss';
 

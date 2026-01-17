@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { bankAccountsApi, BankAccount, CreateBankAccountData, Business } from '../services/api';
+import { bankAccountsApi, BankAccount, CreateBankAccountData, Business } from '../../services/api';
 import './BankAccountForm.scss';
 
 interface BankAccountFormProps {

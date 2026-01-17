@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { tenantsApi, Tenant } from '../services/api';
+import { tenantsApi, Tenant } from '../../services/api';
 import './TenantForm.scss';
 
 interface TenantFormProps {

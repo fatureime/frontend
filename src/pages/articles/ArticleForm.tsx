@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { articlesApi, Article, CreateArticleData, Business } from '../services/api';
+import { articlesApi, Article, CreateArticleData, Business } from '../../services/api';
 import './ArticleForm.scss';
 
 interface ArticleFormProps {

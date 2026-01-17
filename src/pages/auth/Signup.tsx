@@ -1,7 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AxiosError } from 'axios';
-import { useAuth } from '../contexts/useAuth';
+import { useAuth } from '../../contexts/useAuth';
 import './Signup.scss';
 
 const Signup = () => {

@@ -1,62 +1,57 @@
 import { useState } from 'react';
-import { usersApi, User, Tenant } from '../services/api';
-import './UserForm.scss';
+import { usersApi, Tenant } from '../../services/api';
+import './InviteUserForm.scss';
 
-interface UserFormProps {
-  user: User;
+interface InviteUserFormProps {
   tenants: Tenant[];
+  defaultTenantId?: number;
   onSave: () => void;
   onCancel: () => void;
 }
 
-const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
+const InviteUserForm = ({ tenants, defaultTenantId, onSave, onCancel }: InviteUserFormProps) => {
   const [formData, setFormData] = useState({
-    email: user.email,
-    roles: user.roles || ['ROLE_USER'],
-    is_active: user.is_active,
-    tenant_id: user.tenant?.id || null,
-    password: '',
+    email: '',
+    roles: ['ROLE_USER'],
+    tenant_id: defaultTenantId || null,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
-      const updateData: any = {
+      const inviteData: any = {
         email: formData.email,
         roles: formData.roles,
-        is_active: formData.is_active,
       };
 
-      // Only include password if provided
-      if (formData.password) {
-        updateData.password = formData.password;
+      if (formData.tenant_id) {
+        inviteData.tenant_id = formData.tenant_id;
       }
 
-      // Only include tenant_id if tenants are available (admin tenant users)
-      if (tenants.length > 0 && formData.tenant_id) {
-        updateData.tenant_id = formData.tenant_id;
-      }
-
-      await usersApi.updateUser(user.id, updateData);
-      onSave();
+      await usersApi.inviteUser(inviteData);
+      setSuccess('Ftesa u dërgua me sukses!');
+      setTimeout(() => {
+        onSave();
+      }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Dështoi përditësimi i përdoruesit');
+      setError(err.response?.data?.error || 'Dështoi dërgimi i ftesës');
     } finally {
       setLoading(false);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
+    const { name, value } = e.target;
 
     if (name === 'roles') {
-      // Handle roles as multi-select (for now, simple checkbox for ROLE_ADMIN)
+      // Handle roles toggle
       const roles = formData.roles.includes('ROLE_ADMIN')
         ? ['ROLE_USER']
         : ['ROLE_USER', 'ROLE_ADMIN'];
@@ -64,14 +59,14 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: type === 'checkbox' ? checked : (type === 'number' ? parseInt(value) || null : value),
+        [name]: name === 'tenant_id' ? (value ? parseInt(value) : null) : value,
       }));
     }
   };
 
   return (
-    <div className="user-form">
-      <h2>Ndrysho Përdoruesin</h2>
+    <div className="invite-user-form">
+      <h2>Fto Përdorues</h2>
       <form onSubmit={handleSubmit}>
         {error && (
           <div className="error-message">
@@ -79,8 +74,14 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
           </div>
         )}
 
+        {success && (
+          <div className="success-message">
+            {success}
+          </div>
+        )}
+
         <div className="form-group">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">Adresa e Email-it</label>
           <input
             type="email"
             id="email"
@@ -89,21 +90,9 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
             onChange={handleChange}
             required
             disabled={loading}
+            placeholder="user@example.com"
           />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="password">Fjalëkalim i Ri (lëreni bosh për të mbajtur atë aktual)</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            disabled={loading}
-            minLength={8}
-          />
-          <small>Minimum 8 karaktere</small>
+          <small>Një email ftese do të dërgohet në këtë adresë</small>
         </div>
 
         <div className="form-group">
@@ -121,19 +110,6 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
               disabled={loading}
             />
             <span>Përdorues Menagjues (mund të menaxhojë përdoruesit)</span>
-          </label>
-        </div>
-
-        <div className="form-group">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              name="is_active"
-              checked={formData.is_active}
-              onChange={handleChange}
-              disabled={loading}
-            />
-            <span>Aktiv</span>
           </label>
         </div>
 
@@ -158,8 +134,8 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
         )}
 
         <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Duke u ruajtur...' : 'Ruaj Ndryshimet'}
+          <button type="submit" className="btn btn-primary" disabled={loading || !!success}>
+            {loading ? 'Duke u dërguar...' : success ? 'U Dërgua!' : 'Dërgo Ftesën'}
           </button>
           <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>
             Anulo
@@ -170,4 +146,4 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
   );
 };
 
-export default UserForm;
+export default InviteUserForm;

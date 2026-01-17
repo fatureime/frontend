@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams, useLocation, Link } from 'react-router-dom';
 import { AxiosError } from 'axios';
-import { useAuth } from '../contexts/useAuth';
+import { useAuth } from '../../contexts/useAuth';
 import './EmailVerification.scss';
 
 const EmailVerification = () => {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { tenantsApi, Tenant } from '../services/api';
-import { useAuth } from '../contexts/useAuth';
+import { tenantsApi, Tenant } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import TenantForm from './TenantForm';
 import './TenantsPage.scss';
 

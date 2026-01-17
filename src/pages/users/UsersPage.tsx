@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usersApi, tenantsApi, User, Tenant } from '../services/api';
-import { useAuth } from '../contexts/useAuth';
+import { usersApi, tenantsApi, User, Tenant } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import UserForm from './UserForm';
 import InviteUserForm from './InviteUserForm';
 import './UsersPage.scss';

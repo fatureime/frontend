@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { businessesApi, Business, CreateBusinessData } from '../services/api';
+import { businessesApi, Business, CreateBusinessData } from '../../services/api';
 import './BusinessForm.scss';
 
 interface BusinessFormProps {
