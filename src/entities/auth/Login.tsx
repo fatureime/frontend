@@ -25,14 +25,14 @@ const Login = () => {
           // Try to use issuer business first, otherwise get first business
           const issuerBusinessId = user?.tenant?.issuer_business_id;
           if (issuerBusinessId) {
-            navigate('/businesses/invoices');
+            navigate('/invoices');
             return;
           }
 
           // Fetch businesses to get the first one
           const businesses = await businessesApi.getBusinesses();
           if (businesses.length > 0) {
-            navigate('/businesses/invoices');
+            navigate('/invoices');
           } else {
             // No businesses, redirect to businesses page to create one
             navigate('/businesses');

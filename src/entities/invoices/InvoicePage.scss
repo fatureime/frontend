@@ -1,338 +1,147 @@
-@import '../../styles/variables';
-@import '../../styles/responsive';
-
 .invoice-page {
-  min-height: calc(100vh - 80px);
-  background: $bg-secondary;
-  padding: $spacing-xl;
+  min-height: calc(100vh - 200px);
 
-  @include mobile {
-    padding: $spacing-md;
-  }
-}
-
-.invoice-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  background: $bg-primary;
-  border-radius: $border-radius;
-  box-shadow: $shadow-lg;
-  overflow: hidden;
-}
-
-.invoice-header {
-  background: linear-gradient(135deg, $primary 0%, $primary-dark 100%);
-  color: white;
-  padding: $spacing-xl;
-  text-align: center;
-}
-
-.invoice-title {
-  font-size: $font-size-3xl;
-  font-weight: $font-weight-bold;
-  margin: 0;
-  color: white;
-}
-
-.invoice-content {
-  padding: $spacing-2xl;
-
-  @include mobile {
-    padding: $spacing-lg;
-  }
-}
-
-.invoice-section {
-  margin-bottom: $spacing-2xl;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: $spacing-lg;
-
-  @include mobile {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: $spacing-md;
-  }
-}
-
-.section-title {
-  font-size: $font-size-xl;
-  font-weight: $font-weight-semibold;
-  color: $text-primary;
-  margin: 0 0 $spacing-lg 0;
-}
-
-.invoice-info-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: $spacing-lg;
-
-  @include mobile {
-    grid-template-columns: 1fr;
-  }
-}
-
-.customer-info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: $spacing-lg;
-
-  @include mobile {
-    grid-template-columns: 1fr;
-  }
-}
-
-.info-group {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-sm;
-
-  &--full {
-    grid-column: 1 / -1;
-  }
-}
-
-.info-label {
-  font-size: $font-size-sm;
-  font-weight: $font-weight-medium;
-  color: $text-primary;
-}
-
-.info-input,
-.info-textarea {
-  padding: $spacing-md;
-  border: 1px solid $border-color;
-  border-radius: $border-radius;
-  font-size: $font-size-base;
-  font-family: inherit;
-  transition: all $transition-fast;
-  background: $bg-primary;
-  color: $text-primary;
-
-  &:focus {
-    outline: none;
-    border-color: $primary;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  .container {
+    max-width: 1400px;
+    margin: 10px auto;
+    padding: 0 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
-  &::placeholder {
-    color: $text-light;
-  }
-}
+  .invoice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
 
-.info-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-// Table styles removed - using Material UI DataGrid now
-// .invoice-table-container {
-//   ...
-// }
-// .invoice-table {
-//   ...
-// }
-
-.col-article {
-  width: 18%;
-  min-width: 120px;
-}
-
-.col-description {
-  width: 30%;
-  min-width: 150px;
-}
-
-.col-quantity {
-  width: 8%;
-  min-width: 80px;
-}
-
-.col-price {
-  width: 12%;
-  min-width: 100px;
-}
-
-.col-tax {
-  width: 12%;
-  min-width: 100px;
-}
-
-.col-total {
-  width: 12%;
-  min-width: 100px;
-  text-align: right;
-  font-weight: $font-weight-medium;
-}
-
-.col-actions {
-  width: 8%;
-  min-width: 60px;
-  text-align: center;
-}
-
-// Table input styles removed - using Material UI DataGrid now
-// .table-input {
-//   ...
-// }
-// .table-total {
-//   ...
-// }
-// .btn-remove {
-//   ...
-// }
-
-.invoice-totals {
-  margin-top: $spacing-lg;
-  padding-top: $spacing-lg;
-  border-top: 2px solid $border-color;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: $spacing-md;
-}
-
-.totals-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  max-width: 400px;
-  gap: $spacing-lg;
-
-  &--total {
-    margin-top: $spacing-md;
-    padding-top: $spacing-md;
-    border-top: 1px solid $border-color;
-    font-size: $font-size-lg;
-    font-weight: $font-weight-bold;
-  }
-}
-
-.totals-label {
-  font-size: $font-size-base;
-  color: $text-secondary;
-}
-
-.totals-value {
-  font-size: $font-size-base;
-  font-weight: $font-weight-semibold;
-  color: $text-primary;
-  min-width: 100px;
-  text-align: right;
-}
-
-.tax-input-group {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-}
-
-.tax-label {
-  font-size: $font-size-base;
-  color: $text-secondary;
-}
-
-.tax-input {
-  width: 80px;
-  padding: $spacing-sm $spacing-md;
-  border: 1px solid $border-color;
-  border-radius: $border-radius;
-  font-size: $font-size-base;
-  font-family: inherit;
-  transition: all $transition-fast;
-  background: $bg-primary;
-  color: $text-primary;
-
-  &:focus {
-    outline: none;
-    border-color: $primary;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
-  }
-}
-
-.invoice-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: $spacing-2xl;
-  padding-top: $spacing-xl;
-  border-top: 2px solid $border-color;
-  gap: $spacing-md;
-
-  @include mobile {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
-.actions-right {
-  display: flex;
-  gap: $spacing-md;
-
-  @include mobile {
-    flex-direction: column;
-  }
-}
-
-.btn {
-  padding: $spacing-md $spacing-xl;
-  font-size: $font-size-base;
-  font-weight: $font-weight-medium;
-  border: none;
-  border-radius: $border-radius;
-  cursor: pointer;
-  transition: all $transition-fast;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-
-  &--primary {
-    background-color: $primary;
-    color: white;
-
-    &:hover {
-      background-color: $primary-dark;
-      transform: translateY(-1px);
-      box-shadow: $shadow-md;
+    h1 {
+      margin: 0;
+      color: #333;
     }
 
-    &:active {
-      transform: translateY(0);
+    .business-name {
+      margin: 0.5rem 0 0 0;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: stretch;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.3s;
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      &.btn-primary {
+        background: #2196f3;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: #1976d2;
+        }
+      }
+
+      &.btn-secondary {
+        background: #4caf50;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: #45a049;
+        }
+      }
     }
   }
 
-  &--secondary {
-    background-color: $bg-secondary;
-    color: $text-primary;
-    border: 1px solid $border-color;
+  .error-message {
+    background: #ffebee;
+    color: #c62828;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-    &:hover {
-      background-color: $border-color;
+    button {
+      background: none;
+      border: none;
+      color: #c62828;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
     }
   }
 
-  &--outline {
-    background-color: transparent;
-    color: $primary;
-    border: 2px solid $primary;
-
-    &:hover {
-      background-color: $primary;
-      color: white;
-    }
+  .loading {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
   }
 
-  &--small {
-    padding: $spacing-sm $spacing-md;
-    font-size: $font-size-sm;
+
+  .invoice-content {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    box-sizing: border-box;
+
+    .no-invoices {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }
+
+    // Table styles removed - using Material UI DataGrid now
+    // .invoices-table-container {
+    //   overflow-x: auto;
+    //   background: white;
+    //   border-radius: 8px;
+    //   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    //   ...
+    // }
+  }
+}
+
+@media (max-width: 768px) {
+  .invoice-page {
+    .invoice-header {
+      flex-direction: column;
+      align-items: flex-start;
+
+      .header-actions {
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+
+
+    // Mobile table styles removed - using Material UI DataGrid now
+    // .invoices-content {
+    //   .invoices-table-container {
+    //     .invoices-table {
+    //       ...
+    //     }
+    //   }
+    // }
   }
 }

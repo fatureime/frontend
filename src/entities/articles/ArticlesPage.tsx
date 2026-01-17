@@ -91,15 +91,15 @@ const ArticlesPage = () => {
   };
 
   const handleCreate = () => {
-    navigate('/businesses/articles/create');
+    navigate('/articles/create');
   };
 
   const handleView = (article: Article) => {
-    navigate(`/businesses/articles/${article.id}`);
+    navigate(`/articles/${article.id}`);
   };
 
   const handleEdit = (article: Article) => {
-    navigate(`/businesses/articles/${article.id}/edit`);
+    navigate(`/articles/${article.id}/edit`);
   };
 
   const handleDelete = async (articleId: number) => {

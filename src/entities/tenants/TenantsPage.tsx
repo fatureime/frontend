@@ -40,6 +40,10 @@ const TenantsPage = () => {
   }, [user, isAdminTenant, navigate, loadTenants]);
 
 
+  const handleCreate = () => {
+    navigate('/tenants/create');
+  };
+
   const handleView = (tenant: Tenant) => {
     navigate(`/tenants/${tenant.id}`);
   };
@@ -92,6 +96,9 @@ const TenantsPage = () => {
     <div className="tenants-page">
       <div className="container">
         <div className="tenants-header">
+          <button onClick={handleCreate} className="btn btn-primary">
+            Krijo Hapësirëmarrës
+          </button>
         </div>
 
         {error && (

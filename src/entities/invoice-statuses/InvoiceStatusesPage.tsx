@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import { Button, Box } from '@mui/material';
 import { invoiceStatusesApi, InvoiceStatus } from '../../services/api';
@@ -10,15 +10,11 @@ import './InvoiceStatusesPage.scss';
 const InvoiceStatusesPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const [statuses, setStatuses] = useState<InvoiceStatus[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [code, setCode] = useState('');
   const [label, setLabel] = useState('');
   const [labels, setLabels] = useState<Record<string, string>>({});
 
@@ -65,82 +61,14 @@ const InvoiceStatusesPage = () => {
     };
   }, [user, isAdminTenant, navigate, loadStatuses]);
 
-  useEffect(() => {
-    // Check if we're in create or edit mode from route
-    const path = location.pathname;
-    if (path === '/invoice-statuses/create') {
-      setIsCreating(true);
-      setIsEditing(false);
-      setIsEditingLabel(false);
-      setSelectedStatus(null);
-      setCode('');
-      setLabel('');
-    } else if (path.match(/^\/invoice-statuses\/\d+\/edit$/)) {
-      const match = path.match(/^\/invoice-statuses\/(\d+)\/edit$/);
-      if (match && statuses.length > 0) {
-        const statusId = parseInt(match[1]);
-        const status = statuses.find(s => s.id === statusId);
-        if (status) {
-          setSelectedStatus(status);
-          setCode(status.code);
-          setLabel(getStatusLabel(status.code));
-          setIsEditing(true);
-          setIsCreating(false);
-          setIsEditingLabel(false);
-        }
-      }
-    } else {
-      setIsCreating(false);
-      setIsEditing(false);
-      setIsEditingLabel(false);
-      setSelectedStatus(null);
-      setCode('');
-      setLabel('');
-    }
-  }, [location.pathname, statuses]);
-
   const handleEdit = (status: InvoiceStatus) => {
     navigate(`/invoice-statuses/${status.id}/edit`);
   };
 
   const handleEditLabel = (status: InvoiceStatus) => {
     setSelectedStatus(status);
-    setCode(status.code);
     setLabel(getStatusLabel(status.code));
     setIsEditingLabel(true);
-    setIsEditing(false);
-    setIsCreating(false);
-  };
-
-  const handleSave = async () => {
-    if (!code.trim()) {
-      setError('Kodi i gjendjes është i detyrueshëm');
-      return;
-    }
-
-    try {
-      setError(null);
-      if (isCreating) {
-        const created = await invoiceStatusesApi.createInvoiceStatus({ code: code.trim() });
-        // Save label if provided
-        if (label.trim()) {
-          setStatusLabel(code.trim(), label.trim());
-        }
-        await loadStatuses();
-        navigate(`/invoice-statuses/${created.id}`);
-      } else if (selectedStatus) {
-        await invoiceStatusesApi.updateInvoiceStatus(selectedStatus.id, { code: code.trim() });
-        // Save label if provided
-        if (label.trim()) {
-          setStatusLabel(code.trim(), label.trim());
-        }
-        await loadStatuses();
-        navigate(`/invoice-statuses/${selectedStatus.id}`);
-      }
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { error?: string } } };
-      setError(error.response?.data?.error || 'Dështoi ruajtja e gjendjes');
-    }
   };
 
   const handleSaveLabel = () => {
@@ -162,19 +90,9 @@ const InvoiceStatusesPage = () => {
     }
   };
 
-  const handleCancel = () => {
-    if (isCreating) {
-      navigate('/invoice-statuses');
-    } else if (selectedStatus) {
-      navigate(`/invoice-statuses/${selectedStatus.id}`);
-    } else {
-      navigate('/invoice-statuses');
-    }
-    setIsEditing(false);
-    setIsCreating(false);
+  const handleCancelLabel = () => {
     setIsEditingLabel(false);
     setSelectedStatus(null);
-    setCode('');
     setLabel('');
     setError(null);
   };
@@ -235,7 +153,7 @@ const InvoiceStatusesPage = () => {
   return (
     <div className="invoice-statuses-page">
       <div className="container">
-        {!isEditing && !isCreating && !isEditingLabel && (
+        {!isEditingLabel && (
           <div className="invoice-statuses-header">
             <button onClick={handleCreate} className="btn btn-primary">
               Krijo Gjendje të Re
@@ -250,47 +168,7 @@ const InvoiceStatusesPage = () => {
           </div>
         )}
 
-        {(isEditing || isCreating) ? (
-          <div className="invoice-status-form">
-            <div className="invoice-status-form-header">
-              <button onClick={handleCancel} className="btn btn-secondary">
-                ← Anulo
-              </button>
-            </div>
-            <h3>{isCreating ? 'Krijo Gjendje të Re' : 'Ndrysho Gjendje'}</h3>
-            <div className="form-group">
-              <label htmlFor="code">Kodi i Gjendjes:</label>
-              <input
-                id="code"
-                type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="p.sh. draft, sent, paid"
-                className="form-input"
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="label">Etiketa (Shfaqja):</label>
-              <input
-                id="label"
-                type="text"
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                placeholder="p.sh. Draft, Dërguar, Paguar"
-                className="form-input"
-              />
-              <small className="form-help">Etiketa përdoret vetëm për shfaqje në frontend</small>
-            </div>
-            <div className="form-actions">
-              <button onClick={handleSave} className="btn btn-primary">
-                Ruaj
-              </button>
-              <button onClick={handleCancel} className="btn btn-secondary">
-                Anulo
-              </button>
-            </div>
-          </div>
-        ) : isEditingLabel && selectedStatus ? (
+        {isEditingLabel && selectedStatus ? (
           <div className="invoice-status-form">
             <h3>Ndrysho Etiketën për "{selectedStatus.code}"</h3>
             <div className="form-group">
@@ -309,7 +187,7 @@ const InvoiceStatusesPage = () => {
               <button onClick={handleSaveLabel} className="btn btn-primary">
                 Ruaj Etiketën
               </button>
-              <button onClick={handleCancel} className="btn btn-secondary">
+              <button onClick={handleCancelLabel} className="btn btn-secondary">
                 Anulo
               </button>
             </div>

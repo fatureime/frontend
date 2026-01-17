@@ -35,29 +35,29 @@ const Navbar = () => {
       return 'Pranimi i Ftesës';
     }
     // Invoice routes
-    if (path.match(/^\/businesses\/invoices\/\d+\/edit$/)) {
+    if (path.match(/^\/invoices\/\d+\/edit$/)) {
       return 'Ndrysho Faturë';
     }
-    if (path.match(/^\/businesses\/invoices\/create$/)) {
+    if (path.match(/^\/invoices\/create$/)) {
       return 'Krijo Faturë';
     }
-    if (path.match(/^\/businesses\/invoices\/\d+$/)) {
+    if (path.match(/^\/invoices\/\d+$/)) {
       return 'Detajet e Faturës';
     }
-    if (path === '/businesses/invoices') {
+    if (path === '/invoices') {
       return 'Faturat';
     }
     // Article routes
-    if (path.match(/^\/businesses\/articles\/\d+\/edit$/)) {
+    if (path.match(/^\/articles\/\d+\/edit$/)) {
       return 'Ndrysho Artikull';
     }
-    if (path.match(/^\/businesses\/articles\/create$/)) {
+    if (path.match(/^\/articles\/create$/)) {
       return 'Krijo Artikull';
     }
-    if (path.match(/^\/businesses\/articles\/\d+$/)) {
+    if (path.match(/^\/articles\/\d+$/)) {
       return 'Detajet e Artikullit';
     }
-    if (path === '/businesses/articles') {
+    if (path === '/articles') {
       return 'Artikujt';
     }
     // Business routes
@@ -124,6 +124,19 @@ const Navbar = () => {
     }
     if (path === '/invoice-statuses') {
       return 'Gjendjet e Faturave';
+    }
+    // Tax routes
+    if (path.match(/^\/taxes\/\d+\/edit$/)) {
+      return 'Ndrysho Taksë';
+    }
+    if (path.match(/^\/taxes\/create$/)) {
+      return 'Krijo Taksë';
+    }
+    if (path.match(/^\/taxes\/\d+$/)) {
+      return 'Detajet e Taksës';
+    }
+    if (path === '/taxes') {
+      return 'Taksat';
     }
     
     // Default fallback
@@ -231,7 +244,7 @@ const Navbar = () => {
               </div>
               {user?.tenant?.issuer_business_id && (
                 <Link 
-                  to="/businesses/invoices" 
+                  to="/invoices" 
                   className="navbar__link"
                   onClick={closeMenu}
                 >
@@ -247,7 +260,7 @@ const Navbar = () => {
               </Link>
               {user?.tenant?.issuer_business_id && (
                 <Link 
-                  to="/businesses/articles" 
+                  to="/articles" 
                   className="navbar__link"
                   onClick={closeMenu}
                 >
@@ -310,6 +323,15 @@ const Navbar = () => {
                           onClick={closeMenu}
                         >
                           Gjendjet e Faturave
+                        </Link>
+                      )}
+                      {user?.tenant?.is_admin && (
+                        <Link 
+                          to="/taxes" 
+                          className="navbar__link navbar__link--submenu"
+                          onClick={closeMenu}
+                        >
+                          Taksat
                         </Link>
                       )}
                     </div>

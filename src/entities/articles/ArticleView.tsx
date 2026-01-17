@@ -39,7 +39,7 @@ const ArticleView = () => {
 
   const handleEdit = () => {
     if (id) {
-      navigate(`/businesses/articles/${id}/edit`);
+      navigate(`/articles/${id}/edit`);
     }
   };
 
@@ -52,7 +52,7 @@ const ArticleView = () => {
 
     try {
       await articlesApi.deleteArticle(businessId, article.id);
-      navigate('/businesses/articles');
+      navigate('/articles');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi fshirja e artikullit');
     }
@@ -74,7 +74,7 @@ const ArticleView = () => {
         <div className="container">
           <div className="error-message">
             {error}
-            <button onClick={() => navigate('/businesses/articles')} className="btn btn-secondary">
+            <button onClick={() => navigate('/articles')} className="btn btn-secondary">
               Kthehu te Lista
             </button>
           </div>
@@ -97,7 +97,7 @@ const ArticleView = () => {
     <div className="article-view">
       <div className="container">
         <div className="article-view-header">
-          <button onClick={() => navigate('/businesses/articles')} className="btn btn-secondary">
+          <button onClick={() => navigate('/articles')} className="btn btn-secondary">
             ← Kthehu te Lista
           </button>
           <div className="article-view-actions">

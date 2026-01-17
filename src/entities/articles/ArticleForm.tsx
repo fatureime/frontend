@@ -114,10 +114,10 @@ const ArticleForm = () => {
       }
       if (isEditMode && id) {
         await articlesApi.updateArticle(targetBusinessId, parseInt(id), cleanedData);
-        navigate(`/businesses/articles/${id}`);
+        navigate(`/articles/${id}`);
       } else {
         const created = await articlesApi.createArticle(targetBusinessId, cleanedData);
-        navigate(`/businesses/articles/${created.id}`);
+        navigate(`/articles/${created.id}`);
       }
     } catch (err: unknown) {
       const errorMessage = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
@@ -143,9 +143,9 @@ const ArticleForm = () => {
 
   const handleCancel = () => {
     if (isEditMode && id) {
-      navigate(`/businesses/articles/${id}`);
+      navigate(`/articles/${id}`);
     } else {
-      navigate('/businesses/articles');
+      navigate('/articles');
     }
   };
 

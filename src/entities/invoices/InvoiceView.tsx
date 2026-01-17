@@ -4,11 +4,11 @@ import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import { Box } from '@mui/material';
 import { invoicesApi, Invoice, invoiceStatusesApi, InvoiceStatus, InvoiceItem } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
-import './InvoiceDetailPage.scss';
+import './InvoiceView.scss';
 
 type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
 
-const InvoiceDetailPage = () => {
+const InvoiceView = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -53,7 +53,7 @@ const InvoiceDetailPage = () => {
 
   const handleEdit = () => {
     if (id) {
-      navigate(`/businesses/invoices/${id}/edit`);
+      navigate(`/invoices/${id}/edit`);
     }
   };
 
@@ -66,7 +66,7 @@ const InvoiceDetailPage = () => {
 
     try {
       await invoicesApi.deleteInvoice(businessId, parseInt(id));
-      navigate('/businesses/invoices');
+      navigate('/invoices');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi fshirja e faturës');
     }
@@ -99,7 +99,7 @@ const InvoiceDetailPage = () => {
   };
 
   const handleBack = () => {
-    navigate('/businesses/invoices');
+    navigate('/invoices');
   };
 
   const handleDownloadPdf = async () => {
@@ -160,7 +160,7 @@ const InvoiceDetailPage = () => {
 
   if (!businessId || !id) {
     return (
-      <div className="invoice-detail-page">
+      <div className="invoice-view">
         <div className="container">
           <div className="error-message">ID e faturës nuk u gjet.</div>
         </div>
@@ -170,7 +170,7 @@ const InvoiceDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="invoice-detail-page">
+      <div className="invoice-view">
         <div className="container">
           <div className="loading">Duke u ngarkuar fatura...</div>
         </div>
@@ -180,7 +180,7 @@ const InvoiceDetailPage = () => {
 
   if (error && !invoice) {
     return (
-      <div className="invoice-detail-page">
+      <div className="invoice-view">
         <div className="container">
           <div className="error-message">
             {error}
@@ -195,7 +195,7 @@ const InvoiceDetailPage = () => {
 
   if (!invoice) {
     return (
-      <div className="invoice-detail-page">
+      <div className="invoice-view">
         <div className="container">
           <div className="error-message">Fatura nuk u gjet.</div>
         </div>
@@ -204,7 +204,7 @@ const InvoiceDetailPage = () => {
   }
 
   return (
-    <div className="invoice-detail-page">
+    <div className="invoice-view">
       <div className="container">
         <div className="invoice-detail-header">
           <div>
@@ -483,4 +483,4 @@ const InvoiceDetailPage = () => {
   );
 };
 
-export default InvoiceDetailPage;
+export default InvoiceView;

@@ -8,9 +8,9 @@ import Signup from './entities/auth/Signup'
 import EmailVerification from './entities/auth/EmailVerification'
 import AcceptInvitation from './entities/auth/AcceptInvitation'
 import ProtectedRoute from './components/ProtectedRoute'
+import InvoiceForm from './entities/invoices/InvoiceForm'
 import InvoicePage from './entities/invoices/InvoicePage'
-import InvoicesPage from './entities/invoices/InvoicesPage'
-import InvoiceDetailPage from './entities/invoices/InvoiceDetailPage'
+import InvoiceView from './entities/invoices/InvoiceView'
 import TenantsPage from './entities/tenants/TenantsPage'
 import TenantView from './entities/tenants/TenantView'
 import TenantForm from './entities/tenants/TenantForm'
@@ -29,6 +29,10 @@ import BankAccountView from './entities/bank-accounts/BankAccountView'
 import BankAccountForm from './entities/bank-accounts/BankAccountForm'
 import InvoiceStatusesPage from './entities/invoice-statuses/InvoiceStatusesPage'
 import InvoiceStatusView from './entities/invoice-statuses/InvoiceStatusView'
+import InvoiceStatusForm from './entities/invoice-statuses/InvoiceStatusForm'
+import TaxesPage from './entities/taxes/TaxesPage'
+import TaxView from './entities/taxes/TaxView'
+import TaxForm from './entities/taxes/TaxForm'
 import './styles/main.scss'
 import './App.scss'
 
@@ -152,7 +156,7 @@ function App() {
               }
             />
             <Route
-              path="/businesses/articles"
+              path="/articles"
               element={
                 <ProtectedRoute>
                   <ArticlesPage />
@@ -160,7 +164,7 @@ function App() {
               }
             />
             <Route
-              path="/businesses/articles/create"
+              path="/articles/create"
               element={
                 <ProtectedRoute>
                   <ArticleForm />
@@ -168,7 +172,7 @@ function App() {
               }
             />
             <Route
-              path="/businesses/articles/:id"
+              path="/articles/:id"
               element={
                 <ProtectedRoute>
                   <ArticleView />
@@ -176,7 +180,7 @@ function App() {
               }
             />
             <Route
-              path="/businesses/articles/:id/edit"
+              path="/articles/:id/edit"
               element={
                 <ProtectedRoute>
                   <ArticleForm />
@@ -184,15 +188,7 @@ function App() {
               }
             />
             <Route
-              path="/businesses/invoices"
-              element={
-                <ProtectedRoute>
-                  <InvoicesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/businesses/invoices/create"
+              path="/invoices"
               element={
                 <ProtectedRoute>
                   <InvoicePage />
@@ -200,24 +196,32 @@ function App() {
               }
             />
             <Route
-              path="/businesses/invoices/new"
+              path="/invoices/create"
+              element={
+                <ProtectedRoute>
+                  <InvoiceForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/invoices/new"
               element={
                 <Navigate to="create" replace />
               }
             />
             <Route
-              path="/businesses/invoices/:id"
+              path="/invoices/:id/edit"
               element={
                 <ProtectedRoute>
-                  <InvoiceDetailPage />
+                  <InvoiceForm />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/businesses/invoices/:id/edit"
+              path="/invoices/:id"
               element={
                 <ProtectedRoute>
-                  <InvoicePage />
+                  <InvoiceView />
                 </ProtectedRoute>
               }
             />
@@ -265,7 +269,7 @@ function App() {
               path="/invoice-statuses/create"
               element={
                 <ProtectedRoute>
-                  <InvoiceStatusesPage />
+                  <InvoiceStatusForm />
                 </ProtectedRoute>
               }
             />
@@ -281,7 +285,39 @@ function App() {
               path="/invoice-statuses/:id/edit"
               element={
                 <ProtectedRoute>
-                  <InvoiceStatusesPage />
+                  <InvoiceStatusForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/taxes"
+              element={
+                <ProtectedRoute>
+                  <TaxesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/taxes/create"
+              element={
+                <ProtectedRoute>
+                  <TaxForm />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/taxes/:id"
+              element={
+                <ProtectedRoute>
+                  <TaxView />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/taxes/:id/edit"
+              element={
+                <ProtectedRoute>
+                  <TaxForm />
                 </ProtectedRoute>
               }
             />
