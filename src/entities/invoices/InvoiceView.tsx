@@ -378,10 +378,10 @@ const InvoiceView = () => {
 
           {/* Invoice Items */}
           <div className="items-section">
-            <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h2 style={{ margin: 0 }}>Artikujt</h2>
+            <div className="section-header">
+              <h2>Artikujt</h2>
               {invoice.items && invoice.items.length > 0 && (
-                <Box sx={{ display: 'flex', gap: 0.5, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+                <Box sx={{ display: 'flex', gap: 0.5, border: '1px solid #e0e0e0', borderRadius: 1, flexShrink: 0 }}>
                   <IconButton
                     size="small"
                     onClick={() => {
@@ -467,12 +467,10 @@ const InvoiceView = () => {
                     {
                       field: 'index',
                       headerName: '#',
-                      width: 60,
                     },
                     {
                       field: 'description',
                       headerName: 'Përshkrimi',
-                      width: 250,
                       flex: 1,
                       renderCell: (params: GridRenderCellParams<InvoiceItem & { index: number }>) => (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -486,19 +484,16 @@ const InvoiceView = () => {
                     {
                       field: 'quantity',
                       headerName: 'Sasia',
-                      width: 100,
                       valueFormatter: (value: string) => parseFloat(value).toFixed(2),
                     },
                     {
                       field: 'unit_price',
                       headerName: 'Çmimi për Njësi',
-                      width: 130,
                       valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
                     },
                     {
                       field: 'tax_rate',
                       headerName: 'Vlera e TVSH',
-                      width: 130,
                       valueGetter: (_value: unknown, row: InvoiceItem & { index: number }) => 
                         row.tax?.rate ?? null,
                       renderCell: (params: GridRenderCellParams<InvoiceItem & { index: number }>) => (
@@ -510,19 +505,16 @@ const InvoiceView = () => {
                     {
                       field: 'subtotal',
                       headerName: 'Vlera pa TVSH',
-                      width: 130,
                       valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
                     },
                     {
                       field: 'tax_amount',
                       headerName: 'Vlera e TVSH',
-                      width: 130,
                       valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
                     },
                     {
                       field: 'total',
                       headerName: 'Totali',
-                      width: 120,
                       valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
                       renderCell: (params: GridRenderCellParams<InvoiceItem & { index: number }>) => (
                         <strong>{parseFloat(params.value as string).toFixed(2)} €</strong>

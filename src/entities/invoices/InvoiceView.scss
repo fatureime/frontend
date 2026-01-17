@@ -300,6 +300,21 @@
     //   }
     // }
 
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      gap: 1rem;
+      flex-wrap: nowrap;
+      flex-direction: row;
+      h2 {
+        margin: 0;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+    }
+
     .no-items {
       text-align: center;
       padding: 2rem;
@@ -343,7 +358,6 @@
     font-size: 1rem;
     font-weight: 600;
     color: #333;
-    min-width: 100px;
     text-align: right;
   }
 }
@@ -425,7 +439,6 @@
                     color: #666;
                     margin-right: 1rem;
                     flex-shrink: 0;
-                    min-width: 130px;
                   }
 
                   // Value/content styling
