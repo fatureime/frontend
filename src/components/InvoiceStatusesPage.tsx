@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
+import { Button, Box } from '@mui/material';
 import { invoiceStatusesApi, InvoiceStatus } from '../services/api';
 import { useAuth } from '../contexts/useAuth';
 import { getStatusLabels, getStatusLabel, setStatusLabel } from '../utils/invoiceStatusLabels';
@@ -261,51 +263,79 @@ const InvoiceStatusesPage = () => {
             {statuses.length === 0 ? (
               <p className="no-statuses">Nuk u gjetën gjendje të faturave.</p>
             ) : (
-              <div className="statuses-table-container">
-                <table className="statuses-table">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Kodi</th>
-                      <th>Etiketa</th>
-                      {canEdit && <th>Veprimet</th>}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {statuses.map((status) => (
-                      <tr key={status.id}>
-                        <td>{status.id}</td>
-                        <td><strong>{status.code}</strong></td>
-                        <td>{labels[status.code] || getStatusLabel(status.code)}</td>
-                        {canEdit && (
-                          <td>
-                            <div className="action-buttons">
-                              <button
-                                onClick={() => handleEdit(status)}
-                                className="btn btn-sm btn-primary"
-                              >
-                                Ndrysho Kod
-                              </button>
-                              <button
-                                onClick={() => handleEditLabel(status)}
-                                className="btn btn-sm btn-secondary"
-                              >
-                                Ndrysho Etiketë
-                              </button>
-                              <button
-                                onClick={() => handleDelete(status.id)}
-                                className="btn btn-sm btn-danger"
-                              >
-                                Fshi
-                              </button>
-                            </div>
-                          </td>
-                        )}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <Box sx={{ height: 400, width: '100%' }}>
+                <DataGrid
+                  rows={statuses}
+                  columns={[
+                    {
+                      field: 'id',
+                      headerName: 'ID',
+                      width: 80,
+                    },
+                    {
+                      field: 'code',
+                      headerName: 'Kodi',
+                      width: 200,
+                      renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
+                        <strong>{params.value}</strong>
+                      ),
+                    },
+                    {
+                      field: 'label',
+                      headerName: 'Etiketa',
+                      width: 250,
+                      valueGetter: (_value: unknown, row: InvoiceStatus) => 
+                        labels[row.code] || getStatusLabel(row.code),
+                      flex: 1,
+                    },
+                    ...(canEdit ? [{
+                      field: 'actions',
+                      headerName: 'Veprimet',
+                      width: 350,
+                      sortable: false,
+                      filterable: false,
+                      renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={() => handleEdit(params.row)}
+                            sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                          >
+                            Ndrysho Kod
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => handleEditLabel(params.row)}
+                            sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                          >
+                            Ndrysho Etiketë
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="error"
+                            onClick={() => handleDelete(params.row.id)}
+                            sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                          >
+                            Fshi
+                          </Button>
+                        </Box>
+                      ),
+                    }] : []),
+                  ]}
+                  getRowId={(row: InvoiceStatus) => row.id}
+                  disableRowSelectionOnClick
+                  pageSizeOptions={[10, 25, 50]}
+                  initialState={{
+                    pagination: {
+                      paginationModel: { pageSize: 25 },
+                    },
+                  }}
+                  loading={loading}
+                />
+              </Box>
             )}
           </div>
         )}

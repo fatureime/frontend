@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { invoicesApi, Invoice, invoiceStatusesApi, InvoiceStatus } from '../services/api';
+import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
+import { Box } from '@mui/material';
+import { invoicesApi, Invoice, invoiceStatusesApi, InvoiceStatus, InvoiceItem } from '../services/api';
 import './InvoiceDetailPage.scss';
 
 type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
@@ -13,6 +15,19 @@ const InvoiceDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [expandedCards, setExpandedCards] = useState<{ issuer: boolean; receiver: boolean }>({
+    issuer: false,
+    receiver: false,
+  });
+
+  // Sort and prepare invoice items for DataGrid
+  const sortedItems = useMemo(() => 
+    invoice?.items ? [...invoice.items].sort((a, b) => a.sort_order - b.sort_order).map((item, index) => ({
+      ...item,
+      index: index + 1,
+    })) : [],
+    [invoice?.items]
+  );
 
   const loadInvoice = useCallback(async () => {
     if (!businessId || !id) return;
@@ -130,44 +145,6 @@ const InvoiceDetailPage = () => {
     }
   };
 
-  // Calculate tax groups from invoice items
-  const calculateTaxGroups = () => {
-    if (!invoice?.items) return {};
-
-    const taxGroups: Record<string, { label: string; rate: string | null; total: number }> = {};
-
-    invoice.items.forEach((item) => {
-      const tax = item.tax;
-      const taxRate = tax?.rate ?? null;
-      const key = taxRate === null ? 'exempt' : taxRate;
-      const label = taxRate === null ? 'E përjashtuar' : `TVSH ${taxRate}%`;
-
-      if (!taxGroups[key]) {
-        taxGroups[key] = {
-          label,
-          rate: taxRate,
-          total: 0,
-        };
-      }
-
-      const taxAmount = parseFloat(item.tax_amount || '0');
-      taxGroups[key].total += taxAmount;
-    });
-
-    // Sort by rate (exempt last)
-    const sortedKeys = Object.keys(taxGroups).sort((a, b) => {
-      if (a === 'exempt') return 1;
-      if (b === 'exempt') return -1;
-      return parseFloat(a) - parseFloat(b);
-    });
-
-    const sortedGroups: Record<string, { label: string; rate: string | null; total: number }> = {};
-    sortedKeys.forEach((key) => {
-      sortedGroups[key] = taxGroups[key];
-    });
-
-    return sortedGroups;
-  };
 
   const getStatusLabel = (status: string): string => {
     const labels: Record<string, string> = {
@@ -298,61 +275,97 @@ const InvoiceDetailPage = () => {
           {/* Issuer and Receiver */}
           <div className="businesses-section">
             <div className="business-card">
-              <h3>Fatura Nga</h3>
-              {invoice.issuer?.logo && (
-                <img 
-                  src={invoice.issuer.logo} 
-                  alt={`${invoice.issuer.business_name} logo`}
-                  style={{ maxWidth: '150px', maxHeight: '80px', marginBottom: '10px', objectFit: 'contain' }}
-                />
+              <h3 
+                className="business-card-header"
+                onClick={() => setExpandedCards(prev => ({ ...prev, issuer: !prev.issuer }))}
+              >
+                <span>Fatura Nga: {invoice.issuer?.business_name || 'N/A'}</span>
+                <span className={`expand-icon ${expandedCards.issuer ? 'expanded' : ''}`}>▼</span>
+              </h3>
+              {expandedCards.issuer && (
+                <>
+                  {invoice.issuer?.logo && (
+                    <img 
+                      src={invoice.issuer.logo} 
+                      alt={`${invoice.issuer.business_name} logo`}
+                      className="business-logo"
+                    />
+                  )}
+                  <div className="business-details">
+                    {invoice.issuer?.trade_name && (
+                      <p><strong>Emri Tregtar:</strong> {invoice.issuer.trade_name}</p>
+                    )}
+                    {invoice.issuer?.business_type && (
+                      <p><strong>Lloji i Biznesit:</strong> {invoice.issuer.business_type}</p>
+                    )}
+                    {invoice.issuer?.unique_identifier_number && (
+                      <p><strong>Numri Unik:</strong> {invoice.issuer.unique_identifier_number}</p>
+                    )}
+                    {invoice.issuer?.vat_number && (
+                      <p><strong>Numri i TVSH-së:</strong> {invoice.issuer.vat_number}</p>
+                    )}
+                    {invoice.issuer?.municipality && (
+                      <p><strong>Komuna:</strong> {invoice.issuer.municipality}</p>
+                    )}
+                    {invoice.issuer?.address && (
+                      <p><strong>Adresa:</strong> {invoice.issuer.address}</p>
+                    )}
+                    {invoice.issuer?.phone && (
+                      <p><strong>Telefoni:</strong> {invoice.issuer.phone}</p>
+                    )}
+                    {invoice.issuer?.email && (
+                      <p><strong>Email:</strong> {invoice.issuer.email}</p>
+                    )}
+                  </div>
+                </>
               )}
-              <div className="business-details">
-                <p><strong>Emri:</strong> {invoice.issuer?.business_name || 'N/A'}</p>
-                {invoice.issuer?.fiscal_number && (
-                  <p><strong>Numri Fiskal:</strong> {invoice.issuer.fiscal_number}</p>
-                )}
-                {invoice.issuer?.vat_number && (
-                  <p><strong>Numri i TVSH-së:</strong> {invoice.issuer.vat_number}</p>
-                )}
-                {invoice.issuer?.address && (
-                  <p><strong>Adresa:</strong> {invoice.issuer.address}</p>
-                )}
-                {invoice.issuer?.email && (
-                  <p><strong>Email:</strong> {invoice.issuer.email}</p>
-                )}
-                {invoice.issuer?.phone && (
-                  <p><strong>Telefoni:</strong> {invoice.issuer.phone}</p>
-                )}
-              </div>
             </div>
 
             <div className="business-card">
-              <h3>Fatura Për</h3>
-              {invoice.receiver?.logo && (
-                <img 
-                  src={invoice.receiver.logo} 
-                  alt={`${invoice.receiver.business_name} logo`}
-                  style={{ maxWidth: '150px', maxHeight: '80px', marginBottom: '10px', objectFit: 'contain' }}
-                />
+              <h3 
+                className="business-card-header"
+                onClick={() => setExpandedCards(prev => ({ ...prev, receiver: !prev.receiver }))}
+              >
+                <span>Fatura Për: {invoice.receiver?.business_name || 'N/A'}</span>
+                <span className={`expand-icon ${expandedCards.receiver ? 'expanded' : ''}`}>▼</span>
+              </h3>
+              {expandedCards.receiver && (
+                <>
+                  {invoice.receiver?.logo && (
+                    <img 
+                      src={invoice.receiver.logo} 
+                      alt={`${invoice.receiver.business_name} logo`}
+                      className="business-logo"
+                    />
+                  )}
+                  <div className="business-details">
+                    {invoice.receiver?.trade_name && (
+                      <p><strong>Emri Tregtar:</strong> {invoice.receiver.trade_name}</p>
+                    )}
+                    {invoice.receiver?.business_type && (
+                      <p><strong>Lloji i Biznesit:</strong> {invoice.receiver.business_type}</p>
+                    )}
+                    {invoice.receiver?.unique_identifier_number && (
+                      <p><strong>Numri Unik:</strong> {invoice.receiver.unique_identifier_number}</p>
+                    )}
+                    {invoice.receiver?.vat_number && (
+                      <p><strong>Numri i TVSH-së:</strong> {invoice.receiver.vat_number}</p>
+                    )}
+                    {invoice.receiver?.municipality && (
+                      <p><strong>Komuna:</strong> {invoice.receiver.municipality}</p>
+                    )}
+                    {invoice.receiver?.address && (
+                      <p><strong>Adresa:</strong> {invoice.receiver.address}</p>
+                    )}
+                    {invoice.receiver?.phone && (
+                      <p><strong>Telefoni:</strong> {invoice.receiver.phone}</p>
+                    )}
+                    {invoice.receiver?.email && (
+                      <p><strong>Email:</strong> {invoice.receiver.email}</p>
+                    )}
+                  </div>
+                </>
               )}
-              <div className="business-details">
-                <p><strong>Emri:</strong> {invoice.receiver?.business_name || 'N/A'}</p>
-                {invoice.receiver?.fiscal_number && (
-                  <p><strong>Numri Fiskal:</strong> {invoice.receiver.fiscal_number}</p>
-                )}
-                {invoice.receiver?.vat_number && (
-                  <p><strong>Numri i TVSH-së:</strong> {invoice.receiver.vat_number}</p>
-                )}
-                {invoice.receiver?.address && (
-                  <p><strong>Adresa:</strong> {invoice.receiver.address}</p>
-                )}
-                {invoice.receiver?.email && (
-                  <p><strong>Email:</strong> {invoice.receiver.email}</p>
-                )}
-                {invoice.receiver?.phone && (
-                  <p><strong>Telefoni:</strong> {invoice.receiver.phone}</p>
-                )}
-              </div>
             </div>
           </div>
 
@@ -360,110 +373,108 @@ const InvoiceDetailPage = () => {
           <div className="items-section">
             <h2>Artikujt</h2>
             {invoice.items && invoice.items.length > 0 ? (
-              <div className="items-table-container">
-                <table className="items-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Përshkrimi</th>
-                      <th>Sasia</th>
-                      <th>Çmimi për Njësi</th>
-                      <th>Vlera e TVSH</th>
-                      <th>Vlera pa TVSH</th>
-                      <th>Vlera e TVSH</th>
-                      <th>Totali</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {invoice.items
-                      .sort((a, b) => a.sort_order - b.sort_order)
-                      .map((item, index) => (
-                        <tr key={item.id}>
-                          <td data-label="#">{index + 1}</td>
-                          <td data-label="Përshkrimi">
-                            {item.description}
-                            {item.article && (
-                              <span className="article-badge" title="Nga artikulli">
-                                📦
+              <Box sx={{ width: '100%' }}>
+                <DataGrid
+                  rows={sortedItems}
+                  autoHeight
+                  columns={[
+                    {
+                      field: 'index',
+                      headerName: '#',
+                      width: 60,
+                    },
+                    {
+                      field: 'description',
+                      headerName: 'Përshkrimi',
+                      width: 250,
+                      flex: 1,
+                      renderCell: (params: GridRenderCellParams<InvoiceItem & { index: number }>) => (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <span>{params.value}</span>
+                          {params.row.article && (
+                            <span title="Nga artikulli">📦</span>
+                          )}
+                        </Box>
+                      ),
+                    },
+                    {
+                      field: 'quantity',
+                      headerName: 'Sasia',
+                      width: 100,
+                      valueFormatter: (value: string) => parseFloat(value).toFixed(2),
+                    },
+                    {
+                      field: 'unit_price',
+                      headerName: 'Çmimi për Njësi',
+                      width: 130,
+                      valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
+                    },
+                    {
+                      field: 'tax_rate',
+                      headerName: 'Vlera e TVSH',
+                      width: 130,
+                      valueGetter: (_value: unknown, row: InvoiceItem & { index: number }) => 
+                        row.tax?.rate ?? null,
+                      renderCell: (params: GridRenderCellParams<InvoiceItem & { index: number }>) => (
+                        <span className={params.value === null ? 'tax-exempt' : ''}>
+                          {params.value === null ? 'E përjashtuar' : `${params.value}%`}
                               </span>
-                            )}
-                          </td>
-                          <td data-label="Sasia">{parseFloat(item.quantity).toFixed(2)}</td>
-                          <td data-label="Çmimi për Njësi">{parseFloat(item.unit_price).toFixed(2)} €</td>
-                          <td data-label="Vlera e TVSH">
-                            {item.tax ? (
-                              item.tax.rate === null ? (
-                                <span className="tax-exempt">E përjashtuar</span>
-                              ) : (
-                                <span>{item.tax.rate}%</span>
-                              )
-                            ) : (
-                              <span className="tax-exempt">E përjashtuar</span>
-                            )}
-                          </td>
-                          <td data-label="Vlera pa TVSH">{parseFloat(item.subtotal).toFixed(2)} €</td>
-                          <td data-label="Vlera e TVSH">{parseFloat(item.tax_amount).toFixed(2)} €</td>
-                          <td data-label="Totali"><strong>{parseFloat(item.total).toFixed(2)} €</strong></td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
+                      ),
+                    },
+                    {
+                      field: 'subtotal',
+                      headerName: 'Vlera pa TVSH',
+                      width: 130,
+                      valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
+                    },
+                    {
+                      field: 'tax_amount',
+                      headerName: 'Vlera e TVSH',
+                      width: 130,
+                      valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
+                    },
+                    {
+                      field: 'total',
+                      headerName: 'Totali',
+                      width: 120,
+                      valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
+                      renderCell: (params: GridRenderCellParams<InvoiceItem & { index: number }>) => (
+                        <strong>{parseFloat(params.value as string).toFixed(2)} €</strong>
+                      ),
+                    },
+                  ]}
+                  getRowId={(row: InvoiceItem & { index: number }) => row.id}
+                  disableRowSelectionOnClick
+                  disableColumnMenu
+                  hideFooter
+                  sx={{
+                    '& .MuiDataGrid-cell': {
+                      borderBottom: '1px solid rgba(224, 224, 224, 1)',
+                    },
+                    '& .MuiDataGrid-filler': {
+                      display: 'none',
+                    },
+                  }}
+                />
+              </Box>
             ) : (
               <p className="no-items">Nuk ka artikuj në këtë faturë.</p>
             )}
           </div>
 
           {/* Totals */}
-          <div className="totals-section">
-            <div className="totals-card">
-              <div className="total-row">
-                <span className="total-label">Vlera pa TVSH:</span>
-                <span className="total-value">{parseFloat(invoice.subtotal).toFixed(2)} €</span>
+          <div className="invoice-totals">
+            <div className="totals-row">
+              <span className="totals-label">Vlera pa TVSH:</span>
+              <span className="totals-value">{parseFloat(invoice.subtotal).toFixed(2)} €</span>
               </div>
-              <div className="total-row total-tax">
-                <div className="tax-breakdown">
-                  {(() => {
-                    const taxGroups = calculateTaxGroups();
-                    const taxGroupKeys = Object.keys(taxGroups);
-                    const hasTaxGroups = taxGroupKeys.length > 0 && taxGroupKeys.some(key => taxGroups[key].total > 0);
-                    
-                    if (hasTaxGroups) {
-                      return (
-                        <table className="tax-subtable">
-                          <tbody>
-                            {taxGroupKeys.map((key) => {
-                              const group = taxGroups[key];
-                              if (group.total > 0) {
-                                return (
-                                  <tr key={key}>
-                                    <td className="tax-rate-label">{group.label}</td>
-                                    <td className="tax-rate-value">{group.total.toFixed(2)} €</td>
-                                  </tr>
-                                );
-                              }
-                              return null;
-                            })}
-                            <tr className="tax-total-row">
-                              <td className="tax-rate-label">Totali TVSH:</td>
-                              <td className="tax-rate-value">
-                                {(parseFloat(invoice.total) - parseFloat(invoice.subtotal)).toFixed(2)} €
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      );
-                    } else {
-                      const taxTotal = parseFloat(invoice.total) - parseFloat(invoice.subtotal);
-                      return <span>{taxTotal.toFixed(2)} €</span>;
-                    }
-                  })()}
+            <div className="totals-row">
+              <span className="totals-label">Vlera e TVSH:</span>
+              <span className="totals-value">{(parseFloat(invoice.total) - parseFloat(invoice.subtotal)).toFixed(2)} €</span>
                 </div>
-              </div>
-              <div className="total-row total-final">
-                <span className="total-label">Totali:</span>
-                <span className="total-value">{parseFloat(invoice.total).toFixed(2)} €</span>
-              </div>
+            <div className="totals-row totals-row--total">
+              <span className="totals-label">Totali:</span>
+              <span className="totals-value">{parseFloat(invoice.total).toFixed(2)} €</span>
             </div>
           </div>
         </div>

@@ -131,51 +131,13 @@
       color: #666;
     }
 
-    .statuses-table-container {
-      overflow-x: auto;
-    }
-
-    .statuses-table {
-      width: 100%;
-      border-collapse: collapse;
-
-      thead {
-        background-color: #f8f9fa;
-
-        th {
-          padding: 1rem;
-          text-align: left;
-          font-weight: 600;
-          color: #333;
-          border-bottom: 2px solid #dee2e6;
-        }
-      }
-
-      tbody {
-        tr {
-          border-bottom: 1px solid #dee2e6;
-
-          &:hover {
-            background-color: #f8f9fa;
-          }
-
-          td {
-            padding: 1rem;
-            color: #666;
-
-            strong {
-              color: #333;
-            }
-          }
-        }
-      }
-
-      .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: end;
-      }
-    }
+    // Table styles removed - using Material UI DataGrid now
+    // .statuses-table-container {
+    //   overflow-x: auto;
+    // }
+    // .statuses-table {
+    //   ...
+    // }
   }
 
   .btn {

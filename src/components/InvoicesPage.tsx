@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
+import { Button, Select, MenuItem, Box, IconButton, Menu, Checkbox } from '@mui/material';
+import PrintIcon from '@mui/icons-material/Print';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { invoicesApi, Invoice, businessesApi, invoiceStatusesApi, InvoiceStatus } from '../services/api';
 import { useAuth } from '../contexts/useAuth';
 import './InvoicesPage.scss';
@@ -17,6 +21,8 @@ const InvoicesPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [downloadingIds, setDownloadingIds] = useState<Set<number>>(new Set());
   const [exportingExcel, setExportingExcel] = useState(false);
+  const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<number[]>([]);
+  const [menuAnchor, setMenuAnchor] = useState<{ [key: number]: HTMLElement | null }>({});
 
   // Stabilize isAdminTenant to prevent unnecessary callback recreations
   const isAdminTenant = useMemo(() => user?.tenant?.is_admin === true, [user?.tenant?.is_admin]);
@@ -247,24 +253,6 @@ const InvoicesPage = () => {
     }
   };
 
-  const getStatusBadgeClass = (status: InvoiceStatusCode): string => {
-    switch (status) {
-      case 'draft':
-        return 'status-draft';
-      case 'sent':
-        return 'status-sent';
-      case 'paid':
-        return 'status-paid';
-      case 'overdue':
-        return 'status-overdue';
-      case 'cancelled':
-        return 'status-cancelled';
-      default:
-        return '';
-    }
-  };
-
-
   if (!businessId && !isAdminTenant) {
     return (
       <div className="invoices-page">
@@ -290,6 +278,29 @@ const InvoicesPage = () => {
       <div className="container">
         <div className="invoices-header">
           <div className="header-actions">
+            {selectedInvoiceIds.length > 0 && (
+              <button 
+                onClick={async () => {
+                  if (!window.confirm(`Jeni të sigurt që dëshironi të fshini ${selectedInvoiceIds.length} fatura? Ky veprim nuk mund të zhbëhet.`)) {
+                    return;
+                  }
+                  const targetBusinessId = selectedBusinessId || businessId;
+                  if (!targetBusinessId) return;
+                  try {
+                    for (const invoiceId of selectedInvoiceIds) {
+                      await invoicesApi.deleteInvoice(parseInt(targetBusinessId.toString()), invoiceId);
+                    }
+                    setSelectedInvoiceIds([]);
+                    await loadInvoices();
+                  } catch (err: any) {
+                    setError(err.response?.data?.error || 'Dështoi fshirja e faturave');
+                  }
+                }}
+                className="btn btn-danger"
+              >
+                Fshi të Zgjedhurat ({selectedInvoiceIds.length})
+              </button>
+            )}
             <button onClick={handleCreate} className="btn btn-primary">
               Krijo Faturë
             </button>
@@ -315,80 +326,161 @@ const InvoicesPage = () => {
           {invoices.length === 0 ? (
             <p className="no-invoices">Nuk u gjetën fatura.</p>
           ) : (
-            <div className="invoices-table-container">
-              <table className="invoices-table">
-                <thead>
-                  <tr>
-                    <th>Numri i Faturës</th>
-                    <th>Data</th>
-                    <th>Data e Maturimit</th>
-                    <th>Fatura Nga</th>
-                    <th>Fatura Për</th>
-                    <th>Statusi</th>
-                    <th>Totali</th>
-                    <th>Veprimet</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoices.map((invoice) => (
-                    <tr key={invoice.id}>
-                      <td data-label="Numri i Faturës">{invoice.invoice_number}</td>
-                      <td data-label="Data">{new Date(invoice.invoice_date).toLocaleDateString()}</td>
-                      <td data-label="Data e Maturimit">{new Date(invoice.due_date).toLocaleDateString()}</td>
-                      <td data-label="Fatura Nga">{invoice.issuer?.business_name || 'N/A'}</td>
-                      <td data-label="Fatura Për">{invoice.receiver?.business_name || 'N/A'}</td>
-                      <td data-label="Statusi">
-                        <select
-                          value={invoice.status}
-                          onChange={(e) => handleStatusChange(invoice.id, e.target.value as InvoiceStatusCode)}
-                          className={`status-select ${getStatusBadgeClass(invoice.status as InvoiceStatusCode)}`}
+            <Box sx={{ height: 600, width: '100%' }}>
+              <DataGrid
+                rows={invoices}
+                columns={[
+                  {
+                    field: 'invoice_number',
+                    headerName: 'Numri i Faturës',
+                    width: 150,
+                    flex: 1,
+                    renderCell: (params: GridRenderCellParams<Invoice>) => {
+                      const targetBusinessId = selectedBusinessId || businessId;
+                      if (!targetBusinessId) return params.value;
+                      return (
+                        <Link
+                          to={`/businesses/${targetBusinessId}/invoices/${params.row.id}`}
+                          style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 500 }}
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          {invoiceStatuses.map((status) => (
-                            <option key={status.id} value={status.code}>
-                              {statusLabels[status.code] || status.code}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td data-label="Totali">{parseFloat(invoice.total).toFixed(2)} €</td>
-                      <td>
-                        <div className="action-buttons">
-                          <button
-                            onClick={() => handleView(invoice.id)}
-                            className="btn btn-sm btn-primary"
-                            title="Shiko"
+                          {params.value}
+                        </Link>
+                      );
+                    },
+                  },
+                  {
+                    field: 'invoice_date',
+                    headerName: 'Data',
+                    width: 120,
+                    valueFormatter: (value: string) => new Date(value).toLocaleDateString(),
+                  },
+                  {
+                    field: 'due_date',
+                    headerName: 'Data e Maturimit',
+                    width: 150,
+                    valueFormatter: (value: string) => new Date(value).toLocaleDateString(),
+                  },
+                  {
+                    field: 'issuer',
+                    headerName: 'Fatura Nga',
+                    width: 180,
+                    valueGetter: (_value: unknown, row: Invoice) => row.issuer?.business_name || 'N/A',
+                    flex: 1,
+                  },
+                  {
+                    field: 'receiver',
+                    headerName: 'Fatura Për',
+                    width: 180,
+                    valueGetter: (_value: unknown, row: Invoice) => row.receiver?.business_name || 'N/A',
+                    flex: 1,
+                  },
+                  {
+                    field: 'status',
+                    headerName: 'Statusi',
+                    width: 180,
+                    renderCell: (params: GridRenderCellParams<Invoice>) => (
+                      <Select
+                        value={params.value}
+                        onChange={(e) => handleStatusChange(params.row.id, e.target.value as InvoiceStatusCode)}
+                        size="small"
+                        sx={{ 
+                          width: '100%',
+                          '& .MuiSelect-select': {
+                            padding: '4px 8px',
+                          }
+                        }}
+                      >
+                        {invoiceStatuses.map((status) => (
+                          <MenuItem key={status.id} value={status.code}>
+                            {statusLabels[status.code] || status.code}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    ),
+                  },
+                  {
+                    field: 'total',
+                    headerName: 'Totali',
+                    width: 120,
+                    valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
+                  },
+                  {
+                    field: 'actions',
+                    headerName: 'Veprimet',
+                    width: 120,
+                    sortable: false,
+                    filterable: false,
+                    renderCell: (params: GridRenderCellParams<Invoice>) => {
+                      const open = Boolean(menuAnchor[params.row.id]);
+                      return (
+                        <Box sx={{ 
+                          display: 'flex', 
+                          gap: 1, 
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '100%',
+                          width: '100%'
+                        }}>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleDownloadPdf(params.row.id, params.row.invoice_number)}
+                            disabled={downloadingIds.has(params.row.id)}
+                            title="Shkarko PDF"
                           >
-                            Shiko
-                          </button>
-                          <button
-                            onClick={() => handleDownloadPdf(invoice.id, invoice.invoice_number)}
-                            className="btn btn-sm btn-secondary"
-                            title="Shkarko"
-                            disabled={downloadingIds.has(invoice.id)}
+                            <PrintIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => setMenuAnchor({ ...menuAnchor, [params.row.id]: e.currentTarget })}
+                            title="Më shumë veprime"
                           >
-                            {downloadingIds.has(invoice.id) ? 'Duke u shkarkuar...' : 'Shkarko'}
-                          </button>
-                          <button
-                            onClick={() => handleEdit(invoice.id)}
-                            className="btn btn-sm btn-secondary"
-                            title="Ndrysho"
+                            <MoreVertIcon fontSize="small" />
+                          </IconButton>
+                          <Menu
+                            anchorEl={menuAnchor[params.row.id]}
+                            open={open}
+                            onClose={() => setMenuAnchor({ ...menuAnchor, [params.row.id]: null })}
                           >
-                            Ndrysho
-                          </button>
-                          <button
-                            onClick={() => handleDelete(invoice.id)}
-                            className="btn btn-sm btn-danger"
-                            title="Fshi"
-                          >
-                            Fshi
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                            <MenuItem onClick={() => {
+                              handleView(params.row.id);
+                              setMenuAnchor({ ...menuAnchor, [params.row.id]: null });
+                            }}>
+                              Shiko
+                            </MenuItem>
+                            <MenuItem onClick={() => {
+                              handleEdit(params.row.id);
+                              setMenuAnchor({ ...menuAnchor, [params.row.id]: null });
+                            }}>
+                              Ndrysho
+                            </MenuItem>
+                            <MenuItem onClick={() => {
+                              handleDelete(params.row.id);
+                              setMenuAnchor({ ...menuAnchor, [params.row.id]: null });
+                            }} sx={{ color: 'error.main' }}>
+                              Fshi
+                            </MenuItem>
+                          </Menu>
+                        </Box>
+                      );
+                    },
+                  },
+                ]}
+                getRowId={(row: Invoice) => row.id}
+                checkboxSelection
+                rowSelectionModel={selectedInvoiceIds}
+                onRowSelectionModelChange={(newSelection) => {
+                  setSelectedInvoiceIds(newSelection as number[]);
+                }}
+                pageSizeOptions={[10, 25, 50, 100]}
+                initialState={{
+                  pagination: {
+                    paginationModel: { pageSize: 25 },
+                  },
+                }}
+                loading={loading}
+              />
+            </Box>
           )}
         </div>
       </div>

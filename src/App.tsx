@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
 import { AuthProvider } from './contexts/AuthContext'
 import Navbar from './components/Navbar'
 import LandingPage from './components/LandingPage'
@@ -18,13 +19,20 @@ import BankAccountsPage from './components/BankAccountsPage'
 import InvoiceStatusesPage from './components/InvoiceStatusesPage'
 import './styles/main.scss'
 
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+  },
+})
+
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <div className="App">
-          <Navbar />
-          <Routes>
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <AuthProvider>
+          <div className="App">
+            <Navbar />
+            <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/login" element={<Login />} />
             <Route path="/about" element={<LandingPage />} />
@@ -121,6 +129,7 @@ function App() {
         </div>
       </AuthProvider>
     </BrowserRouter>
+    </ThemeProvider>
   )
 }
 
