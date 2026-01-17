@@ -9,6 +9,8 @@ import {
   Article, 
   taxesApi, 
   Tax,
+  invoiceStatusesApi,
+  InvoiceStatus,
   CreateInvoiceData,
   CreateInvoiceItemData
 } from '../services/api';
@@ -45,7 +47,7 @@ const InvoicePage = () => {
     date.setDate(date.getDate() + 30);
     return date.toISOString().split('T')[0];
   });
-  const [status, setStatus] = useState<'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'>('draft');
+  const [status, setStatus] = useState<string>('draft');
   const [issuerId, setIssuerId] = useState<number | null>(null);
   const [receiverId, setReceiverId] = useState<number | null>(null);
   const [items, setItems] = useState<InvoiceItemForm[]>([
@@ -67,6 +69,7 @@ const InvoicePage = () => {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
   const [taxes, setTaxes] = useState<Tax[]>([]);
+  const [invoiceStatuses, setInvoiceStatuses] = useState<InvoiceStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +119,15 @@ const InvoicePage = () => {
     }
   }, []);
 
+  const loadInvoiceStatuses = useCallback(async () => {
+    try {
+      const data = await invoiceStatusesApi.getInvoiceStatuses();
+      setInvoiceStatuses(data);
+    } catch (err: any) {
+      console.error('Failed to load invoice statuses:', err);
+    }
+  }, []);
+
   const loadInvoice = useCallback(async () => {
     if (!businessId || !id) return;
     try {
@@ -153,7 +165,8 @@ const InvoicePage = () => {
   useEffect(() => {
     loadBusinesses();
     loadTaxes();
-  }, [loadBusinesses, loadTaxes]);
+    loadInvoiceStatuses();
+  }, [loadBusinesses, loadTaxes, loadInvoiceStatuses]);
 
   useEffect(() => {
     if (issuerId) {
@@ -416,13 +429,22 @@ const InvoicePage = () => {
                 <select
                   className="info-input"
                   value={status}
-                  onChange={(e) => setStatus(e.target.value as typeof status)}
+                  onChange={(e) => setStatus(e.target.value)}
                 >
-                  <option value="draft">Draft</option>
-                  <option value="sent">Dërguar</option>
-                  <option value="paid">Paguar</option>
-                  <option value="overdue">Vonuar</option>
-                  <option value="cancelled">Anuluar</option>
+                  {invoiceStatuses.map((invoiceStatus) => {
+                    const statusLabels: Record<string, string> = {
+                      'draft': 'Draft',
+                      'sent': 'Dërguar',
+                      'paid': 'Paguar',
+                      'overdue': 'Vonuar',
+                      'cancelled': 'Anuluar',
+                    };
+                    return (
+                      <option key={invoiceStatus.id} value={invoiceStatus.code}>
+                        {statusLabels[invoiceStatus.code] || invoiceStatus.code}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             </div>

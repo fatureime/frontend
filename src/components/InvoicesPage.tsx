@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { invoicesApi, Invoice, businessesApi, Business } from '../services/api';
+import { invoicesApi, Invoice, businessesApi, Business, invoiceStatusesApi, InvoiceStatus } from '../services/api';
 import { useAuth } from '../contexts/useAuth';
 import './InvoicesPage.scss';
 
-type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
 type SortField = 'invoice_date' | 'due_date' | 'invoice_number' | 'total' | 'status';
 type SortDirection = 'asc' | 'desc';
 
@@ -16,8 +16,9 @@ const InvoicesPage = () => {
   const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([]);
   const [business, setBusiness] = useState<Business | null>(null);
   const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [invoiceStatuses, setInvoiceStatuses] = useState<InvoiceStatus[]>([]);
   const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(null);
-  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all');
+  const [statusFilter, setStatusFilter] = useState<InvoiceStatusCode | 'all'>('all');
   const [sortField, setSortField] = useState<SortField>('invoice_date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [loading, setLoading] = useState(true);
@@ -32,6 +33,24 @@ const InvoicesPage = () => {
   const loadingBusinessesRef = useRef(false);
   const loadingBusinessRef = useRef(false);
   const loadingInvoicesRef = useRef(false);
+
+  // Status label mapping (Albanian)
+  const statusLabels: Record<string, string> = {
+    'draft': 'Draft',
+    'sent': 'Dërguar',
+    'paid': 'Paguar',
+    'overdue': 'Vonuar',
+    'cancelled': 'Anuluar',
+  };
+
+  const loadInvoiceStatuses = useCallback(async () => {
+    try {
+      const data = await invoiceStatusesApi.getInvoiceStatuses();
+      setInvoiceStatuses(data);
+    } catch (err: any) {
+      console.error('Failed to load invoice statuses:', err);
+    }
+  }, []);
 
   const loadBusinesses = useCallback(async () => {
     if (loadingBusinessesRef.current) return; // Prevent concurrent calls
@@ -102,13 +121,14 @@ const InvoicesPage = () => {
   }, [isAdminTenant, selectedBusinessId, businessId]);
 
   useEffect(() => {
+    loadInvoiceStatuses();
     if (isAdminTenant) {
       loadBusinesses();
     } else if (businessId) {
       loadBusiness();
     }
     // loadBusinesses and loadBusiness are stable (empty deps or only businessId), safe to include
-  }, [isAdminTenant, businessId, loadBusinesses, loadBusiness]);
+  }, [isAdminTenant, businessId, loadBusinesses, loadBusiness, loadInvoiceStatuses]);
 
   useEffect(() => {
     loadInvoices();
@@ -199,7 +219,7 @@ const InvoicesPage = () => {
     }
   };
 
-  const handleStatusChange = async (invoiceId: number, newStatus: InvoiceStatus) => {
+  const handleStatusChange = async (invoiceId: number, newStatus: InvoiceStatusCode) => {
     const targetBusinessId = selectedBusinessId || businessId;
     if (!targetBusinessId) return;
 
@@ -293,7 +313,7 @@ const InvoicesPage = () => {
     }
   };
 
-  const getStatusBadgeClass = (status: InvoiceStatus): string => {
+  const getStatusBadgeClass = (status: InvoiceStatusCode): string => {
     switch (status) {
       case 'draft':
         return 'status-draft';
@@ -399,14 +419,14 @@ const InvoicesPage = () => {
             <select
               id="status-filter"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as InvoiceStatus | 'all')}
+              onChange={(e) => setStatusFilter(e.target.value as InvoiceStatusCode | 'all')}
             >
               <option value="all">Të gjitha</option>
-              <option value="draft">Draft</option>
-              <option value="sent">Dërguar</option>
-              <option value="paid">Paguar</option>
-              <option value="overdue">Vonuar</option>
-              <option value="cancelled">Anuluar</option>
+              {invoiceStatuses.map((status) => (
+                <option key={status.id} value={status.code}>
+                  {statusLabels[status.code] || status.code}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -472,14 +492,14 @@ const InvoicesPage = () => {
                       <td data-label="Statusi">
                         <select
                           value={invoice.status}
-                          onChange={(e) => handleStatusChange(invoice.id, e.target.value as InvoiceStatus)}
-                          className={`status-select ${getStatusBadgeClass(invoice.status)}`}
+                          onChange={(e) => handleStatusChange(invoice.id, e.target.value as InvoiceStatusCode)}
+                          className={`status-select ${getStatusBadgeClass(invoice.status as InvoiceStatusCode)}`}
                         >
-                          <option value="draft">Draft</option>
-                          <option value="sent">Dërguar</option>
-                          <option value="paid">Paguar</option>
-                          <option value="overdue">Vonuar</option>
-                          <option value="cancelled">Anuluar</option>
+                          {invoiceStatuses.map((status) => (
+                            <option key={status.id} value={status.code}>
+                              {statusLabels[status.code] || status.code}
+                            </option>
+                          ))}
                         </select>
                       </td>
                       <td data-label="Totali">{parseFloat(invoice.total).toFixed(2)} €</td>

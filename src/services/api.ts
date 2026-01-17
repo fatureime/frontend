@@ -230,6 +230,11 @@ export interface Tax {
   updated_at?: string;
 }
 
+export interface InvoiceStatus {
+  id: number;
+  code: string;
+}
+
 export interface InvoiceItem {
   id: number;
   invoice_id: number;
@@ -663,6 +668,17 @@ export const taxesApi = {
    */
   async deleteTax(id: number): Promise<{ message: string }> {
     const response = await api.delete(`/taxes/${id}`);
+    return response.data;
+  },
+};
+
+// Invoice Status API methods
+export const invoiceStatusesApi = {
+  /**
+   * Get all invoice statuses
+   */
+  async getInvoiceStatuses(): Promise<InvoiceStatus[]> {
+    const response = await api.get('/invoice-statuses');
     return response.data;
   },
 };

@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { invoicesApi, Invoice } from '../services/api';
+import { invoicesApi, Invoice, invoiceStatusesApi, InvoiceStatus } from '../services/api';
 import './InvoiceDetailPage.scss';
 
-type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
 
 const InvoiceDetailPage = () => {
   const { businessId, id } = useParams<{ businessId: string; id: string }>();
   const navigate = useNavigate();
   const [invoice, setInvoice] = useState<Invoice | null>(null);
+  const [invoiceStatuses, setInvoiceStatuses] = useState<InvoiceStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
@@ -53,7 +54,20 @@ const InvoiceDetailPage = () => {
     }
   };
 
-  const handleStatusChange = async (newStatus: InvoiceStatus) => {
+  const loadInvoiceStatuses = useCallback(async () => {
+    try {
+      const data = await invoiceStatusesApi.getInvoiceStatuses();
+      setInvoiceStatuses(data);
+    } catch (err: any) {
+      console.error('Failed to load invoice statuses:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadInvoiceStatuses();
+  }, [loadInvoiceStatuses]);
+
+  const handleStatusChange = async (newStatus: string) => {
     if (!businessId || !id || !invoice) return;
 
     try {
@@ -99,7 +113,7 @@ const InvoiceDetailPage = () => {
     }
   };
 
-  const getStatusBadgeClass = (status: InvoiceStatus): string => {
+  const getStatusBadgeClass = (status: InvoiceStatusCode): string => {
     switch (status) {
       case 'draft':
         return 'status-draft';
@@ -155,15 +169,15 @@ const InvoiceDetailPage = () => {
     return sortedGroups;
   };
 
-  const getStatusLabel = (status: InvoiceStatus): string => {
-    const labels: Record<InvoiceStatus, string> = {
+  const getStatusLabel = (status: string): string => {
+    const labels: Record<string, string> = {
       draft: 'Draft',
       sent: 'Dërguar',
       paid: 'Paguar',
       overdue: 'Vonuar',
       cancelled: 'Anuluar',
     };
-    return labels[status];
+    return labels[status] || status;
   };
 
   if (!businessId || !id) {
@@ -223,14 +237,14 @@ const InvoiceDetailPage = () => {
           <div className="header-actions">
             <select
               value={invoice.status}
-              onChange={(e) => handleStatusChange(e.target.value as InvoiceStatus)}
-              className={`status-select ${getStatusBadgeClass(invoice.status)}`}
+              onChange={(e) => handleStatusChange(e.target.value)}
+              className={`status-select ${getStatusBadgeClass(invoice.status as InvoiceStatusCode)}`}
             >
-              <option value="draft">Draft</option>
-              <option value="sent">Dërguar</option>
-              <option value="paid">Paguar</option>
-              <option value="overdue">Vonuar</option>
-              <option value="cancelled">Anuluar</option>
+              {invoiceStatuses.map((invoiceStatus) => (
+                <option key={invoiceStatus.id} value={invoiceStatus.code}>
+                  {getStatusLabel(invoiceStatus.code)}
+                </option>
+              ))}
             </select>
             <button
               onClick={handleDownloadPdf}
