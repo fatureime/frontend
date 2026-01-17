@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { DataGrid, GridRenderCellParams, GridRenderEditCellParams } from '@mui/x-data-grid';
-import { Select, MenuItem, TextField, Box, IconButton, Button, Card, CardContent, Typography } from '@mui/material';
+import { Select, MenuItem, TextField, Box, IconButton, Card, CardContent, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import GridViewIcon from '@mui/icons-material/GridView';
@@ -759,7 +759,6 @@ const InvoiceForm = () => {
               <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2, mb: 2 }}>
                 {items.map((item, index) => {
                   const article = articles.find(a => a.id === item.articleId);
-                  const tax = taxes.find(t => t.id === item.taxId);
                   return (
                     <Card key={item.id} sx={{ display: 'flex', flexDirection: 'column' }}>
                       <CardContent>
@@ -789,7 +788,7 @@ const InvoiceForm = () => {
                               <Select
                                 value={item.articleId || ''}
                                 onChange={(e) => {
-                                  const newValue = e.target.value ? parseInt(e.target.value) : null;
+                                  const newValue = e.target.value ? parseInt(String(e.target.value)) : null;
                                   updateItem(item.id, 'articleId', newValue);
                                 }}
                                 fullWidth
@@ -866,7 +865,7 @@ const InvoiceForm = () => {
                             <Select
                               value={item.taxId || ''}
                               onChange={(e) => {
-                                const newValue = e.target.value ? parseInt(e.target.value) : null;
+                                const newValue = e.target.value ? parseInt(String(e.target.value)) : null;
                                 updateItem(item.id, 'taxId', newValue);
                               }}
                               fullWidth

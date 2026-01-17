@@ -441,7 +441,7 @@ const InvoiceView = () => {
                           <Typography variant="body2">
                             <strong>Vlera e TVSH:</strong>{' '}
                             <span className={item.tax?.rate === null ? 'tax-exempt' : ''}>
-                              {item.tax?.rate === null ? 'E përjashtuar' : `${item.tax.rate}%`}
+                              {item.tax?.rate === null ? 'E përjashtuar' : `${item.tax?.rate}%`}
                             </span>
                           </Typography>
                           <Typography variant="body2">
