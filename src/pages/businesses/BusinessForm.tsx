@@ -1,39 +1,78 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { businessesApi, Business, CreateBusinessData } from '../../services/api';
 import './BusinessForm.scss';
 
-interface BusinessFormProps {
-  business?: Business | null;
-  onSave: () => void;
-  onCancel: () => void;
-}
+const BusinessForm = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const isEditMode = !!id;
 
-const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
-  const isEditMode = !!business;
+  const [business, setBusiness] = useState<Business | null>(null);
 
   const [formData, setFormData] = useState<CreateBusinessData>({
-    business_name: business?.business_name || '',
-    trade_name: business?.trade_name || '',
-    business_type: business?.business_type || '',
-    unique_identifier_number: business?.unique_identifier_number || '',
-    business_number: business?.business_number || '',
-    fiscal_number: business?.fiscal_number || '',
-    number_of_employees: business?.number_of_employees || undefined,
-    registration_date: business?.registration_date || '',
-    municipality: business?.municipality || '',
-    address: business?.address || '',
-    phone: business?.phone || '',
-    email: business?.email || '',
-    capital: business?.capital || '',
-    arbk_status: business?.arbk_status || '',
-    vat_number: business?.vat_number || '',
+    business_name: '',
+    trade_name: '',
+    business_type: '',
+    unique_identifier_number: '',
+    business_number: '',
+    fiscal_number: '',
+    number_of_employees: undefined,
+    registration_date: '',
+    municipality: '',
+    address: '',
+    phone: '',
+    email: '',
+    capital: '',
+    arbk_status: '',
+    vat_number: '',
   });
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [error, setError] = useState<string | null>(null);
   const [bulkInput, setBulkInput] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(business?.logo || null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+
+  const loadBusiness = useCallback(async () => {
+    if (!id) return;
+
+    try {
+      setInitialLoading(true);
+      setError(null);
+      const data = await businessesApi.getBusiness(parseInt(id));
+      setBusiness(data);
+      setFormData({
+        business_name: data.business_name || '',
+        trade_name: data.trade_name || '',
+        business_type: data.business_type || '',
+        unique_identifier_number: data.unique_identifier_number || '',
+        business_number: data.business_number || '',
+        fiscal_number: data.fiscal_number || '',
+        number_of_employees: data.number_of_employees || undefined,
+        registration_date: data.registration_date || '',
+        municipality: data.municipality || '',
+        address: data.address || '',
+        phone: data.phone || '',
+        email: data.email || '',
+        capital: data.capital || '',
+        arbk_status: data.arbk_status || '',
+        vat_number: data.vat_number || '',
+      });
+      setLogoPreview(data.logo || null);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Dështoi ngarkimi i subjektit');
+    } finally {
+      setInitialLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (isEditMode) {
+      loadBusiness();
+    }
+  }, [isEditMode, loadBusiness]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,12 +99,13 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
         vat_number: formData.vat_number?.trim() || undefined,
       };
 
-      if (isEditMode && business) {
-        await businessesApi.updateBusiness(business.id, cleanedData, logoFile || undefined);
+      if (isEditMode && id) {
+        await businessesApi.updateBusiness(parseInt(id), cleanedData, logoFile || undefined);
+        navigate(`/businesses/${id}`);
       } else {
-        await businessesApi.createBusiness(cleanedData, logoFile || undefined);
+        const created = await businessesApi.createBusiness(cleanedData, logoFile || undefined);
+        navigate(`/businesses/${created.id}`);
       }
-      onSave();
     } catch (err: unknown) {
       const errorMessage = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setError(errorMessage || (isEditMode ? 'Dështoi përditësimi i subjektit' : 'Dështoi krijimi i subjektit'));
@@ -246,15 +286,39 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
     }
   };
 
+  const handleCancel = () => {
+    if (isEditMode && id) {
+      navigate(`/businesses/${id}`);
+    } else {
+      navigate('/businesses');
+    }
+  };
+
+  if (initialLoading) {
+    return (
+      <div className="business-form">
+        <div className="container">
+          <div className="loading">Duke u ngarkuar...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="business-form">
-      <h2>{isEditMode ? 'Ndrysho Subjektin' : 'Krijo Subjekt'}</h2>
-      <form onSubmit={handleSubmit}>
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
+      <div className="container">
+        <div className="business-form-header">
+          <button onClick={handleCancel} className="btn btn-secondary">
+            ← Anulo
+          </button>
+        </div>
+        <h2>{isEditMode ? 'Ndrysho Subjektin' : 'Krijo Subjekt'}</h2>
+        <form onSubmit={handleSubmit}>
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
 
         {isEditMode && business?.created_by && (
           <div className="form-group info-group">
@@ -518,15 +582,16 @@ const BusinessForm = ({ business, onSave, onCancel }: BusinessFormProps) => {
           />
         </div>
 
-        <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Duke u ruajtur...' : 'Ruaj Ndryshimet'}
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>
-            Anulo
-          </button>
-        </div>
-      </form>
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? 'Duke u ruajtur...' : (isEditMode ? 'Ruaj Ndryshimet' : 'Krijo Subjekt')}
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={loading}>
+              Anulo
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

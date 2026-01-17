@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { bankAccountsApi, businessesApi, BankAccount, Business } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
-import BankAccountForm from './BankAccountForm';
 import './BankAccountsPage.scss';
 
 interface BankAccountWithBusiness extends BankAccount {
@@ -10,12 +10,10 @@ interface BankAccountWithBusiness extends BankAccount {
 
 const BankAccountsPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const isAdminTenant = user?.tenant?.is_admin === true;
   const [bankAccounts, setBankAccounts] = useState<BankAccountWithBusiness[]>([]);
   const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [selectedBankAccount, setSelectedBankAccount] = useState<BankAccountWithBusiness | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -83,28 +81,15 @@ const BankAccountsPage = () => {
   }, [loadBankAccounts]);
 
   const handleCreate = () => {
-    setSelectedBankAccount(null);
-    setIsCreating(true);
-    setIsEditing(false);
+    navigate('/bank-accounts/create');
+  };
+
+  const handleView = (bankAccount: BankAccountWithBusiness) => {
+    navigate(`/bank-accounts/${bankAccount.id}`);
   };
 
   const handleEdit = (bankAccount: BankAccountWithBusiness) => {
-    setSelectedBankAccount(bankAccount);
-    setIsEditing(true);
-    setIsCreating(false);
-  };
-
-  const handleSave = async () => {
-    await loadBankAccounts();
-    setIsEditing(false);
-    setIsCreating(false);
-    setSelectedBankAccount(null);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setIsCreating(false);
-    setSelectedBankAccount(null);
+    navigate(`/bank-accounts/${bankAccount.id}/edit`);
   };
 
   const handleDelete = async (bankAccount: BankAccountWithBusiness) => {
@@ -120,10 +105,6 @@ const BankAccountsPage = () => {
     try {
       await bankAccountsApi.deleteBankAccount(bankAccount.business_id, bankAccount.id);
       await loadBankAccounts();
-      if (selectedBankAccount?.id === bankAccount.id) {
-        setSelectedBankAccount(null);
-        setIsEditing(false);
-      }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi fshirja e llogarisë bankare');
     }
@@ -157,75 +138,71 @@ const BankAccountsPage = () => {
           </div>
         )}
 
-        {(isEditing || isCreating) ? (
-          <BankAccountForm
-            bankAccount={selectedBankAccount || null}
-            businesses={businesses}
-            isAdminTenant={isAdminTenant}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
-        ) : (
-          <div className="bank-accounts-content">
-            <div className="bank-accounts-list">
-              {bankAccounts.length === 0 ? (
-                <p className="no-bank-accounts">
-                  {businesses.length === 0 
-                    ? 'Nuk u gjetën subjekte. Ju lutem krijoni një subjekt fillimisht.'
-                    : 'Nuk u gjetën llogari bankare. Klikoni "Krijo Llogari Bankare" për të shtuar një të re.'}
-                </p>
-              ) : (
-                <div className="bank-account-cards">
-                  {bankAccounts.map((bankAccount) => (
-                    <div key={`${bankAccount.business_id}-${bankAccount.id}`} className="bank-account-card">
-                      <div className="bank-account-card-header">
-                        <h3>
-                          {bankAccount.business?.business_name || `Subjekti #${bankAccount.business_id}`}
-                        </h3>
-                        {isAdminTenant && bankAccount.business && (
-                          <span className="badge business-badge">
-                            {bankAccount.business.business_name}
-                          </span>
-                        )}
-                      </div>
-                      <div className="bank-account-card-body">
-                        {bankAccount.bank_name && (
-                          <p><strong>Emri i bankës:</strong> {bankAccount.bank_name}</p>
-                        )}
-                        {bankAccount.swift && (
-                          <p><strong>SWIFT:</strong> {bankAccount.swift}</p>
-                        )}
-                        {bankAccount.iban && (
-                          <p><strong>IBAN:</strong> {bankAccount.iban}</p>
-                        )}
-                        {bankAccount.bank_account_number && (
-                          <p><strong>Numri i llogarisë:</strong> {bankAccount.bank_account_number}</p>
-                        )}
-                        {bankAccount.created_at && (
-                          <p><strong>Krijuar:</strong> {new Date(bankAccount.created_at).toLocaleDateString()}</p>
-                        )}
-                      </div>
-                      <div className="bank-account-card-actions">
-                        <button 
-                          onClick={() => handleEdit(bankAccount)} 
-                          className="btn btn-primary"
-                        >
-                          Ndrysho
-                        </button>
-                        <button
-                          onClick={() => handleDelete(bankAccount)}
-                          className="btn btn-danger"
-                        >
-                          Fshi
-                        </button>
-                      </div>
+        <div className="bank-accounts-content">
+          <div className="bank-accounts-list">
+            {bankAccounts.length === 0 ? (
+              <p className="no-bank-accounts">
+                {businesses.length === 0 
+                  ? 'Nuk u gjetën subjekte. Ju lutem krijoni një subjekt fillimisht.'
+                  : 'Nuk u gjetën llogari bankare. Klikoni "Krijo Llogari Bankare" për të shtuar një të re.'}
+              </p>
+            ) : (
+              <div className="bank-account-cards">
+                {bankAccounts.map((bankAccount) => (
+                  <div key={`${bankAccount.business_id}-${bankAccount.id}`} className="bank-account-card">
+                    <div className="bank-account-card-header">
+                      <h3>
+                        {bankAccount.business?.business_name || `Subjekti #${bankAccount.business_id}`}
+                      </h3>
+                      {isAdminTenant && bankAccount.business && (
+                        <span className="badge business-badge">
+                          {bankAccount.business.business_name}
+                        </span>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    <div className="bank-account-card-body">
+                      {bankAccount.bank_name && (
+                        <p><strong>Emri i bankës:</strong> {bankAccount.bank_name}</p>
+                      )}
+                      {bankAccount.swift && (
+                        <p><strong>SWIFT:</strong> {bankAccount.swift}</p>
+                      )}
+                      {bankAccount.iban && (
+                        <p><strong>IBAN:</strong> {bankAccount.iban}</p>
+                      )}
+                      {bankAccount.bank_account_number && (
+                        <p><strong>Numri i llogarisë:</strong> {bankAccount.bank_account_number}</p>
+                      )}
+                      {bankAccount.created_at && (
+                        <p><strong>Krijuar:</strong> {new Date(bankAccount.created_at).toLocaleDateString()}</p>
+                      )}
+                    </div>
+                    <div className="bank-account-card-actions">
+                      <button 
+                        onClick={() => handleView(bankAccount)} 
+                        className="btn btn-secondary"
+                      >
+                        Shiko
+                      </button>
+                      <button 
+                        onClick={() => handleEdit(bankAccount)} 
+                        className="btn btn-primary"
+                      >
+                        Ndrysho
+                      </button>
+                      <button
+                        onClick={() => handleDelete(bankAccount)}
+                        className="btn btn-danger"
+                      >
+                        Fshi
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

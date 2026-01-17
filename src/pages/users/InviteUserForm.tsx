@@ -1,23 +1,38 @@
-import { useState } from 'react';
-import { usersApi, Tenant } from '../../services/api';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { usersApi, tenantsApi, Tenant } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import './InviteUserForm.scss';
 
-interface InviteUserFormProps {
-  tenants: Tenant[];
-  defaultTenantId?: number;
-  onSave: () => void;
-  onCancel: () => void;
-}
-
-const InviteUserForm = ({ tenants, defaultTenantId, onSave, onCancel }: InviteUserFormProps) => {
+const InviteUserForm = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdminTenant = user?.tenant?.is_admin === true;
+  const [tenants, setTenants] = useState<Tenant[]>([]);
   const [formData, setFormData] = useState({
     email: '',
     roles: ['ROLE_USER'],
-    tenant_id: defaultTenantId || null,
+    tenant_id: user?.tenant?.id || null,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  const loadTenants = useCallback(async () => {
+    if (!isAdminTenant) return;
+    try {
+      const data = await tenantsApi.getTenants();
+      setTenants(data);
+    } catch (err: any) {
+      console.error('Failed to load tenants:', err);
+    }
+  }, [isAdminTenant]);
+
+  useEffect(() => {
+    if (isAdminTenant) {
+      loadTenants();
+    }
+  }, [isAdminTenant, loadTenants]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +53,7 @@ const InviteUserForm = ({ tenants, defaultTenantId, onSave, onCancel }: InviteUs
       await usersApi.inviteUser(inviteData);
       setSuccess('Ftesa u dërgua me sukses!');
       setTimeout(() => {
-        onSave();
+        navigate('/users');
       }, 2000);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi dërgimi i ftesës');
@@ -66,8 +81,14 @@ const InviteUserForm = ({ tenants, defaultTenantId, onSave, onCancel }: InviteUs
 
   return (
     <div className="invite-user-form">
-      <h2>Fto Përdorues</h2>
-      <form onSubmit={handleSubmit}>
+      <div className="container">
+        <div className="invite-user-form-header">
+          <button onClick={() => navigate('/users')} className="btn btn-secondary">
+            ← Anulo
+          </button>
+        </div>
+        <h2>Fto Përdorues</h2>
+        <form onSubmit={handleSubmit}>
         {error && (
           <div className="error-message">
             {error}
@@ -133,15 +154,16 @@ const InviteUserForm = ({ tenants, defaultTenantId, onSave, onCancel }: InviteUs
           </div>
         )}
 
-        <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={loading || !!success}>
-            {loading ? 'Duke u dërguar...' : success ? 'U Dërgua!' : 'Dërgo Ftesën'}
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>
-            Anulo
-          </button>
-        </div>
-      </form>
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary" disabled={loading || !!success}>
+              {loading ? 'Duke u dërguar...' : success ? 'U Dërgua!' : 'Dërgo Ftesën'}
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={() => navigate('/users')} disabled={loading}>
+              Anulo
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

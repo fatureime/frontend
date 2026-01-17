@@ -3,13 +3,16 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import { Box } from '@mui/material';
 import { invoicesApi, Invoice, invoiceStatusesApi, InvoiceStatus, InvoiceItem } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import './InvoiceDetailPage.scss';
 
 type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
 
 const InvoiceDetailPage = () => {
-  const { businessId, id } = useParams<{ businessId: string; id: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const businessId = user?.tenant?.issuer_business_id;
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [invoiceStatuses, setInvoiceStatuses] = useState<InvoiceStatus[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +38,7 @@ const InvoiceDetailPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await invoicesApi.getInvoice(parseInt(businessId), parseInt(id));
+      const data = await invoicesApi.getInvoice(businessId, parseInt(id));
       setInvoice(data);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi ngarkimi i faturës');
@@ -49,8 +52,8 @@ const InvoiceDetailPage = () => {
   }, [loadInvoice]);
 
   const handleEdit = () => {
-    if (businessId && id) {
-      navigate(`/businesses/${businessId}/invoices/${id}/edit`);
+    if (id) {
+      navigate(`/businesses/invoices/${id}/edit`);
     }
   };
 
@@ -62,8 +65,8 @@ const InvoiceDetailPage = () => {
     }
 
     try {
-      await invoicesApi.deleteInvoice(parseInt(businessId), parseInt(id));
-      navigate(`/businesses/${businessId}/invoices`);
+      await invoicesApi.deleteInvoice(businessId, parseInt(id));
+      navigate('/businesses/invoices');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi fshirja e faturës');
     }
@@ -96,9 +99,7 @@ const InvoiceDetailPage = () => {
   };
 
   const handleBack = () => {
-    if (businessId) {
-      navigate(`/businesses/${businessId}/invoices`);
-    }
+    navigate('/businesses/invoices');
   };
 
   const handleDownloadPdf = async () => {

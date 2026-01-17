@@ -1,21 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { articlesApi, Article, businessesApi, Business } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
-import ArticleForm from './ArticleForm';
 import './ArticlesPage.scss';
 
 const ArticlesPage = () => {
-  const { businessId } = useParams<{ businessId: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const isAdminTenant = user?.tenant?.is_admin === true;
+  const currentBusinessId = user?.tenant?.issuer_business_id || null;
   const [articles, setArticles] = useState<Article[]>([]);
-  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [business, setBusiness] = useState<Business | null>(null);
   const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [currentBusinessId, setCurrentBusinessId] = useState<number | null>(businessId ? parseInt(businessId) : null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
+  const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(currentBusinessId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,64 +21,69 @@ const ArticlesPage = () => {
       const data = await businessesApi.getBusinesses();
       setBusinesses(data);
       
-      // Set current business based on businessId from URL or default
-      if (businessId) {
-        const foundBusiness = data.find(b => b.id === parseInt(businessId));
+      // Set current business based on issuer_business_id from user context or selected business
+      const targetBusinessId = selectedBusinessId || currentBusinessId;
+      if (targetBusinessId) {
+        const foundBusiness = data.find(b => b.id === targetBusinessId);
         if (foundBusiness) {
           setBusiness(foundBusiness);
-          setCurrentBusinessId(parseInt(businessId));
-        } else if (data.length > 0) {
-          // If businessId not found, use first available business
-          setBusiness(data[0]);
-          setCurrentBusinessId(data[0].id);
         }
-      } else if (data.length > 0) {
-        // If no businessId in URL, use first available business
+      } else if (data.length > 0 && isAdminTenant) {
+        // If no issuer_business_id and admin tenant, use first available business
         setBusiness(data[0]);
-        setCurrentBusinessId(data[0].id);
+        setSelectedBusinessId(data[0].id);
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi ngarkimi i bizneseve');
     }
-  }, [businessId]);
+  }, [selectedBusinessId, currentBusinessId, isAdminTenant]);
 
   const loadBusiness = useCallback(async () => {
-    if (!currentBusinessId) return;
+    const targetBusinessId = selectedBusinessId || currentBusinessId;
+    if (!targetBusinessId) return;
     try {
-      const data = await businessesApi.getBusiness(currentBusinessId);
+      const data = await businessesApi.getBusiness(targetBusinessId);
       setBusiness(data);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi ngarkimi i biznesit');
     }
-  }, [currentBusinessId]);
+  }, [selectedBusinessId, currentBusinessId]);
 
   const loadArticles = useCallback(async () => {
-    if (!currentBusinessId) return;
+    const targetBusinessId = selectedBusinessId || currentBusinessId;
+    if (!targetBusinessId) return;
     try {
       setLoading(true);
       setError(null);
-      const data = await articlesApi.getArticles(currentBusinessId);
+      const data = await articlesApi.getArticles(targetBusinessId);
       setArticles(data);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi ngarkimi i artikujve');
     } finally {
       setLoading(false);
     }
-  }, [currentBusinessId]);
+  }, [selectedBusinessId, currentBusinessId]);
 
   useEffect(() => {
+    if (!currentBusinessId && !isAdminTenant) {
+      setError('Nuk u gjet subjekt. Ju lutem kontaktoni administratorin.');
+      setLoading(false);
+      return;
+    }
     loadBusinesses();
-  }, [loadBusinesses]);
+  }, [currentBusinessId, isAdminTenant, loadBusinesses]);
 
   useEffect(() => {
-    if (currentBusinessId) {
+    const targetBusinessId = selectedBusinessId || currentBusinessId;
+    if (targetBusinessId) {
       loadBusiness();
       loadArticles();
     }
-  }, [currentBusinessId, loadBusiness, loadArticles]);
+  }, [selectedBusinessId, currentBusinessId, loadBusiness, loadArticles]);
 
   const handleBusinessChange = (newBusinessId: number) => {
-    setCurrentBusinessId(newBusinessId);
+    // For admin tenants, they can switch businesses
+    setSelectedBusinessId(newBusinessId);
     const foundBusiness = businesses.find(b => b.id === newBusinessId);
     if (foundBusiness) {
       setBusiness(foundBusiness);
@@ -89,28 +91,15 @@ const ArticlesPage = () => {
   };
 
   const handleCreate = () => {
-    setSelectedArticle(null);
-    setIsCreating(true);
-    setIsEditing(false);
+    navigate('/businesses/articles/create');
+  };
+
+  const handleView = (article: Article) => {
+    navigate(`/businesses/articles/${article.id}`);
   };
 
   const handleEdit = (article: Article) => {
-    setSelectedArticle(article);
-    setIsEditing(true);
-    setIsCreating(false);
-  };
-
-  const handleSave = async () => {
-    await loadArticles();
-    setIsEditing(false);
-    setIsCreating(false);
-    setSelectedArticle(null);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setIsCreating(false);
-    setSelectedArticle(null);
+    navigate(`/businesses/articles/${article.id}/edit`);
   };
 
   const handleDelete = async (articleId: number) => {
@@ -123,10 +112,6 @@ const ArticlesPage = () => {
     try {
       await articlesApi.deleteArticle(currentBusinessId, articleId);
       await loadArticles();
-      if (selectedArticle?.id === articleId) {
-        setSelectedArticle(null);
-        setIsEditing(false);
-      }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi fshirja e artikullit');
     }
@@ -168,59 +153,49 @@ const ArticlesPage = () => {
           </div>
         )}
 
-        {(isEditing || isCreating) ? (
-          <ArticleForm
-            businessId={currentBusinessId}
-            article={selectedArticle || null}
-            businesses={businesses}
-            currentBusiness={business}
-            isAdminTenant={isAdminTenant}
-            onBusinessChange={handleBusinessChange}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
-        ) : (
-          <div className="articles-content">
-            <div className="articles-list">
-              {articles.length === 0 ? (
-                <p className="no-articles">Nuk u gjetën artikuj.</p>
-              ) : (
-                <div className="article-cards">
-                  {articles.map((article) => (
-                    <div key={article.id} className="article-card">
-                      <div className="article-card-header">
-                        <h3>{article.name}</h3>
-                      </div>
-                      <div className="article-card-body">
-                        {article.description && (
-                          <p><strong>Përshkrimi:</strong> {article.description}</p>
-                        )}
-                        <p><strong>Çmimi për njësi:</strong> {parseFloat(article.unit_price).toFixed(2)} €</p>
-                        {article.unit && (
-                          <p><strong>Njësia:</strong> {article.unit}</p>
-                        )}
-                        {article.created_at && (
-                          <p><strong>Krijuar:</strong> {new Date(article.created_at).toLocaleDateString()}</p>
-                        )}
-                      </div>
-                      <div className="article-card-actions">
-                        <button onClick={() => handleEdit(article)} className="btn btn-primary">
-                          Ndrysho
-                        </button>
-                        <button
-                          onClick={() => handleDelete(article.id)}
-                          className="btn btn-danger"
-                        >
-                          Fshi
-                        </button>
-                      </div>
+        <div className="articles-content">
+          <div className="articles-list">
+            {articles.length === 0 ? (
+              <p className="no-articles">Nuk u gjetën artikuj.</p>
+            ) : (
+              <div className="article-cards">
+                {articles.map((article) => (
+                  <div key={article.id} className="article-card">
+                    <div className="article-card-header">
+                      <h3>{article.name}</h3>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    <div className="article-card-body">
+                      {article.description && (
+                        <p><strong>Përshkrimi:</strong> {article.description}</p>
+                      )}
+                      <p><strong>Çmimi për njësi:</strong> {parseFloat(article.unit_price).toFixed(2)} €</p>
+                      {article.unit && (
+                        <p><strong>Njësia:</strong> {article.unit}</p>
+                      )}
+                      {article.created_at && (
+                        <p><strong>Krijuar:</strong> {new Date(article.created_at).toLocaleDateString()}</p>
+                      )}
+                    </div>
+                    <div className="article-card-actions">
+                      <button onClick={() => handleView(article)} className="btn btn-secondary">
+                        Shiko
+                      </button>
+                      <button onClick={() => handleEdit(article)} className="btn btn-primary">
+                        Ndrysho
+                      </button>
+                      <button
+                        onClick={() => handleDelete(article.id)}
+                        className="btn btn-danger"
+                      >
+                        Fshi
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

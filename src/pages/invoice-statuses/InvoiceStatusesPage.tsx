@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import { Button, Box } from '@mui/material';
 import { invoiceStatusesApi, InvoiceStatus } from '../../services/api';
@@ -10,6 +10,7 @@ import './InvoiceStatusesPage.scss';
 const InvoiceStatusesPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [statuses, setStatuses] = useState<InvoiceStatus[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<InvoiceStatus | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -64,12 +65,42 @@ const InvoiceStatusesPage = () => {
     };
   }, [user, isAdminTenant, navigate, loadStatuses]);
 
+  useEffect(() => {
+    // Check if we're in create or edit mode from route
+    const path = location.pathname;
+    if (path === '/invoice-statuses/create') {
+      setIsCreating(true);
+      setIsEditing(false);
+      setIsEditingLabel(false);
+      setSelectedStatus(null);
+      setCode('');
+      setLabel('');
+    } else if (path.match(/^\/invoice-statuses\/\d+\/edit$/)) {
+      const match = path.match(/^\/invoice-statuses\/(\d+)\/edit$/);
+      if (match && statuses.length > 0) {
+        const statusId = parseInt(match[1]);
+        const status = statuses.find(s => s.id === statusId);
+        if (status) {
+          setSelectedStatus(status);
+          setCode(status.code);
+          setLabel(getStatusLabel(status.code));
+          setIsEditing(true);
+          setIsCreating(false);
+          setIsEditingLabel(false);
+        }
+      }
+    } else {
+      setIsCreating(false);
+      setIsEditing(false);
+      setIsEditingLabel(false);
+      setSelectedStatus(null);
+      setCode('');
+      setLabel('');
+    }
+  }, [location.pathname, statuses]);
+
   const handleEdit = (status: InvoiceStatus) => {
-    setSelectedStatus(status);
-    setCode(status.code);
-    setLabel(getStatusLabel(status.code));
-    setIsEditing(true);
-    setIsCreating(false);
+    navigate(`/invoice-statuses/${status.id}/edit`);
   };
 
   const handleEditLabel = (status: InvoiceStatus) => {
@@ -90,25 +121,22 @@ const InvoiceStatusesPage = () => {
     try {
       setError(null);
       if (isCreating) {
-        await invoiceStatusesApi.createInvoiceStatus({ code: code.trim() });
+        const created = await invoiceStatusesApi.createInvoiceStatus({ code: code.trim() });
         // Save label if provided
         if (label.trim()) {
           setStatusLabel(code.trim(), label.trim());
         }
+        await loadStatuses();
+        navigate(`/invoice-statuses/${created.id}`);
       } else if (selectedStatus) {
         await invoiceStatusesApi.updateInvoiceStatus(selectedStatus.id, { code: code.trim() });
         // Save label if provided
         if (label.trim()) {
           setStatusLabel(code.trim(), label.trim());
         }
+        await loadStatuses();
+        navigate(`/invoice-statuses/${selectedStatus.id}`);
       }
-      await loadStatuses();
-      setIsEditing(false);
-      setIsCreating(false);
-      setIsEditingLabel(false);
-      setSelectedStatus(null);
-      setCode('');
-      setLabel('');
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };
       setError(error.response?.data?.error || 'Dështoi ruajtja e gjendjes');
@@ -135,6 +163,13 @@ const InvoiceStatusesPage = () => {
   };
 
   const handleCancel = () => {
+    if (isCreating) {
+      navigate('/invoice-statuses');
+    } else if (selectedStatus) {
+      navigate(`/invoice-statuses/${selectedStatus.id}`);
+    } else {
+      navigate('/invoice-statuses');
+    }
     setIsEditing(false);
     setIsCreating(false);
     setIsEditingLabel(false);
@@ -142,6 +177,14 @@ const InvoiceStatusesPage = () => {
     setCode('');
     setLabel('');
     setError(null);
+  };
+
+  const handleView = (status: InvoiceStatus) => {
+    navigate(`/invoice-statuses/${status.id}`);
+  };
+
+  const handleCreate = () => {
+    navigate('/invoice-statuses/create');
   };
 
   const handleDelete = async (statusId: number) => {
@@ -192,6 +235,14 @@ const InvoiceStatusesPage = () => {
   return (
     <div className="invoice-statuses-page">
       <div className="container">
+        {!isEditing && !isCreating && !isEditingLabel && (
+          <div className="invoice-statuses-header">
+            <button onClick={handleCreate} className="btn btn-primary">
+              Krijo Gjendje të Re
+            </button>
+          </div>
+        )}
+
         {error && (
           <div className="error-message">
             {error}
@@ -201,6 +252,11 @@ const InvoiceStatusesPage = () => {
 
         {(isEditing || isCreating) ? (
           <div className="invoice-status-form">
+            <div className="invoice-status-form-header">
+              <button onClick={handleCancel} className="btn btn-secondary">
+                ← Anulo
+              </button>
+            </div>
             <h3>{isCreating ? 'Krijo Gjendje të Re' : 'Ndrysho Gjendje'}</h3>
             <div className="form-group">
               <label htmlFor="code">Kodi i Gjendjes:</label>
@@ -288,10 +344,27 @@ const InvoiceStatusesPage = () => {
                         labels[row.code] || getStatusLabel(row.code),
                       flex: 1,
                     },
+                    {
+                      field: 'view',
+                      headerName: 'Shiko',
+                      width: 100,
+                      sortable: false,
+                      filterable: false,
+                      renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => handleView(params.row)}
+                          sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                        >
+                          Shiko
+                        </Button>
+                      ),
+                    },
                     ...(canEdit ? [{
                       field: 'actions',
                       headerName: 'Veprimet',
-                      width: 350,
+                      width: 400,
                       sortable: false,
                       filterable: false,
                       renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (

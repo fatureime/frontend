@@ -1,15 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { businessesApi, Business } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
-import BusinessForm from './BusinessForm';
 import './BusinessesPage.scss';
 
 const BusinessesPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [selectedBusiness, setSelectedBusiness] = useState<Business | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,28 +29,15 @@ const BusinessesPage = () => {
   }, [loadBusinesses]);
 
   const handleCreate = () => {
-    setSelectedBusiness(null);
-    setIsCreating(true);
-    setIsEditing(false);
+    navigate('/businesses/create');
+  };
+
+  const handleView = (business: Business) => {
+    navigate(`/businesses/${business.id}`);
   };
 
   const handleEdit = (business: Business) => {
-    setSelectedBusiness(business);
-    setIsEditing(true);
-    setIsCreating(false);
-  };
-
-  const handleSave = async () => {
-    await loadBusinesses();
-    setIsEditing(false);
-    setIsCreating(false);
-    setSelectedBusiness(null);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setIsCreating(false);
-    setSelectedBusiness(null);
+    navigate(`/businesses/${business.id}/edit`);
   };
 
   const handleDelete = async (businessId: number) => {
@@ -69,10 +54,6 @@ const BusinessesPage = () => {
     try {
       await businessesApi.deleteBusiness(businessId);
       await loadBusinesses();
-      if (selectedBusiness?.id === businessId) {
-        setSelectedBusiness(null);
-        setIsEditing(false);
-      }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi fshirja e biznesit');
     }
@@ -104,22 +85,15 @@ const BusinessesPage = () => {
           </div>
         )}
 
-        {(isEditing || isCreating) ? (
-          <BusinessForm
-            business={selectedBusiness || null}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
-        ) : (
-          <div className="businesses-content">
-            <div className="businesses-list">
-              {businesses.length === 0 ? (
-                <p className="no-businesses">Nuk u gjetën subjekte.</p>
-              ) : (
-                <div className="business-cards">
-                  {businesses.map((business) => {
-                    const isIssuer = user?.tenant?.issuer_business_id === business.id;
-                    return (
+        <div className="businesses-content">
+          <div className="businesses-list">
+            {businesses.length === 0 ? (
+              <p className="no-businesses">Nuk u gjetën subjekte.</p>
+            ) : (
+              <div className="business-cards">
+                {businesses.map((business) => {
+                  const isIssuer = user?.tenant?.issuer_business_id === business.id;
+                  return (
                     <div key={business.id} className="business-card">
                       <div className="business-card-header">
                         {business.logo && (
@@ -174,6 +148,9 @@ const BusinessesPage = () => {
                         )}
                       </div>
                       <div className="business-card-actions">
+                        <button onClick={() => handleView(business)} className="btn btn-secondary">
+                          Shiko
+                        </button>
                         <button onClick={() => handleEdit(business)} className="btn btn-primary">
                           Ndrysho
                         </button>
@@ -187,13 +164,12 @@ const BusinessesPage = () => {
                         </button>
                       </div>
                     </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

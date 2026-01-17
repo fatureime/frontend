@@ -33,10 +33,11 @@ interface InvoiceItemForm {
 }
 
 const InvoicePage = () => {
-  const { businessId, id } = useParams<{ businessId: string; id: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
+  const businessId = user?.tenant?.issuer_business_id;
   // Only treat as edit mode if pathname contains "/edit" or id is a valid number
   const isEditMode = location.pathname.includes('/edit') || (id && !isNaN(parseInt(id)));
   const isAdminTenant = user?.tenant?.is_admin === true;
@@ -135,7 +136,7 @@ const InvoicePage = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await invoicesApi.getInvoice(parseInt(businessId), parseInt(id));
+      const data = await invoicesApi.getInvoice(businessId, parseInt(id));
       setInvoiceNumber(data.invoice_number);
       setInvoiceDate(data.invoice_date.split('T')[0]);
       setDueDate(data.due_date.split('T')[0]);
@@ -305,8 +306,8 @@ const InvoicePage = () => {
 
       let savedInvoice: Invoice;
       if (isEditMode && businessId && id) {
-        // For edit mode, use businessId from route (which should be the issuer business)
-        savedInvoice = await invoicesApi.updateInvoice(parseInt(businessId), parseInt(id), invoiceData);
+        // For edit mode, use businessId from JWT context
+        savedInvoice = await invoicesApi.updateInvoice(businessId, parseInt(id), invoiceData);
       } else if (issuerId) {
         // For create mode, use issuerId from the form (not businessId from route)
         savedInvoice = await invoicesApi.createInvoice(issuerId, invoiceData);
@@ -319,13 +320,7 @@ const InvoicePage = () => {
         throw new Error('Invoice was created but no ID was returned');
       }
 
-      // Use issuer_id from the response (or fallback to issuerId from form, or route businessId)
-      const issuerBusinessId = savedInvoice.issuer_id || issuerId || businessId;
-      if (!issuerBusinessId) {
-        throw new Error('Could not determine issuer business ID for navigation');
-      }
-
-      navigate(`/businesses/${issuerBusinessId}/invoices/${savedInvoice.id}`);
+      navigate(`/businesses/invoices/${savedInvoice.id}`);
     } catch (err: any) {
       console.error('Error saving invoice:', err);
       console.error('Error response:', err.response?.data);
@@ -345,11 +340,7 @@ const InvoicePage = () => {
   };
 
   const handleCancel = () => {
-    if (businessId) {
-      navigate(`/businesses/${businessId}/invoices`);
-    } else {
-      navigate('/businesses');
-    }
+    navigate('/businesses/invoices');
   };
 
 

@@ -1,19 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usersApi, tenantsApi, User, Tenant } from '../../services/api';
+import { usersApi, User } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
-import UserForm from './UserForm';
-import InviteUserForm from './InviteUserForm';
 import './UsersPage.scss';
 
 const UsersPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
-  const [tenants, setTenants] = useState<Tenant[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isInviting, setIsInviting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,15 +28,6 @@ const UsersPage = () => {
     }
   }, []);
 
-  const loadTenants = useCallback(async () => {
-    try {
-      const data = await tenantsApi.getTenants();
-      setTenants(data);
-    } catch (err: any) {
-      console.error('Failed to load tenants:', err);
-    }
-  }, []);
-
   useEffect(() => {
     // Redirect if user is not admin
     if (user && !isAdmin) {
@@ -51,36 +36,20 @@ const UsersPage = () => {
     }
     
     if (isAdmin) {
-      if (isAdminTenant) {
-        loadTenants();
-      }
       loadUsers();
     }
-  }, [user, isAdmin, isAdminTenant, navigate, loadUsers, loadTenants]);
+  }, [user, isAdmin, navigate, loadUsers]);
+
+  const handleView = (userToView: User) => {
+    navigate(`/users/${userToView.id}`);
+  };
 
   const handleEdit = (userToEdit: User) => {
-    setSelectedUser(userToEdit);
-    setIsEditing(true);
-    setIsInviting(false);
+    navigate(`/users/${userToEdit.id}/edit`);
   };
 
   const handleInvite = () => {
-    setSelectedUser(null);
-    setIsInviting(true);
-    setIsEditing(false);
-  };
-
-  const handleSave = async () => {
-    await loadUsers();
-    setIsEditing(false);
-    setIsInviting(false);
-    setSelectedUser(null);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setIsInviting(false);
-    setSelectedUser(null);
+    navigate('/users/create');
   };
 
   const handleDelete = async (userId: number) => {
@@ -91,10 +60,6 @@ const UsersPage = () => {
     try {
       await usersApi.deleteUser(userId);
       await loadUsers();
-      if (selectedUser?.id === userId) {
-        setSelectedUser(null);
-        setIsEditing(false);
-      }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi fshirja e përdoruesit');
     }
@@ -145,74 +110,61 @@ const UsersPage = () => {
           </div>
         )}
 
-        {isInviting ? (
-          <InviteUserForm
-            tenants={isAdminTenant ? tenants : []}
-            defaultTenantId={user?.tenant?.id || undefined}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
-        ) : isEditing && selectedUser ? (
-          <UserForm
-            user={selectedUser}
-            tenants={isAdminTenant ? tenants : []}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
-        ) : (
-          <div className="users-content">
-            <div className="users-list">
-              {users.length === 0 ? (
-                <p className="no-users">Nuk u gjetën përdorues.</p>
-              ) : (
-                <div className="user-cards">
-                  {users.map((userItem) => (
-                    <div key={userItem.id} className="user-card">
-                      <div className="user-card-header">
-                        <h3>{userItem.email}</h3>
-                        <div className="user-badges">
-                          {userItem.roles?.includes('ROLE_ADMIN') && (
-                            <span className="badge admin">Menagjues</span>
-                          )}
-                          {userItem.is_active ? (
-                            <span className="badge active">Aktiv</span>
-                          ) : (
-                            <span className="badge inactive">Jo Aktiv</span>
-                          )}
-                          {!userItem.email_verified && (
-                            <span className="badge unverified">I Paverifikuar</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="user-card-body">
-                        <p><strong>ID:</strong> {userItem.id}</p>
-                        <p><strong>Rolet:</strong> {userItem.roles?.join(', ') || 'ROLE_USER'}</p>
-                        {userItem.tenant && (
-                          <p><strong>Hapësirëmarrësi:</strong> {userItem.tenant.name}</p>
+        <div className="users-content">
+          <div className="users-list">
+            {users.length === 0 ? (
+              <p className="no-users">Nuk u gjetën përdorues.</p>
+            ) : (
+              <div className="user-cards">
+                {users.map((userItem) => (
+                  <div key={userItem.id} className="user-card">
+                    <div className="user-card-header">
+                      <h3>{userItem.email}</h3>
+                      <div className="user-badges">
+                        {userItem.roles?.includes('ROLE_ADMIN') && (
+                          <span className="badge admin">Menagjues</span>
                         )}
-                        {userItem.created_at && (
-                          <p><strong>Krijuar:</strong> {new Date(userItem.created_at).toLocaleDateString()}</p>
+                        {userItem.is_active ? (
+                          <span className="badge active">Aktiv</span>
+                        ) : (
+                          <span className="badge inactive">Jo Aktiv</span>
                         )}
-                      </div>
-                      <div className="user-card-actions">
-                        <button onClick={() => handleEdit(userItem)} className="btn btn-primary">
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(userItem.id)}
-                          className="btn btn-danger"
-                          disabled={userItem.id === user?.id}
-                        >
-                          Delete
-                        </button>
+                        {!userItem.email_verified && (
+                          <span className="badge unverified">I Paverifikuar</span>
+                        )}
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    <div className="user-card-body">
+                      <p><strong>ID:</strong> {userItem.id}</p>
+                      <p><strong>Rolet:</strong> {userItem.roles?.join(', ') || 'ROLE_USER'}</p>
+                      {userItem.tenant && (
+                        <p><strong>Hapësirëmarrësi:</strong> {userItem.tenant.name}</p>
+                      )}
+                      {userItem.created_at && (
+                        <p><strong>Krijuar:</strong> {new Date(userItem.created_at).toLocaleDateString()}</p>
+                      )}
+                    </div>
+                    <div className="user-card-actions">
+                      <button onClick={() => handleView(userItem)} className="btn btn-secondary">
+                        Shiko
+                      </button>
+                      <button onClick={() => handleEdit(userItem)} className="btn btn-primary">
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(userItem.id)}
+                        className="btn btn-danger"
+                        disabled={userItem.id === user?.id}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

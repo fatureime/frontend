@@ -2,15 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tenantsApi, Tenant } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
-import TenantForm from './TenantForm';
 import './TenantsPage.scss';
 
 const TenantsPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [tenants, setTenants] = useState<Tenant[]>([]);
-  const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,19 +20,12 @@ const TenantsPage = () => {
       setError(null);
       const data = await tenantsApi.getTenants();
       setTenants(data);
-      // If user has a tenant, select it by default
-      if (user?.tenant && data.length > 0) {
-        const userTenant = data.find(t => t.id === user.tenant?.id);
-        if (userTenant) {
-          setSelectedTenant(userTenant);
-        }
-      }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi ngarkimi i hapësirëmarrësve');
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     // Redirect if user is not part of an admin tenant
@@ -50,20 +40,12 @@ const TenantsPage = () => {
   }, [user, isAdminTenant, navigate, loadTenants]);
 
 
+  const handleView = (tenant: Tenant) => {
+    navigate(`/tenants/${tenant.id}`);
+  };
+
   const handleEdit = (tenant: Tenant) => {
-    setSelectedTenant(tenant);
-    setIsEditing(true);
-  };
-
-  const handleSave = async () => {
-    await loadTenants();
-    setIsEditing(false);
-    setSelectedTenant(null);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setSelectedTenant(null);
+    navigate(`/tenants/${tenant.id}/edit`);
   };
 
   const handleDelete = async (tenantId: number) => {
@@ -74,10 +56,6 @@ const TenantsPage = () => {
     try {
       await tenantsApi.deleteTenant(tenantId);
       await loadTenants();
-      if (selectedTenant?.id === tenantId) {
-        setSelectedTenant(null);
-        setIsEditing(false);
-      }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi fshirja e hapësirëmarrësit');
     }
@@ -123,60 +101,55 @@ const TenantsPage = () => {
           </div>
         )}
 
-        {isEditing && selectedTenant ? (
-          <TenantForm
-            tenant={selectedTenant}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
-        ) : (
-          <div className="tenants-content">
-            <div className="tenants-list">
-              {tenants.length === 0 ? (
-                <p className="no-tenants">Nuk u gjetën hapësirëmarrës.</p>
-              ) : (
-                <div className="tenant-cards">
-                  {tenants.map((tenant) => (
-                    <div key={tenant.id} className="tenant-card">
-                      <div className="tenant-card-header">
-                        <h3>{tenant.name}</h3>
-                        <div className="tenant-badges">
-                          {tenant.is_admin && <span className="badge admin">Menagjues</span>}
-                          {tenant.has_paid && <span className="badge paid">I Paguar</span>}
-                        </div>
-                      </div>
-                      <div className="tenant-card-body">
-                        <p><strong>ID:</strong> {tenant.id}</p>
-                        {tenant.issuer_business && (
-                          <p><strong>Subjekti Lëshues:</strong> {tenant.issuer_business.business_name}</p>
-                        )}
-                        {tenant.users && (
-                          <p><strong>Përdoruesit:</strong> {tenant.users.length}</p>
-                        )}
-                        {tenant.created_at && (
-                          <p><strong>Krijuar:</strong> {new Date(tenant.created_at).toLocaleDateString()}</p>
-                        )}
-                      </div>
-                      <div className="tenant-card-actions">
-                        <button onClick={() => handleEdit(tenant)} className="btn btn-primary">
-                          Ndrysho
-                        </button>
-                        {user?.tenant?.is_admin && (
-                          <button
-                            onClick={() => handleDelete(tenant.id)}
-                            className="btn btn-danger"
-                          >
-                            Fshi
-                          </button>
-                        )}
+        <div className="tenants-content">
+          <div className="tenants-list">
+            {tenants.length === 0 ? (
+              <p className="no-tenants">Nuk u gjetën hapësirëmarrës.</p>
+            ) : (
+              <div className="tenant-cards">
+                {tenants.map((tenant) => (
+                  <div key={tenant.id} className="tenant-card">
+                    <div className="tenant-card-header">
+                      <h3>{tenant.name}</h3>
+                      <div className="tenant-badges">
+                        {tenant.is_admin && <span className="badge admin">Menagjues</span>}
+                        {tenant.has_paid && <span className="badge paid">I Paguar</span>}
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                    <div className="tenant-card-body">
+                      <p><strong>ID:</strong> {tenant.id}</p>
+                      {tenant.issuer_business && (
+                        <p><strong>Subjekti Lëshues:</strong> {tenant.issuer_business.business_name}</p>
+                      )}
+                      {tenant.users && (
+                        <p><strong>Përdoruesit:</strong> {tenant.users.length}</p>
+                      )}
+                      {tenant.created_at && (
+                        <p><strong>Krijuar:</strong> {new Date(tenant.created_at).toLocaleDateString()}</p>
+                      )}
+                    </div>
+                    <div className="tenant-card-actions">
+                      <button onClick={() => handleView(tenant)} className="btn btn-secondary">
+                        Shiko
+                      </button>
+                      <button onClick={() => handleEdit(tenant)} className="btn btn-primary">
+                        Ndrysho
+                      </button>
+                      {user?.tenant?.is_admin && (
+                        <button
+                          onClick={() => handleDelete(tenant.id)}
+                          className="btn btn-danger"
+                        >
+                          Fshi
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

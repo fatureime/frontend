@@ -1,24 +1,75 @@
-import { useState } from 'react';
-import { usersApi, User, Tenant } from '../../services/api';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { usersApi, tenantsApi, User, Tenant } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import './UserForm.scss';
 
-interface UserFormProps {
-  user: User;
-  tenants: Tenant[];
-  onSave: () => void;
-  onCancel: () => void;
-}
+const UserForm = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
+  const isEditMode = !!id;
 
-const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
   const [formData, setFormData] = useState({
-    email: user.email,
-    roles: user.roles || ['ROLE_USER'],
-    is_active: user.is_active,
-    tenant_id: user.tenant?.id || null,
+    email: '',
+    roles: ['ROLE_USER'],
+    is_active: true,
+    tenant_id: null as number | null,
     password: '',
   });
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [error, setError] = useState<string | null>(null);
+
+  const isAdminTenant = currentUser?.tenant?.is_admin === true;
+
+  const loadTenants = useCallback(async () => {
+    if (!isAdminTenant) return;
+    try {
+      const data = await tenantsApi.getTenants();
+      setTenants(data);
+    } catch (err: any) {
+      console.error('Failed to load tenants:', err);
+    }
+  }, [isAdminTenant]);
+
+  const loadUser = useCallback(async () => {
+    if (!id) return;
+
+    try {
+      setInitialLoading(true);
+      setError(null);
+      const data = await usersApi.getUsers();
+      const foundUser = data.find(u => u.id === parseInt(id));
+      if (foundUser) {
+        setUser(foundUser);
+        setFormData({
+          email: foundUser.email,
+          roles: foundUser.roles || ['ROLE_USER'],
+          is_active: foundUser.is_active,
+          tenant_id: foundUser.tenant?.id || null,
+          password: '',
+        });
+      } else {
+        setError('Përdoruesi nuk u gjet');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Dështoi ngarkimi i përdoruesit');
+    } finally {
+      setInitialLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (isEditMode) {
+      loadUser();
+    }
+    if (isAdminTenant) {
+      loadTenants();
+    }
+  }, [isEditMode, loadUser, isAdminTenant, loadTenants]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,28 +77,40 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
     setError(null);
 
     try {
-      const updateData: any = {
-        email: formData.email,
-        roles: formData.roles,
-        is_active: formData.is_active,
-      };
+      if (isEditMode && id) {
+        const updateData: any = {
+          email: formData.email,
+          roles: formData.roles,
+          is_active: formData.is_active,
+        };
 
-      // Only include password if provided
-      if (formData.password) {
-        updateData.password = formData.password;
+        // Only include password if provided
+        if (formData.password) {
+          updateData.password = formData.password;
+        }
+
+        // Only include tenant_id if tenants are available (admin tenant users)
+        if (tenants.length > 0 && formData.tenant_id) {
+          updateData.tenant_id = formData.tenant_id;
+        }
+
+        await usersApi.updateUser(parseInt(id), updateData);
+        navigate(`/users/${id}`);
+      } else {
+        navigate('/users');
       }
-
-      // Only include tenant_id if tenants are available (admin tenant users)
-      if (tenants.length > 0 && formData.tenant_id) {
-        updateData.tenant_id = formData.tenant_id;
-      }
-
-      await usersApi.updateUser(user.id, updateData);
-      onSave();
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi përditësimi i përdoruesit');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (isEditMode && id) {
+      navigate(`/users/${id}`);
+    } else {
+      navigate('/users');
     }
   };
 
@@ -69,15 +132,31 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
     }
   };
 
+  if (initialLoading) {
+    return (
+      <div className="user-form">
+        <div className="container">
+          <div className="loading">Duke u ngarkuar...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="user-form">
-      <h2>Ndrysho Përdoruesin</h2>
-      <form onSubmit={handleSubmit}>
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
+      <div className="container">
+        <div className="user-form-header">
+          <button onClick={handleCancel} className="btn btn-secondary">
+            ← Anulo
+          </button>
+        </div>
+        <h2>Ndrysho Përdoruesin</h2>
+        <form onSubmit={handleSubmit}>
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
 
         <div className="form-group">
           <label htmlFor="email">Email</label>
@@ -157,15 +236,16 @@ const UserForm = ({ user, tenants, onSave, onCancel }: UserFormProps) => {
           </div>
         )}
 
-        <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Duke u ruajtur...' : 'Ruaj Ndryshimet'}
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>
-            Anulo
-          </button>
-        </div>
-      </form>
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? 'Duke u ruajtur...' : 'Ruaj Ndryshimet'}
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={loading}>
+              Anulo
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

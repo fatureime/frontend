@@ -34,32 +34,93 @@ const Navbar = () => {
     if (path === '/accept-invitation') {
       return 'Pranimi i Ftesës';
     }
-    if (path.match(/^\/businesses\/\d+\/invoices\/\d+\/edit$/)) {
+    // Invoice routes
+    if (path.match(/^\/businesses\/invoices\/\d+\/edit$/)) {
       return 'Ndrysho Faturë';
     }
-    if (path.match(/^\/businesses\/\d+\/invoices\/create$/)) {
+    if (path.match(/^\/businesses\/invoices\/create$/)) {
       return 'Krijo Faturë';
     }
-    if (path.match(/^\/businesses\/\d+\/invoices\/\d+$/)) {
+    if (path.match(/^\/businesses\/invoices\/\d+$/)) {
       return 'Detajet e Faturës';
     }
-    if (path.match(/^\/businesses\/\d+\/invoices$/)) {
+    if (path === '/businesses/invoices') {
       return 'Faturat';
     }
-    if (path.match(/^\/businesses\/\d+\/articles$/)) {
+    // Article routes
+    if (path.match(/^\/businesses\/articles\/\d+\/edit$/)) {
+      return 'Ndrysho Artikull';
+    }
+    if (path.match(/^\/businesses\/articles\/create$/)) {
+      return 'Krijo Artikull';
+    }
+    if (path.match(/^\/businesses\/articles\/\d+$/)) {
+      return 'Detajet e Artikullit';
+    }
+    if (path === '/businesses/articles') {
       return 'Artikujt';
+    }
+    // Business routes
+    if (path.match(/^\/businesses\/\d+\/edit$/)) {
+      return 'Ndrysho Subjekt';
+    }
+    if (path.match(/^\/businesses\/create$/)) {
+      return 'Krijo Subjekt';
+    }
+    if (path.match(/^\/businesses\/\d+$/)) {
+      return 'Detajet e Subjektit';
     }
     if (path === '/businesses') {
       return 'Subjektet';
     }
+    // Bank account routes
+    if (path.match(/^\/bank-accounts\/\d+\/edit$/)) {
+      return 'Ndrysho Llogari Bankare';
+    }
+    if (path.match(/^\/bank-accounts\/create$/)) {
+      return 'Krijo Llogari Bankare';
+    }
+    if (path.match(/^\/bank-accounts\/\d+$/)) {
+      return 'Detajet e Llogarisë Bankare';
+    }
     if (path === '/bank-accounts') {
       return 'Llogaritë Bankare';
+    }
+    // User routes
+    if (path.match(/^\/users\/\d+\/edit$/)) {
+      return 'Ndrysho Përdorues';
+    }
+    if (path.match(/^\/users\/create$/)) {
+      return 'Fto Përdorues';
+    }
+    if (path.match(/^\/users\/\d+$/)) {
+      return 'Detajet e Përdoruesit';
     }
     if (path === '/users') {
       return 'Përdoruesit';
     }
+    // Tenant routes
+    if (path.match(/^\/tenants\/\d+\/edit$/)) {
+      return 'Ndrysho Hapësirëmarrës';
+    }
+    if (path.match(/^\/tenants\/create$/)) {
+      return 'Krijo Hapësirëmarrës';
+    }
+    if (path.match(/^\/tenants\/\d+$/)) {
+      return 'Detajet e Hapësirëmarrësit';
+    }
     if (path === '/tenants') {
       return 'Hapësirëmarrësit';
+    }
+    // Invoice status routes
+    if (path.match(/^\/invoice-statuses\/\d+\/edit$/)) {
+      return 'Ndrysho Gjendje Fature';
+    }
+    if (path.match(/^\/invoice-statuses\/create$/)) {
+      return 'Krijo Gjendje Fature';
+    }
+    if (path.match(/^\/invoice-statuses\/\d+$/)) {
+      return 'Detajet e Gjendjes së Faturës';
     }
     if (path === '/invoice-statuses') {
       return 'Gjendjet e Faturave';
@@ -170,7 +231,7 @@ const Navbar = () => {
               </div>
               {user?.tenant?.issuer_business_id && (
                 <Link 
-                  to={`/businesses/${user.tenant.issuer_business_id}/invoices`} 
+                  to="/businesses/invoices" 
                   className="navbar__link"
                   onClick={closeMenu}
                 >
@@ -186,7 +247,7 @@ const Navbar = () => {
               </Link>
               {user?.tenant?.issuer_business_id && (
                 <Link 
-                  to={`/businesses/${user.tenant.issuer_business_id}/articles`} 
+                  to="/businesses/articles" 
                   className="navbar__link"
                   onClick={closeMenu}
                 >

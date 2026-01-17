@@ -1,41 +1,96 @@
-import { useState, useEffect } from 'react';
-import { bankAccountsApi, BankAccount, CreateBankAccountData, Business } from '../../services/api';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { bankAccountsApi, businessesApi, BankAccount, CreateBankAccountData, Business } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import './BankAccountForm.scss';
 
-interface BankAccountFormProps {
-  bankAccount?: BankAccount | null;
-  businesses: Business[];
-  isAdminTenant: boolean;
-  onSave: () => void;
-  onCancel: () => void;
-}
+const BankAccountForm = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdminTenant = user?.tenant?.is_admin === true;
+  const isEditMode = !!id;
 
-const BankAccountForm = ({ bankAccount, businesses, isAdminTenant, onSave, onCancel }: BankAccountFormProps) => {
-  const isEditMode = !!bankAccount;
+  const [bankAccount, setBankAccount] = useState<BankAccount | null>(null);
+  const [businesses, setBusinesses] = useState<Business[]>([]);
 
   const [formData, setFormData] = useState<CreateBankAccountData>({
-    swift: bankAccount?.swift || '',
-    iban: bankAccount?.iban || '',
-    bank_account_number: bankAccount?.bank_account_number || '',
-    bank_name: bankAccount?.bank_name || '',
+    swift: '',
+    iban: '',
+    bank_account_number: '',
+    bank_name: '',
   });
 
-  const [selectedBusinessId, setSelectedBusinessId] = useState<number>(() => {
-    // If editing, use the bank account's business_id, otherwise use first business
-    return bankAccount?.business_id || (businesses.length > 0 ? businesses[0].id : 0);
-  });
-
-  // Update selectedBusinessId when bankAccount or businesses change
-  useEffect(() => {
-    if (isEditMode && bankAccount?.business_id) {
-      setSelectedBusinessId(bankAccount.business_id);
-    } else if (businesses.length > 0 && !selectedBusinessId) {
-      setSelectedBusinessId(businesses[0].id);
-    }
-  }, [bankAccount, isEditMode, businesses, selectedBusinessId]);
+  const [selectedBusinessId, setSelectedBusinessId] = useState<number>(0);
 
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [error, setError] = useState<string | null>(null);
+
+  const loadBusinesses = useCallback(async () => {
+    try {
+      const data = await businessesApi.getBusinesses();
+      setBusinesses(data);
+      if (data.length > 0 && !isEditMode) {
+        setSelectedBusinessId(data[0].id);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Dështoi ngarkimi i bizneseve');
+    }
+  }, [isEditMode]);
+
+  const loadBankAccount = useCallback(async () => {
+    if (!id) return;
+
+    try {
+      setInitialLoading(true);
+      setError(null);
+      
+      // Load all businesses and their bank accounts to find the one with matching ID
+      const businessesList = await businessesApi.getBusinesses();
+      
+      let foundAccount: BankAccount | null = null;
+      let foundBusiness: Business | null = null;
+
+      for (const businessItem of businessesList) {
+        try {
+          const accounts = await bankAccountsApi.getBankAccounts(businessItem.id);
+          const account = accounts.find(a => a.id === parseInt(id));
+          if (account) {
+            foundAccount = account;
+            foundBusiness = businessItem;
+            break;
+          }
+        } catch (err) {
+          continue;
+        }
+      }
+
+      if (foundAccount && foundBusiness) {
+        setBankAccount(foundAccount);
+        setFormData({
+          swift: foundAccount.swift || '',
+          iban: foundAccount.iban || '',
+          bank_account_number: foundAccount.bank_account_number || '',
+          bank_name: foundAccount.bank_name || '',
+        });
+        setSelectedBusinessId(foundBusiness.id);
+      } else {
+        setError('Llogaria bankare nuk u gjet');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Dështoi ngarkimi i llogarisë bankare');
+    } finally {
+      setInitialLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    loadBusinesses();
+    if (isEditMode) {
+      loadBankAccount();
+    }
+  }, [isEditMode, loadBusinesses, loadBankAccount]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,12 +123,13 @@ const BankAccountForm = ({ bankAccount, businesses, isAdminTenant, onSave, onCan
         return;
       }
 
-      if (isEditMode && bankAccount) {
-        await bankAccountsApi.updateBankAccount(selectedBusinessId, bankAccount.id, cleanedData);
+      if (isEditMode && id && bankAccount) {
+        await bankAccountsApi.updateBankAccount(selectedBusinessId, parseInt(id), cleanedData);
+        navigate(`/bank-accounts/${id}`);
       } else {
-        await bankAccountsApi.createBankAccount(selectedBusinessId, cleanedData);
+        const created = await bankAccountsApi.createBankAccount(selectedBusinessId, cleanedData);
+        navigate(`/bank-accounts/${created.id}`);
       }
-      onSave();
     } catch (err: unknown) {
       const errorMessage = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setError(errorMessage || (isEditMode ? 'Dështoi përditësimi i llogarisë bankare' : 'Dështoi krijimi i llogarisë bankare'));
@@ -92,15 +148,39 @@ const BankAccountForm = ({ bankAccount, businesses, isAdminTenant, onSave, onCan
 
   const currentBusiness = businesses.find(b => b.id === selectedBusinessId);
 
+  const handleCancel = () => {
+    if (isEditMode && id) {
+      navigate(`/bank-accounts/${id}`);
+    } else {
+      navigate('/bank-accounts');
+    }
+  };
+
+  if (initialLoading) {
+    return (
+      <div className="bank-account-form">
+        <div className="container">
+          <div className="loading">Duke u ngarkuar...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bank-account-form">
-      <h2>{isEditMode ? 'Ndrysho Llogarinë Bankare' : 'Krijo Llogari Bankare'}</h2>
-      <form onSubmit={handleSubmit}>
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
+      <div className="container">
+        <div className="bank-account-form-header">
+          <button onClick={handleCancel} className="btn btn-secondary">
+            ← Anulo
+          </button>
+        </div>
+        <h2>{isEditMode ? 'Ndrysho Llogarinë Bankare' : 'Krijo Llogari Bankare'}</h2>
+        <form onSubmit={handleSubmit}>
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
 
         {businesses.length > 0 && (
           <div className="form-group">
@@ -204,15 +284,16 @@ const BankAccountForm = ({ bankAccount, businesses, isAdminTenant, onSave, onCan
           <strong>Shënim:</strong> Ju lutem plotësoni të paktën një nga fushat: SWIFT, IBAN, ose Numri i llogarisë.
         </div>
 
-        <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Duke u ruajtur...' : (isEditMode ? 'Ruaj Ndryshimet' : 'Krijo Llogari Bankare')}
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>
-            Anulo
-          </button>
-        </div>
-      </form>
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? 'Duke u ruajtur...' : (isEditMode ? 'Ruaj Ndryshimet' : 'Krijo Llogari Bankare')}
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={loading}>
+              Anulo
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

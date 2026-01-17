@@ -1,51 +1,94 @@
-import { useState, useEffect } from 'react';
-import { articlesApi, Article, CreateArticleData, Business } from '../../services/api';
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { articlesApi, Article, CreateArticleData, Business, businessesApi } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import './ArticleForm.scss';
 
-interface ArticleFormProps {
-  businessId: number | null;
-  article?: Article | null;
-  businesses: Business[];
-  currentBusiness: Business | null;
-  isAdminTenant: boolean;
-  onBusinessChange?: (businessId: number) => void;
-  onSave: () => void;
-  onCancel: () => void;
-}
+const ArticleForm = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdminTenant = user?.tenant?.is_admin === true;
+  const businessId = user?.tenant?.issuer_business_id;
+  const isEditMode = !!id;
 
-const ArticleForm = ({ businessId, article, businesses, currentBusiness, isAdminTenant, onBusinessChange, onSave, onCancel }: ArticleFormProps) => {
-  const isEditMode = !!article;
+  const [article, setArticle] = useState<Article | null>(null);
+  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [currentBusiness, setCurrentBusiness] = useState<Business | null>(null);
 
   const [formData, setFormData] = useState<CreateArticleData>({
-    name: article?.name || '',
-    description: article?.description || '',
-    unit_price: article?.unit_price ? parseFloat(article.unit_price) : 0,
-    unit: article?.unit || '',
+    name: '',
+    description: '',
+    unit_price: 0,
+    unit: '',
   });
 
   const [selectedBusinessId, setSelectedBusinessId] = useState<number>(() => {
-    // If editing, use the article's business_id, otherwise use the provided businessId
-    return article?.business_id || businessId || (businesses.length > 0 ? businesses[0].id : 0);
+    return businessId || 0;
   });
 
-  // Update selectedBusinessId when businessId or article changes
-  useEffect(() => {
-    if (isEditMode && article?.business_id) {
-      setSelectedBusinessId(article.business_id);
-    } else if (businessId) {
-      setSelectedBusinessId(businessId);
-    } else if (businesses.length > 0) {
-      setSelectedBusinessId(businesses[0].id);
-    }
-  }, [businessId, article, isEditMode, businesses]);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(isEditMode);
   const [error, setError] = useState<string | null>(null);
+
+  const loadBusinesses = useCallback(async () => {
+    try {
+      const data = await businessesApi.getBusinesses();
+      setBusinesses(data);
+      
+      if (businessId) {
+        const foundBusiness = data.find(b => b.id === businessId);
+        if (foundBusiness) {
+          setCurrentBusiness(foundBusiness);
+          setSelectedBusinessId(foundBusiness.id);
+        }
+      } else if (data.length > 0) {
+        setCurrentBusiness(data[0]);
+        setSelectedBusinessId(data[0].id);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Dështoi ngarkimi i bizneseve');
+    }
+  }, [businessId]);
+
+  const loadArticle = useCallback(async () => {
+    if (!businessId || !id) return;
+
+    try {
+      setInitialLoading(true);
+      setError(null);
+      const articleData = await articlesApi.getArticle(businessId, parseInt(id));
+      setArticle(articleData);
+      setFormData({
+        name: articleData.name || '',
+        description: articleData.description || '',
+        unit_price: articleData.unit_price ? parseFloat(articleData.unit_price) : 0,
+        unit: articleData.unit || '',
+      });
+      setSelectedBusinessId(articleData.business_id);
+      
+      const businessData = await businessesApi.getBusiness(articleData.business_id);
+      setCurrentBusiness(businessData);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Dështoi ngarkimi i artikullit');
+    } finally {
+      setInitialLoading(false);
+    }
+  }, [businessId, id]);
+
+  useEffect(() => {
+    loadBusinesses();
+    if (isEditMode) {
+      loadArticle();
+    }
+  }, [isEditMode, loadBusinesses, loadArticle]);
 
   const handleBusinessChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newBusinessId = parseInt(e.target.value);
     setSelectedBusinessId(newBusinessId);
-    if (onBusinessChange) {
-      onBusinessChange(newBusinessId);
+    const foundBusiness = businesses.find(b => b.id === newBusinessId);
+    if (foundBusiness) {
+      setCurrentBusiness(foundBusiness);
     }
   };
 
@@ -69,12 +112,13 @@ const ArticleForm = ({ businessId, article, businesses, currentBusiness, isAdmin
         setLoading(false);
         return;
       }
-      if (isEditMode && article) {
-        await articlesApi.updateArticle(targetBusinessId, article.id, cleanedData);
+      if (isEditMode && id) {
+        await articlesApi.updateArticle(targetBusinessId, parseInt(id), cleanedData);
+        navigate(`/businesses/articles/${id}`);
       } else {
-        await articlesApi.createArticle(targetBusinessId, cleanedData);
+        const created = await articlesApi.createArticle(targetBusinessId, cleanedData);
+        navigate(`/businesses/articles/${created.id}`);
       }
-      onSave();
     } catch (err: unknown) {
       const errorMessage = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
       setError(errorMessage || (isEditMode ? 'Dështoi përditësimi i artikullit' : 'Dështoi krijimi i artikullit'));
@@ -97,15 +141,39 @@ const ArticleForm = ({ businessId, article, businesses, currentBusiness, isAdmin
     });
   };
 
+  const handleCancel = () => {
+    if (isEditMode && id) {
+      navigate(`/businesses/articles/${id}`);
+    } else {
+      navigate('/businesses/articles');
+    }
+  };
+
+  if (initialLoading) {
+    return (
+      <div className="article-form">
+        <div className="container">
+          <div className="loading">Duke u ngarkuar...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="article-form">
-      <h2>{isEditMode ? 'Ndrysho Artikullin' : 'Krijo Artikull'}</h2>
-      <form onSubmit={handleSubmit}>
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
+      <div className="container">
+        <div className="article-form-header">
+          <button onClick={handleCancel} className="btn btn-secondary">
+            ← Anulo
+          </button>
+        </div>
+        <h2>{isEditMode ? 'Ndrysho Artikullin' : 'Krijo Artikull'}</h2>
+        <form onSubmit={handleSubmit}>
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
 
         {businesses.length > 0 && (
           <div className="form-group">
@@ -200,15 +268,16 @@ const ArticleForm = ({ businessId, article, businesses, currentBusiness, isAdmin
           <small className="form-hint">Njësia e matjes (opsionale)</small>
         </div>
 
-        <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Duke u ruajtur...' : (isEditMode ? 'Ruaj Ndryshimet' : 'Krijo Artikull')}
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={onCancel} disabled={loading}>
-            Anulo
-          </button>
-        </div>
-      </form>
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? 'Duke u ruajtur...' : (isEditMode ? 'Ruaj Ndryshimet' : 'Krijo Artikull')}
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={loading}>
+              Anulo
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

@@ -11,12 +11,12 @@ import './InvoicesPage.scss';
 type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
 
 const InvoicesPage = () => {
-  const { businessId } = useParams<{ businessId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const businessId = user?.tenant?.issuer_business_id || null;
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [invoiceStatuses, setInvoiceStatuses] = useState<InvoiceStatus[]>([]);
-  const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(null);
+  const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(businessId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingIds, setDownloadingIds] = useState<Set<number>>(new Set());
@@ -69,7 +69,7 @@ const InvoicesPage = () => {
     if (loadingBusinessRef.current) return; // Prevent concurrent calls
     loadingBusinessRef.current = true;
     try {
-      const data = await businessesApi.getBusiness(parseInt(businessId));
+      const data = await businessesApi.getBusiness(businessId);
       setSelectedBusinessId(data.id);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi ngarkimi i biznesit');
@@ -87,11 +87,11 @@ const InvoicesPage = () => {
       
       // Admin tenants can see all invoices, or filter by selected business
       if (isAdminTenant) {
-        // If selectedBusinessId is explicitly null (user selected "All"), ignore businessId from route
+        // If selectedBusinessId is explicitly null (user selected "All"), show all
         const targetBusinessId = selectedBusinessId !== null ? (selectedBusinessId || businessId) : null;
         if (targetBusinessId) {
           // Filter by selected business
-          const data = await invoicesApi.getInvoices(parseInt(targetBusinessId.toString()));
+          const data = await invoicesApi.getInvoices(targetBusinessId);
           setInvoices(data);
         } else {
           // Show all invoices
@@ -105,7 +105,7 @@ const InvoicesPage = () => {
           loadingInvoicesRef.current = false;
           return;
         }
-        const data = await invoicesApi.getInvoices(parseInt(targetBusinessId.toString()));
+        const data = await invoicesApi.getInvoices(targetBusinessId);
         setInvoices(data);
       }
     } catch (err: any) {
@@ -132,23 +132,20 @@ const InvoicesPage = () => {
   }, [loadInvoices]);
 
   const handleCreate = () => {
-    const targetBusinessId = selectedBusinessId || businessId;
-    if (targetBusinessId) {
-      navigate(`/businesses/${targetBusinessId}/invoices/create`);
-    }
+    navigate('/businesses/invoices/create');
   };
 
   const handleView = (invoiceId: number) => {
     const targetBusinessId = selectedBusinessId || businessId;
     if (targetBusinessId) {
-      navigate(`/businesses/${targetBusinessId}/invoices/${invoiceId}`);
+      navigate(`/businesses/invoices/${invoiceId}`);
     }
   };
 
   const handleEdit = (invoiceId: number) => {
     const targetBusinessId = selectedBusinessId || businessId;
     if (targetBusinessId) {
-      navigate(`/businesses/${targetBusinessId}/invoices/${invoiceId}/edit`);
+      navigate(`/businesses/invoices/${invoiceId}/edit`);
     }
   };
 
@@ -161,7 +158,7 @@ const InvoicesPage = () => {
     }
 
     try {
-      await invoicesApi.deleteInvoice(parseInt(targetBusinessId.toString()), invoiceId);
+      await invoicesApi.deleteInvoice(targetBusinessId, invoiceId);
       await loadInvoices();
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi fshirja e faturës');
@@ -288,7 +285,7 @@ const InvoicesPage = () => {
                   if (!targetBusinessId) return;
                   try {
                     for (const invoiceId of selectedInvoiceIds) {
-                      await invoicesApi.deleteInvoice(parseInt(targetBusinessId.toString()), invoiceId);
+                      await invoicesApi.deleteInvoice(targetBusinessId, invoiceId);
                     }
                     setSelectedInvoiceIds([]);
                     await loadInvoices();
@@ -336,11 +333,9 @@ const InvoicesPage = () => {
                     width: 150,
                     flex: 1,
                     renderCell: (params: GridRenderCellParams<Invoice>) => {
-                      const targetBusinessId = selectedBusinessId || businessId;
-                      if (!targetBusinessId) return params.value;
                       return (
                         <Link
-                          to={`/businesses/${targetBusinessId}/invoices/${params.row.id}`}
+                          to={`/businesses/invoices/${params.row.id}`}
                           style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 500 }}
                           onClick={(e) => e.stopPropagation()}
                         >
