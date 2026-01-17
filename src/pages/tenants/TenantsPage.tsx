@@ -114,13 +114,6 @@ const TenantsPage = () => {
     <div className="tenants-page">
       <div className="container">
         <div className="tenants-header">
-          {user?.tenant && (
-            <div className="current-tenant-info">
-              <span>Hapësirëmarrësi Aktual: <strong>{user.tenant.name}</strong></span>
-              {user.tenant.is_admin && <span className="badge admin">Menagjues</span>}
-              {user.tenant.has_paid && <span className="badge paid">Ka Paguar</span>}
-            </div>
-          )}
         </div>
 
         {error && (
@@ -139,7 +132,6 @@ const TenantsPage = () => {
         ) : (
           <div className="tenants-content">
             <div className="tenants-list">
-              <h2>Hapësirëmarrësit</h2>
               {tenants.length === 0 ? (
                 <p className="no-tenants">Nuk u gjetën hapësirëmarrës.</p>
               ) : (

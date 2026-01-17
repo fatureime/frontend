@@ -12,7 +12,6 @@ const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [selectedTenantId, setSelectedTenantId] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isInviting, setIsInviting] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -22,11 +21,11 @@ const UsersPage = () => {
   const isAdmin = user?.roles?.includes('ROLE_ADMIN') === true;
   const isAdminTenant = user?.tenant?.is_admin === true;
 
-  const loadUsers = useCallback(async (tenantId?: number) => {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await usersApi.getUsers(tenantId);
+      const data = await usersApi.getUsers();
       setUsers(data);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to load users');
@@ -59,11 +58,6 @@ const UsersPage = () => {
     }
   }, [user, isAdmin, isAdminTenant, navigate, loadUsers, loadTenants]);
 
-  const handleTenantFilter = (tenantId: number | null) => {
-    setSelectedTenantId(tenantId);
-    loadUsers(tenantId || undefined);
-  };
-
   const handleEdit = (userToEdit: User) => {
     setSelectedUser(userToEdit);
     setIsEditing(true);
@@ -77,7 +71,7 @@ const UsersPage = () => {
   };
 
   const handleSave = async () => {
-    await loadUsers(selectedTenantId || undefined);
+    await loadUsers();
     setIsEditing(false);
     setIsInviting(false);
     setSelectedUser(null);
@@ -96,7 +90,7 @@ const UsersPage = () => {
 
     try {
       await usersApi.deleteUser(userId);
-      await loadUsers(selectedTenantId || undefined);
+      await loadUsers();
       if (selectedUser?.id === userId) {
         setSelectedUser(null);
         setIsEditing(false);
@@ -138,12 +132,6 @@ const UsersPage = () => {
       <div className="container">
         <div className="users-header">
           <div className="users-header-actions">
-            {user?.tenant && (
-              <div className="current-tenant-info">
-                <span>Hapësirëmarrësi Aktual: <strong>{user.tenant.name}</strong></span>
-                {user.tenant.is_admin && <span className="badge admin">Menagjues</span>}
-              </div>
-            )}
             <button onClick={handleInvite} className="btn btn-primary">
               Fto Përdorues
             </button>
@@ -173,26 +161,7 @@ const UsersPage = () => {
           />
         ) : (
           <div className="users-content">
-            {isAdminTenant && tenants.length > 0 && (
-              <div className="tenant-filter">
-                <label htmlFor="tenant-filter">Filtro sipas Hapësirëmarrësit:</label>
-                <select
-                  id="tenant-filter"
-                  value={selectedTenantId || ''}
-                  onChange={(e) => handleTenantFilter(e.target.value ? parseInt(e.target.value) : null)}
-                >
-                  <option value="">All Tenants</option>
-                  {tenants.map((tenant) => (
-                    <option key={tenant.id} value={tenant.id}>
-                      {tenant.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
             <div className="users-list">
-              <h2>Përdoruesit</h2>
               {users.length === 0 ? (
                 <p className="no-users">Nuk u gjetën përdorues.</p>
               ) : (

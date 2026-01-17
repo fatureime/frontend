@@ -20,32 +20,6 @@
       margin: 0;
       color: #333;
     }
-
-    .current-tenant-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.5rem 1rem;
-      background: #f5f5f5;
-      border-radius: 8px;
-
-      .badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 4px;
-        font-size: 0.875rem;
-        font-weight: 600;
-
-        &.admin {
-          background: #4caf50;
-          color: white;
-        }
-
-        &.paid {
-          background: #2196f3;
-          color: white;
-        }
-      }
-    }
   }
 
   .error-message {
