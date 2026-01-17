@@ -12,10 +12,11 @@
 
   .invoice-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
+    padding-left: 100px; // Space for view-toggle on left
 
     h1 {
       margin: 0;
@@ -32,6 +33,46 @@
       display: flex;
       gap: 1rem;
       align-items: stretch;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 0.5rem;
+      background: #f5f5f5;
+      border-radius: 4px;
+      padding: 2px;
+      z-index: 10;
+
+      .toggle-btn {
+        padding: 0.5rem;
+        border: none;
+        background: transparent;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        transition: all 0.2s;
+
+        &:hover {
+          background: #e0e0e0;
+          color: #333;
+        }
+
+        &.active {
+          background: #2196f3;
+          color: white;
+
+          &:hover {
+            background: #1976d2;
+          }
+        }
+
+        svg {
+          font-size: 1.25rem;
+        }
+      }
     }
 
     .btn {
@@ -124,6 +165,7 @@
     .invoice-header {
       flex-direction: column;
       align-items: flex-start;
+      padding-left: 90px; // Less space on mobile
 
       .header-actions {
         width: 100%;
@@ -131,6 +173,12 @@
 
       .btn {
         width: 100%;
+      }
+
+      .view-toggle {
+        position: fixed;
+        left: 24px;
+        bottom: 24px;
       }
     }
 

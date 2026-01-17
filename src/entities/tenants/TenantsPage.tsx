@@ -2,7 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tenantsApi, Tenant } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import TenantsList from './TenantsList';
+import TenantsGrid from './TenantsGrid';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import GridViewIcon from '@mui/icons-material/GridView';
 import './TenantsPage.scss';
+
+type ViewMode = 'list' | 'grid';
 
 const TenantsPage = () => {
   const { user } = useAuth();
@@ -10,6 +16,10 @@ const TenantsPage = () => {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('tenants-view-mode');
+    return (saved === 'list' || saved === 'grid') ? saved : 'list';
+  });
 
   // Check if user is part of an admin tenant
   const isAdminTenant = user?.tenant?.is_admin === true;
@@ -65,6 +75,11 @@ const TenantsPage = () => {
     }
   };
 
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('tenants-view-mode', mode);
+  };
+
   // Show access denied if user is not part of an admin tenant
   if (user && !isAdminTenant) {
     return (
@@ -82,7 +97,7 @@ const TenantsPage = () => {
     );
   }
 
-  if (loading) {
+  if (loading && tenants.length === 0) {
     return (
       <div className="tenants-page">
         <div className="container">
@@ -96,9 +111,27 @@ const TenantsPage = () => {
     <div className="tenants-page">
       <div className="container">
         <div className="tenants-header">
-          <button onClick={handleCreate} className="btn btn-primary">
-            Krijo Hapësirëmarrës
-          </button>
+          <div className="header-actions">
+            <button onClick={handleCreate} className="btn btn-primary">
+              Krijo Hapësirëmarrës
+            </button>
+          </div>
+          <div className="view-toggle">
+            <button
+              onClick={() => handleViewModeChange('list')}
+              className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              title="Lista"
+            >
+              <GridViewIcon />
+            </button>
+            <button
+              onClick={() => handleViewModeChange('grid')}
+              className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              title="Tabelë"
+            >
+              <ViewListIcon />
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -109,53 +142,27 @@ const TenantsPage = () => {
         )}
 
         <div className="tenants-content">
-          <div className="tenants-list">
-            {tenants.length === 0 ? (
-              <p className="no-tenants">Nuk u gjetën hapësirëmarrës.</p>
-            ) : (
-              <div className="tenant-cards">
-                {tenants.map((tenant) => (
-                  <div key={tenant.id} className="tenant-card">
-                    <div className="tenant-card-header">
-                      <h3>{tenant.name}</h3>
-                      <div className="tenant-badges">
-                        {tenant.is_admin && <span className="badge admin">Menagjues</span>}
-                        {tenant.has_paid && <span className="badge paid">I Paguar</span>}
-                      </div>
-                    </div>
-                    <div className="tenant-card-body">
-                      <p><strong>ID:</strong> {tenant.id}</p>
-                      {tenant.issuer_business && (
-                        <p><strong>Subjekti Lëshues:</strong> {tenant.issuer_business.business_name}</p>
-                      )}
-                      {tenant.users && (
-                        <p><strong>Përdoruesit:</strong> {tenant.users.length}</p>
-                      )}
-                      {tenant.created_at && (
-                        <p><strong>Krijuar:</strong> {new Date(tenant.created_at).toLocaleDateString()}</p>
-                      )}
-                    </div>
-                    <div className="tenant-card-actions">
-                      <button onClick={() => handleView(tenant)} className="btn btn-secondary">
-                        Shiko
-                      </button>
-                      <button onClick={() => handleEdit(tenant)} className="btn btn-primary">
-                        Ndrysho
-                      </button>
-                      {user?.tenant?.is_admin && (
-                        <button
-                          onClick={() => handleDelete(tenant.id)}
-                          className="btn btn-danger"
-                        >
-                          Fshi
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {viewMode === 'list' ? (
+            <TenantsList
+              tenants={tenants}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              canDelete={user?.tenant?.is_admin === true}
+            />
+          ) : (
+            <TenantsGrid
+              tenants={tenants}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              canDelete={user?.tenant?.is_admin === true}
+            />
+          )}
         </div>
       </div>
     </div>

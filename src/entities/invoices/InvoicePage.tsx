@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
-import { Select, MenuItem, Box, IconButton, Menu } from '@mui/material';
-import PrintIcon from '@mui/icons-material/Print';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useNavigate } from 'react-router-dom';
 import { invoicesApi, Invoice, invoiceStatusesApi, InvoiceStatus } from '../../services/api';
+import InvoicesList from './InvoicesList';
+import InvoicesGrid from './InvoicesGrid';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import GridViewIcon from '@mui/icons-material/GridView';
 import './InvoicePage.scss';
+
+type ViewMode = 'list' | 'grid';
 
 type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
 
@@ -19,6 +21,10 @@ const InvoicePage = () => {
   const [exportingExcel, setExportingExcel] = useState(false);
   const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<number[]>([]);
   const [menuAnchor, setMenuAnchor] = useState<{ [key: number]: HTMLElement | null }>({});
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('invoices-view-mode');
+    return (saved === 'list' || saved === 'grid') ? saved : 'grid';
+  });
 
 
   // Refs to prevent concurrent API calls
@@ -178,6 +184,23 @@ const InvoicePage = () => {
     }
   };
 
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('invoices-view-mode', mode);
+  };
+
+  const handleMenuOpen = (invoiceId: number, anchor: HTMLElement) => {
+    setMenuAnchor({ ...menuAnchor, [invoiceId]: anchor });
+  };
+
+  const handleMenuClose = (invoiceId: number) => {
+    setMenuAnchor({ ...menuAnchor, [invoiceId]: null });
+  };
+
+  const handleSelectionChange = (selectedIds: number[]) => {
+    setSelectedInvoiceIds(selectedIds);
+  };
+
 
   if (loading) {
     return (
@@ -231,7 +254,23 @@ const InvoicePage = () => {
               {exportingExcel ? 'Duke u eksportuar...' : 'Eksporto në Excel'}
             </button>
           </div>
-            </div>
+          <div className="view-toggle">
+            <button
+              onClick={() => handleViewModeChange('list')}
+              className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              title="Lista"
+            >
+              <GridViewIcon />
+            </button>
+            <button
+              onClick={() => handleViewModeChange('grid')}
+              className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              title="Tabelë"
+            >
+              <ViewListIcon />
+            </button>
+          </div>
+        </div>
 
         {error && (
           <div className="error-message">
@@ -241,168 +280,39 @@ const InvoicePage = () => {
         )}
 
         <div className="invoice-content">
-          {invoices.length === 0 ? (
-            <p className="no-invoices">Nuk u gjetën fatura.</p>
+          {viewMode === 'list' ? (
+            <InvoicesList
+              invoices={invoices}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onStatusChange={handleStatusChange}
+              onDownloadPdf={handleDownloadPdf}
+              invoiceStatuses={invoiceStatuses}
+              statusLabels={statusLabels}
+              downloadingIds={downloadingIds}
+            />
           ) : (
-            <Box sx={{ 
-              height: 600, 
-              width: '100%',
-              maxWidth: '100%',
-              overflow: 'hidden'
-            }}>
-              <DataGrid
-                rows={invoices}
-                columns={[
-                  {
-                    field: 'invoice_number',
-                    headerName: 'Numri i Faturës',
-                    flex: 1,
-                    renderCell: (params: GridRenderCellParams<Invoice>) => {
-                      return (
-                        <Link
-                          to={`/invoices/${params.row.id}`}
-                          style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 500 }}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {params.value}
-                        </Link>
-                      );
-                    },
-                  },
-                  {
-                    field: 'invoice_date',
-                    headerName: 'Data',
-                    flex: 0.8,
-                    valueFormatter: (value: string) => new Date(value).toLocaleDateString(),
-                  },
-                  {
-                    field: 'due_date',
-                    headerName: 'Data e Maturimit',
-                    flex: 1,
-                    valueFormatter: (value: string) => new Date(value).toLocaleDateString(),
-                  },
-                  {
-                    field: 'issuer',
-                    headerName: 'Fatura Nga',
-                    flex: 1.2,
-                    valueGetter: (_value: unknown, row: Invoice) => row.issuer?.business_name || 'N/A',
-                  },
-                  {
-                    field: 'receiver',
-                    headerName: 'Fatura Për',
-                    flex: 1.2,
-                    valueGetter: (_value: unknown, row: Invoice) => row.receiver?.business_name || 'N/A',
-                  },
-                  {
-                    field: 'status',
-                    headerName: 'Statusi',
-                    flex: 1,
-                    renderCell: (params: GridRenderCellParams<Invoice>) => (
-                      <Select
-                        value={params.value}
-                        onChange={(e) => handleStatusChange(params.row.id, e.target.value as InvoiceStatusCode)}
-                        size="small"
-                        sx={{ 
-                          width: '100%',
-                          '& .MuiSelect-select': {
-                            padding: '4px 8px',
-                          }
-                        }}
-                      >
-                        {invoiceStatuses.map((status) => (
-                          <MenuItem key={status.id} value={status.code}>
-                            {statusLabels[status.code] || status.code}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    ),
-                  },
-                  {
-                    field: 'total',
-                    headerName: 'Totali',
-                    flex: 0.8,
-                    valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
-                  },
-                  {
-                    field: 'actions',
-                    headerName: 'Veprimet',
-                    flex: 0.8,
-                    sortable: false,
-                    filterable: false,
-                    renderCell: (params: GridRenderCellParams<Invoice>) => {
-                      const open = Boolean(menuAnchor[params.row.id]);
-                      return (
-                        <Box sx={{ 
-                          display: 'flex', 
-                          gap: 1, 
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          height: '100%',
-                          width: '100%'
-                        }}>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDownloadPdf(params.row.id, params.row.invoice_number)}
-                            disabled={downloadingIds.has(params.row.id)}
-                            title="Shkarko PDF"
-                          >
-                            <PrintIcon fontSize="small" />
-                          </IconButton>
-                        <IconButton
-                          size="small"
-                            onClick={(e) => setMenuAnchor({ ...menuAnchor, [params.row.id]: e.currentTarget })}
-                            title="Më shumë veprime"
-                        >
-                            <MoreVertIcon fontSize="small" />
-                        </IconButton>
-                          <Menu
-                            anchorEl={menuAnchor[params.row.id]}
-                            open={open}
-                            onClose={() => setMenuAnchor({ ...menuAnchor, [params.row.id]: null })}
-                          >
-                            <MenuItem onClick={() => {
-                              handleView(params.row.id);
-                              setMenuAnchor({ ...menuAnchor, [params.row.id]: null });
-                            }}>
-                              Shiko
-                            </MenuItem>
-                            <MenuItem onClick={() => {
-                              handleEdit(params.row.id);
-                              setMenuAnchor({ ...menuAnchor, [params.row.id]: null });
-                            }}>
-                              Ndrysho
-                            </MenuItem>
-                            <MenuItem onClick={() => {
-                              handleDelete(params.row.id);
-                              setMenuAnchor({ ...menuAnchor, [params.row.id]: null });
-                            }} sx={{ color: 'error.main' }}>
-                              Fshi
-                            </MenuItem>
-                          </Menu>
-                        </Box>
-                      );
-                    },
-                  },
-                ]}
-                getRowId={(row: Invoice) => row.id}
-                checkboxSelection
-                rowSelectionModel={selectedInvoiceIds}
-                onRowSelectionModelChange={(newSelection) => {
-                  setSelectedInvoiceIds(newSelection as number[]);
-                }}
-                pageSizeOptions={[10, 25, 50, 100]}
-                initialState={{
-                  pagination: {
-                    paginationModel: { pageSize: 25 },
-                  },
-                }}
-                loading={loading}
-                sx={{
-                  width: '100%',
-                  maxWidth: '100%',
-                }}
-              />
-            </Box>
+            <InvoicesGrid
+              invoices={invoices}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onStatusChange={handleStatusChange}
+              onDownloadPdf={handleDownloadPdf}
+              invoiceStatuses={invoiceStatuses}
+              statusLabels={statusLabels}
+              downloadingIds={downloadingIds}
+              selectedInvoiceIds={selectedInvoiceIds}
+              onSelectionChange={handleSelectionChange}
+              menuAnchor={menuAnchor}
+              onMenuOpen={handleMenuOpen}
+              onMenuClose={handleMenuClose}
+            />
           )}
         </div>
       </div>

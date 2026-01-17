@@ -2,7 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { businessesApi, Business } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import BusinessesList from './BusinessesList';
+import BusinessesGrid from './BusinessesGrid';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import GridViewIcon from '@mui/icons-material/GridView';
 import './BusinessesPage.scss';
+
+type ViewMode = 'list' | 'grid';
 
 const BusinessesPage = () => {
   const { user } = useAuth();
@@ -10,6 +16,10 @@ const BusinessesPage = () => {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('businesses-view-mode');
+    return (saved === 'list' || saved === 'grid') ? saved : 'list';
+  });
 
   const loadBusinesses = useCallback(async () => {
     try {
@@ -59,7 +69,12 @@ const BusinessesPage = () => {
     }
   };
 
-  if (loading) {
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('businesses-view-mode', mode);
+  };
+
+  if (loading && businesses.length === 0) {
     return (
       <div className="businesses-page">
         <div className="container">
@@ -73,9 +88,27 @@ const BusinessesPage = () => {
     <div className="businesses-page">
       <div className="container">
         <div className="businesses-header">
+          <div className="header-actions">
           <button onClick={handleCreate} className="btn btn-primary">
             Krijo Subjekt
           </button>
+          </div>
+          <div className="view-toggle">
+            <button
+              onClick={() => handleViewModeChange('list')}
+              className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              title="Lista"
+            >
+              <GridViewIcon />
+            </button>
+            <button
+              onClick={() => handleViewModeChange('grid')}
+              className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              title="Tabelë"
+            >
+              <ViewListIcon />
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -86,89 +119,27 @@ const BusinessesPage = () => {
         )}
 
         <div className="businesses-content">
-          <div className="businesses-list">
-            {businesses.length === 0 ? (
-              <p className="no-businesses">Nuk u gjetën subjekte.</p>
-            ) : (
-              <div className="business-cards">
-                {businesses.map((business) => {
-                  const isIssuer = user?.tenant?.issuer_business_id === business.id;
-                  return (
-                    <div key={business.id} className="business-card">
-                      <div className="business-card-header">
-                        {business.logo && (
-                          <img 
-                            src={business.logo} 
-                            alt={`${business.business_name} logo`}
-                            className="business-logo"
-                            style={{ maxWidth: '100px', maxHeight: '60px', marginBottom: '10px', objectFit: 'contain' }}
-                          />
-                        )}
-                        <h3>{business.business_name}</h3>
-                        {isIssuer && (
-                          <span className="badge issuer">Biznesi Lëshues</span>
-                        )}
-                      </div>
-                      <div className="business-card-body">
-                        {business.trade_name && (
-                          <p><strong>Emri tregtar:</strong> {business.trade_name}</p>
-                        )}
-                        {business.business_type && (
-                          <p><strong>Lloji i subjektit:</strong> {business.business_type}</p>
-                        )}
-                        {business.fiscal_number && (
-                          <p><strong>Numri Fiskal:</strong> {business.fiscal_number}</p>
-                        )}
-                        {business.vat_number && (
-                          <p><strong>Numri i TVSH-së:</strong> {business.vat_number}</p>
-                        )}
-                        {business.business_number && (
-                          <p><strong>Numri i biznesit:</strong> {business.business_number}</p>
-                        )}
-                        {business.unique_identifier_number && (
-                          <p><strong>Numri unik identifikues:</strong> {business.unique_identifier_number}</p>
-                        )}
-                        {business.number_of_employees !== undefined && business.number_of_employees !== null && (
-                          <p><strong>Numri punëtorëve:</strong> {business.number_of_employees}</p>
-                        )}
-                        {business.municipality && (
-                          <p><strong>Komuna:</strong> {business.municipality}</p>
-                        )}
-                        {business.email && (
-                          <p><strong>E-mail:</strong> {business.email}</p>
-                        )}
-                        {business.phone && (
-                          <p><strong>Telefoni:</strong> {business.phone}</p>
-                        )}
-                        {business.created_by && (
-                          <p><strong>Krijuar nga:</strong> {business.created_by.email}</p>
-                        )}
-                        {business.created_at && (
-                          <p><strong>Krijuar:</strong> {new Date(business.created_at).toLocaleDateString()}</p>
-                        )}
-                      </div>
-                      <div className="business-card-actions">
-                        <button onClick={() => handleView(business)} className="btn btn-secondary">
-                          Shiko
-                        </button>
-                        <button onClick={() => handleEdit(business)} className="btn btn-primary">
-                          Ndrysho
-                        </button>
-                        <button
-                          onClick={() => handleDelete(business.id)}
-                          className="btn btn-danger"
-                          disabled={isIssuer}
-                          title={isIssuer ? 'Nuk mund të fshihet subjekti lëshues' : ''}
-                        >
-                          Fshi
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+          {viewMode === 'list' ? (
+            <BusinessesList
+              businesses={businesses}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              issuerBusinessId={user?.tenant?.issuer_business_id}
+            />
+          ) : (
+            <BusinessesGrid
+              businesses={businesses}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              issuerBusinessId={user?.tenant?.issuer_business_id}
+            />
             )}
-          </div>
         </div>
       </div>
     </div>

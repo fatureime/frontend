@@ -2,7 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usersApi, User } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import UsersList from './UsersList';
+import UsersGrid from './UsersGrid';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import GridViewIcon from '@mui/icons-material/GridView';
 import './UsersPage.scss';
+
+type ViewMode = 'list' | 'grid';
 
 const UsersPage = () => {
   const { user } = useAuth();
@@ -10,6 +16,10 @@ const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('users-view-mode');
+    return (saved === 'list' || saved === 'grid') ? saved : 'list';
+  });
 
   // Check if user is admin
   const isAdmin = user?.roles?.includes('ROLE_ADMIN') === true;
@@ -64,6 +74,11 @@ const UsersPage = () => {
     }
   };
 
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('users-view-mode', mode);
+  };
+
   // Show access denied if user is not admin
   if (user && !isAdmin) {
     return (
@@ -100,6 +115,22 @@ const UsersPage = () => {
               Fto Përdorues
             </button>
           </div>
+          <div className="view-toggle">
+            <button
+              onClick={() => handleViewModeChange('list')}
+              className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              title="Lista"
+            >
+              <GridViewIcon />
+            </button>
+            <button
+              onClick={() => handleViewModeChange('grid')}
+              className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              title="Tabelë"
+            >
+              <ViewListIcon />
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -110,59 +141,27 @@ const UsersPage = () => {
         )}
 
         <div className="users-content">
-          <div className="users-list">
-            {users.length === 0 ? (
-              <p className="no-users">Nuk u gjetën përdorues.</p>
-            ) : (
-              <div className="user-cards">
-                {users.map((userItem) => (
-                  <div key={userItem.id} className="user-card">
-                    <div className="user-card-header">
-                      <h3>{userItem.email}</h3>
-                      <div className="user-badges">
-                        {userItem.roles?.includes('ROLE_ADMIN') && (
-                          <span className="badge admin">Menagjues</span>
-                        )}
-                        {userItem.is_active ? (
-                          <span className="badge active">Aktiv</span>
-                        ) : (
-                          <span className="badge inactive">Jo Aktiv</span>
-                        )}
-                        {!userItem.email_verified && (
-                          <span className="badge unverified">I Paverifikuar</span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="user-card-body">
-                      <p><strong>ID:</strong> {userItem.id}</p>
-                      <p><strong>Rolet:</strong> {userItem.roles?.join(', ') || 'ROLE_USER'}</p>
-                      {userItem.tenant && (
-                        <p><strong>Hapësirëmarrësi:</strong> {userItem.tenant.name}</p>
-                      )}
-                      {userItem.created_at && (
-                        <p><strong>Krijuar:</strong> {new Date(userItem.created_at).toLocaleDateString()}</p>
-                      )}
-                    </div>
-                    <div className="user-card-actions">
-                      <button onClick={() => handleView(userItem)} className="btn btn-secondary">
-                        Shiko
-                      </button>
-                      <button onClick={() => handleEdit(userItem)} className="btn btn-primary">
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(userItem.id)}
-                        className="btn btn-danger"
-                        disabled={userItem.id === user?.id}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {viewMode === 'list' ? (
+            <UsersList
+              users={users}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              currentUserId={user?.id}
+            />
+          ) : (
+            <UsersGrid
+              users={users}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              currentUserId={user?.id}
+            />
+          )}
         </div>
       </div>
     </div>

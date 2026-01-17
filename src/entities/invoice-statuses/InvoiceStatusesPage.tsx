@@ -1,11 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
-import { Button, Box } from '@mui/material';
 import { invoiceStatusesApi, InvoiceStatus } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
 import { getStatusLabels, getStatusLabel, setStatusLabel } from '../../utils/invoiceStatusLabels';
+import InvoiceStatusesList from './InvoiceStatusesList';
+import InvoiceStatusesGrid from './InvoiceStatusesGrid';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import GridViewIcon from '@mui/icons-material/GridView';
 import './InvoiceStatusesPage.scss';
+
+type ViewMode = 'list' | 'grid';
 
 const InvoiceStatusesPage = () => {
   const { user } = useAuth();
@@ -17,6 +21,10 @@ const InvoiceStatusesPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [label, setLabel] = useState('');
   const [labels, setLabels] = useState<Record<string, string>>({});
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('invoice-statuses-view-mode');
+    return (saved === 'list' || saved === 'grid') ? saved : 'grid';
+  });
 
   // Check if user is part of an admin tenant
   const isAdminTenant = user?.tenant?.is_admin === true;
@@ -123,6 +131,11 @@ const InvoiceStatusesPage = () => {
     }
   };
 
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('invoice-statuses-view-mode', mode);
+  };
+
   // Show access denied if user is not part of an admin tenant
   if (user && !isAdminTenant) {
     return (
@@ -155,9 +168,27 @@ const InvoiceStatusesPage = () => {
       <div className="container">
         {!isEditingLabel && (
           <div className="invoice-statuses-header">
-            <button onClick={handleCreate} className="btn btn-primary">
-              Krijo Gjendje të Re
-            </button>
+            <div className="header-actions">
+              <button onClick={handleCreate} className="btn btn-primary">
+                Krijo Gjendje të Re
+              </button>
+            </div>
+            <div className="view-toggle">
+              <button
+                onClick={() => handleViewModeChange('list')}
+                className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+                title="Lista"
+              >
+                <GridViewIcon />
+              </button>
+              <button
+                onClick={() => handleViewModeChange('grid')}
+                className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                title="Tabelë"
+              >
+                <ViewListIcon />
+              </button>
+            </div>
           </div>
         )}
 
@@ -194,99 +225,30 @@ const InvoiceStatusesPage = () => {
           </div>
         ) : (
           <div className="invoice-statuses-content">
-            {statuses.length === 0 ? (
-              <p className="no-statuses">Nuk u gjetën gjendje të faturave.</p>
+            {viewMode === 'list' ? (
+              <InvoiceStatusesList
+                statuses={statuses}
+                loading={loading}
+                error={null}
+                onView={handleView}
+                onEdit={handleEdit}
+                onEditLabel={handleEditLabel}
+                onDelete={handleDelete}
+                canEdit={canEdit}
+                labels={labels}
+              />
             ) : (
-              <Box sx={{ height: 400, width: '100%' }}>
-                <DataGrid
-                  rows={statuses}
-                  columns={[
-                    {
-                      field: 'id',
-                      headerName: 'ID',
-                      width: 80,
-                    },
-                    {
-                      field: 'code',
-                      headerName: 'Kodi',
-                      width: 200,
-                      renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
-                        <strong>{params.value}</strong>
-                      ),
-                    },
-                    {
-                      field: 'label',
-                      headerName: 'Etiketa',
-                      width: 250,
-                      valueGetter: (_value: unknown, row: InvoiceStatus) => 
-                        labels[row.code] || getStatusLabel(row.code),
-                      flex: 1,
-                    },
-                    {
-                      field: 'view',
-                      headerName: 'Shiko',
-                      width: 100,
-                      sortable: false,
-                      filterable: false,
-                      renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          onClick={() => handleView(params.row)}
-                          sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                        >
-                          Shiko
-                        </Button>
-                      ),
-                    },
-                    ...(canEdit ? [{
-                      field: 'actions',
-                      headerName: 'Veprimet',
-                      width: 400,
-                      sortable: false,
-                      filterable: false,
-                      renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            onClick={() => handleEdit(params.row)}
-                            sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                          >
-                            Ndrysho Kod
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={() => handleEditLabel(params.row)}
-                            sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                          >
-                            Ndrysho Etiketë
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            color="error"
-                            onClick={() => handleDelete(params.row.id)}
-                            sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                          >
-                            Fshi
-                          </Button>
-                        </Box>
-                      ),
-                    }] : []),
-                  ]}
-                  getRowId={(row: InvoiceStatus) => row.id}
-                  disableRowSelectionOnClick
-                  pageSizeOptions={[10, 25, 50]}
-                  initialState={{
-                    pagination: {
-                      paginationModel: { pageSize: 25 },
-                    },
-                  }}
-                  loading={loading}
-                />
-              </Box>
+              <InvoiceStatusesGrid
+                statuses={statuses}
+                loading={loading}
+                error={null}
+                onView={handleView}
+                onEdit={handleEdit}
+                onEditLabel={handleEditLabel}
+                onDelete={handleDelete}
+                canEdit={canEdit}
+                labels={labels}
+              />
             )}
           </div>
         )}

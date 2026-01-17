@@ -2,7 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { articlesApi, Article, businessesApi, Business } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import ArticlesList from './ArticlesList';
+import ArticlesGrid from './ArticlesGrid';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import GridViewIcon from '@mui/icons-material/GridView';
 import './ArticlesPage.scss';
+
+type ViewMode = 'list' | 'grid';
 
 const ArticlesPage = () => {
   const navigate = useNavigate();
@@ -15,6 +21,10 @@ const ArticlesPage = () => {
   const [selectedBusinessId, setSelectedBusinessId] = useState<number | null>(currentBusinessId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('articles-view-mode');
+    return (saved === 'list' || saved === 'grid') ? saved : 'list';
+  });
 
   const loadBusinesses = useCallback(async () => {
     try {
@@ -110,6 +120,11 @@ const ArticlesPage = () => {
     }
   };
 
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('articles-view-mode', mode);
+  };
+
   if (!currentBusinessId) {
     return (
       <div className="articles-page">
@@ -120,7 +135,7 @@ const ArticlesPage = () => {
     );
   }
 
-  if (loading) {
+  if (loading && articles.length === 0) {
     return (
       <div className="articles-page">
         <div className="container">
@@ -134,9 +149,27 @@ const ArticlesPage = () => {
     <div className="articles-page">
       <div className="container">
         <div className="articles-header">
-          <button onClick={handleCreate} className="btn btn-primary">
-            Krijo Artikull
-          </button>
+          <div className="header-actions">
+            <button onClick={handleCreate} className="btn btn-primary">
+              Krijo Artikull
+            </button>
+          </div>
+          <div className="view-toggle">
+            <button
+              onClick={() => handleViewModeChange('list')}
+              className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              title="Lista"
+            >
+              <GridViewIcon />
+            </button>
+            <button
+              onClick={() => handleViewModeChange('grid')}
+              className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              title="Tabelë"
+            >
+              <ViewListIcon />
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -147,47 +180,25 @@ const ArticlesPage = () => {
         )}
 
         <div className="articles-content">
-          <div className="articles-list">
-            {articles.length === 0 ? (
-              <p className="no-articles">Nuk u gjetën artikuj.</p>
-            ) : (
-              <div className="article-cards">
-                {articles.map((article) => (
-                  <div key={article.id} className="article-card">
-                    <div className="article-card-header">
-                      <h3>{article.name}</h3>
-                    </div>
-                    <div className="article-card-body">
-                      {article.description && (
-                        <p><strong>Përshkrimi:</strong> {article.description}</p>
-                      )}
-                      <p><strong>Çmimi për njësi:</strong> {parseFloat(article.unit_price).toFixed(2)} €</p>
-                      {article.unit && (
-                        <p><strong>Njësia:</strong> {article.unit}</p>
-                      )}
-                      {article.created_at && (
-                        <p><strong>Krijuar:</strong> {new Date(article.created_at).toLocaleDateString()}</p>
-                      )}
-                    </div>
-                    <div className="article-card-actions">
-                      <button onClick={() => handleView(article)} className="btn btn-secondary">
-                        Shiko
-                      </button>
-                      <button onClick={() => handleEdit(article)} className="btn btn-primary">
-                        Ndrysho
-                      </button>
-                      <button
-                        onClick={() => handleDelete(article.id)}
-                        className="btn btn-danger"
-                      >
-                        Fshi
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {viewMode === 'list' ? (
+            <ArticlesList
+              articles={articles}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ) : (
+            <ArticlesGrid
+              articles={articles}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </div>
       </div>
     </div>

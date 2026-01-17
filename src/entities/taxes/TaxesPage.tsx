@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
-import { Button, Box } from '@mui/material';
 import { taxesApi, Tax } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import TaxesList from './TaxesList';
+import TaxesGrid from './TaxesGrid';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import GridViewIcon from '@mui/icons-material/GridView';
 import './TaxesPage.scss';
+
+type ViewMode = 'list' | 'grid';
 
 const TaxesPage = () => {
   const { user } = useAuth();
@@ -12,6 +16,10 @@ const TaxesPage = () => {
   const [taxes, setTaxes] = useState<Tax[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('taxes-view-mode');
+    return (saved === 'list' || saved === 'grid') ? saved : 'grid';
+  });
 
   // Check if user is part of an admin tenant
   const isAdminTenant = user?.tenant?.is_admin === true;
@@ -71,21 +79,39 @@ const TaxesPage = () => {
     }
   };
 
-  const formatRate = (rate: string | null): string => {
-    if (rate === null) return 'E përjashtuar';
-    return `${rate}%`;
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('taxes-view-mode', mode);
   };
 
   return (
     <div className="taxes-page">
       <div className="container">
-        {canEdit && (
-          <div className="taxes-header">
-            <button onClick={handleCreate} className="btn btn-primary">
-              Krijo Takse të Re
+        <div className="taxes-header">
+          <div className="header-actions">
+            {canEdit && (
+              <button onClick={handleCreate} className="btn btn-primary">
+                Krijo Takse të Re
+              </button>
+            )}
+          </div>
+          <div className="view-toggle">
+            <button
+              onClick={() => handleViewModeChange('list')}
+              className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              title="Lista"
+            >
+              <GridViewIcon />
+            </button>
+            <button
+              onClick={() => handleViewModeChange('grid')}
+              className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              title="Tabelë"
+            >
+              <ViewListIcon />
             </button>
           </div>
-        )}
+        </div>
 
         {error && (
           <div className="error-message">
@@ -95,94 +121,26 @@ const TaxesPage = () => {
         )}
 
         <div className="taxes-content">
-          {taxes.length === 0 ? (
-            <p className="no-taxes">Nuk u gjetën taksa.</p>
+          {viewMode === 'list' ? (
+            <TaxesList
+              taxes={taxes}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              canEdit={canEdit}
+            />
           ) : (
-            <Box sx={{ height: 400, width: '100%' }}>
-              <DataGrid
-                rows={taxes}
-                columns={[
-                  {
-                    field: 'id',
-                    headerName: 'ID',
-                    width: 80,
-                  },
-                  {
-                    field: 'rate',
-                    headerName: 'Norma',
-                    width: 150,
-                    valueGetter: (_value: unknown, row: Tax) => formatRate(row.rate),
-                  },
-                  {
-                    field: 'name',
-                    headerName: 'Emri',
-                    width: 200,
-                    flex: 1,
-                  },
-                  {
-                    field: 'created_at',
-                    headerName: 'Krijuar',
-                    width: 150,
-                    valueGetter: (_value: unknown, row: Tax) => 
-                      row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
-                  },
-                  {
-                    field: 'view',
-                    headerName: 'Shiko',
-                    width: 100,
-                    sortable: false,
-                    filterable: false,
-                    renderCell: (params: GridRenderCellParams<Tax>) => (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => handleView(params.row)}
-                        sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                      >
-                        Shiko
-                      </Button>
-                    ),
-                  },
-                  ...(canEdit ? [{
-                    field: 'actions',
-                    headerName: 'Veprimet',
-                    width: 200,
-                    sortable: false,
-                    filterable: false,
-                    renderCell: (params: GridRenderCellParams<Tax>) => (
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Button
-                          size="small"
-                          variant="contained"
-                          onClick={() => handleEdit(params.row)}
-                          sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                        >
-                          Ndrysho
-                        </Button>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          color="error"
-                          onClick={() => handleDelete(params.row.id)}
-                          sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                        >
-                          Fshi
-                        </Button>
-                      </Box>
-                    ),
-                  }] : []),
-                ]}
-                getRowId={(row: Tax) => row.id}
-                disableRowSelectionOnClick
-                pageSizeOptions={[10, 25, 50]}
-                initialState={{
-                  pagination: {
-                    paginationModel: { pageSize: 25 },
-                  },
-                }}
-                loading={loading}
-              />
-            </Box>
+            <TaxesGrid
+              taxes={taxes}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              canEdit={canEdit}
+            />
           )}
         </div>
       </div>

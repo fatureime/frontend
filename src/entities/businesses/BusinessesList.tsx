@@ -1,0 +1,197 @@
+import { Card, CardContent, CardActions, Button, IconButton, Typography, Box, Chip, useMediaQuery, useTheme } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Business } from '../../services/api';
+import './BusinessesList.scss';
+
+interface BusinessesListProps {
+  businesses: Business[];
+  loading: boolean;
+  error: string | null;
+  onView: (business: Business) => void;
+  onEdit: (business: Business) => void;
+  onDelete: (businessId: number) => void;
+  issuerBusinessId?: number | null;
+}
+
+const BusinessesList = ({
+  businesses,
+  loading,
+  error,
+  onView,
+  onEdit,
+  onDelete,
+  issuerBusinessId,
+}: BusinessesListProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  if (loading) {
+    return (
+      <Box className="businesses-list" sx={{ textAlign: 'center', padding: 3 }}>
+        <Typography variant="body1" color="text.secondary">Duke u ngarkuar subjektet...</Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box className="businesses-list" sx={{ p: 2 }}>
+        <Box className="error-message" sx={{ bgcolor: '#ffebee', color: '#c62828', p: 2, borderRadius: 1 }}>
+          <Typography variant="body2">{error}</Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  return (
+    <div className="businesses-list">
+      {businesses.length === 0 ? (
+        <Typography variant="body1" className="no-businesses">Nuk u gjetën subjekte.</Typography>
+      ) : (
+        <Box className="business-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
+          {businesses.map((business) => {
+            const isIssuer = issuerBusinessId === business.id;
+            return (
+              <Card key={business.id} className="business-card" sx={{ display: 'flex', flexDirection: 'column' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
+                    {business.logo && (
+                      <Box
+                        component="img"
+                        src={business.logo}
+                        alt={`${business.business_name} logo`}
+                        sx={{ maxWidth: '100px', maxHeight: '60px', objectFit: 'contain', mr: 2 }}
+                      />
+                    )}
+                    <Typography variant="h6" component="h3" sx={{ flex: 1 }}>
+                      {business.business_name}
+                    </Typography>
+                    {isIssuer && (
+                      <Chip label="Biznesi Lëshues" color="success" size="small" />
+                    )}
+                  </Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    {business.trade_name && (
+                      <Typography variant="body2">
+                        <strong>Emri tregtar:</strong> {business.trade_name}
+                      </Typography>
+                    )}
+                    {business.business_type && (
+                      <Typography variant="body2">
+                        <strong>Lloji i subjektit:</strong> {business.business_type}
+                      </Typography>
+                    )}
+                    {business.fiscal_number && (
+                      <Typography variant="body2">
+                        <strong>Numri Fiskal:</strong> {business.fiscal_number}
+                      </Typography>
+                    )}
+                    {business.vat_number && (
+                      <Typography variant="body2">
+                        <strong>Numri i TVSH-së:</strong> {business.vat_number}
+                      </Typography>
+                    )}
+                    {business.business_number && (
+                      <Typography variant="body2">
+                        <strong>Numri i biznesit:</strong> {business.business_number}
+                      </Typography>
+                    )}
+                    {business.unique_identifier_number && (
+                      <Typography variant="body2">
+                        <strong>Numri unik identifikues:</strong> {business.unique_identifier_number}
+                      </Typography>
+                    )}
+                    {business.number_of_employees !== undefined && business.number_of_employees !== null && (
+                      <Typography variant="body2">
+                        <strong>Numri punëtorëve:</strong> {business.number_of_employees}
+                      </Typography>
+                    )}
+                    {business.municipality && (
+                      <Typography variant="body2">
+                        <strong>Komuna:</strong> {business.municipality}
+                      </Typography>
+                    )}
+                    {business.email && (
+                      <Typography variant="body2">
+                        <strong>E-mail:</strong> {business.email}
+                      </Typography>
+                    )}
+                    {business.phone && (
+                      <Typography variant="body2">
+                        <strong>Telefoni:</strong> {business.phone}
+                      </Typography>
+                    )}
+                    {business.created_by && (
+                      <Typography variant="body2">
+                        <strong>Krijuar nga:</strong> {business.created_by.email}
+                      </Typography>
+                    )}
+                    {business.created_at && (
+                      <Typography variant="body2">
+                        <strong>Krijuar:</strong> {new Date(business.created_at).toLocaleDateString()}
+                      </Typography>
+                    )}
+                  </Box>
+                </CardContent>
+                <CardActions sx={{ pt: 1, borderTop: 1, borderColor: 'divider' }}>
+                  {isMobile ? (
+                    <>
+                      <IconButton
+                        size="small"
+                        onClick={() => onView(business)}
+                        title="Shiko"
+                        color="primary"
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => onEdit(business)}
+                        title="Ndrysho"
+                        color="primary"
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => onDelete(business.id)}
+                        disabled={isIssuer}
+                        title={isIssuer ? 'Nuk mund të fshihet subjekti lëshues' : 'Fshi'}
+                        color="error"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </>
+                  ) : (
+                    <>
+                  <Button size="small" variant="outlined" onClick={() => onView(business)}>
+                    Shiko
+                  </Button>
+                  <Button size="small" variant="contained" onClick={() => onEdit(business)}>
+                    Ndrysho
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="error"
+                    onClick={() => onDelete(business.id)}
+                    disabled={isIssuer}
+                    title={isIssuer ? 'Nuk mund të fshihet subjekti lëshues' : ''}
+                  >
+                    Fshi
+                  </Button>
+                    </>
+                  )}
+                </CardActions>
+              </Card>
+            );
+          })}
+        </Box>
+      )}
+    </div>
+  );
+};
+
+export default BusinessesList;

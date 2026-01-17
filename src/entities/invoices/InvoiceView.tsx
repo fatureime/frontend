@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
-import { Box } from '@mui/material';
+import { Box, IconButton, Card, CardContent, Typography } from '@mui/material';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import GridViewIcon from '@mui/icons-material/GridView';
 import { invoicesApi, Invoice, invoiceStatusesApi, InvoiceStatus, InvoiceItem } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
 import './InvoiceView.scss';
@@ -21,6 +23,10 @@ const InvoiceView = () => {
   const [expandedCards, setExpandedCards] = useState<{ issuer: boolean; receiver: boolean }>({
     issuer: false,
     receiver: false,
+  });
+  const [itemsViewMode, setItemsViewMode] = useState<'list' | 'grid'>(() => {
+    const saved = localStorage.getItem('invoice-items-view-mode');
+    return (saved === 'list' || saved === 'grid') ? saved : 'grid';
   });
 
   // Sort and prepare invoice items for DataGrid
@@ -372,7 +378,87 @@ const InvoiceView = () => {
 
           {/* Invoice Items */}
           <div className="items-section">
+            <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ margin: 0 }}>Artikujt</h2>
+              {invoice.items && invoice.items.length > 0 && (
+                <Box sx={{ display: 'flex', gap: 0.5, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setItemsViewMode('list');
+                      localStorage.setItem('invoice-items-view-mode', 'list');
+                    }}
+                    sx={{
+                      borderRadius: 0,
+                      bgcolor: itemsViewMode === 'list' ? 'primary.main' : 'transparent',
+                      color: itemsViewMode === 'list' ? 'white' : 'inherit',
+                      '&:hover': {
+                        bgcolor: itemsViewMode === 'list' ? 'primary.dark' : 'rgba(0,0,0,0.04)',
+                      },
+                    }}
+                    title="Lista"
+                  >
+                    <GridViewIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setItemsViewMode('grid');
+                      localStorage.setItem('invoice-items-view-mode', 'grid');
+                    }}
+                    sx={{
+                      borderRadius: 0,
+                      bgcolor: itemsViewMode === 'grid' ? 'primary.main' : 'transparent',
+                      color: itemsViewMode === 'grid' ? 'white' : 'inherit',
+                      '&:hover': {
+                        bgcolor: itemsViewMode === 'grid' ? 'primary.dark' : 'rgba(0,0,0,0.04)',
+                      },
+                    }}
+                    title="Tabelë"
+                  >
+                    <ViewListIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              )}
+            </div>
             {invoice.items && invoice.items.length > 0 ? (
+              itemsViewMode === 'list' ? (
+                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
+                  {sortedItems.map((item) => (
+                    <Card key={item.id} sx={{ display: 'flex', flexDirection: 'column' }}>
+                      <CardContent>
+                        <Typography variant="h6" component="h3" sx={{ mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
+                          #{item.index} {item.description}
+                          {item.article && <span title="Nga artikulli" style={{ marginLeft: '0.5rem' }}>📦</span>}
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                          <Typography variant="body2">
+                            <strong>Sasia:</strong> {parseFloat(item.quantity).toFixed(2)}
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Çmimi për Njësi:</strong> {parseFloat(item.unit_price).toFixed(2)} €
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Vlera e TVSH:</strong>{' '}
+                            <span className={item.tax?.rate === null ? 'tax-exempt' : ''}>
+                              {item.tax?.rate === null ? 'E përjashtuar' : `${item.tax.rate}%`}
+                            </span>
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Vlera pa TVSH:</strong> {parseFloat(item.subtotal).toFixed(2)} €
+                          </Typography>
+                          <Typography variant="body2">
+                            <strong>Vlera e TVSH:</strong> {parseFloat(item.tax_amount).toFixed(2)} €
+                          </Typography>
+                          <Typography variant="body2" sx={{ mt: 1, pt: 1, borderTop: 1, borderColor: 'divider' }}>
+                            <strong>Totali:</strong> <strong style={{ fontSize: '1.1em' }}>{parseFloat(item.total).toFixed(2)} €</strong>
+                          </Typography>
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </Box>
+              ) : (
               <Box sx={{ width: '100%' }}>
                 <DataGrid
                   rows={sortedItems}
@@ -457,6 +543,7 @@ const InvoiceView = () => {
                   }}
                 />
               </Box>
+              )
             ) : (
               <p className="no-items">Nuk ka artikuj në këtë faturë.</p>
             )}

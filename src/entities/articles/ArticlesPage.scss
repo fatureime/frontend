@@ -27,6 +27,51 @@
       font-size: 0.9rem;
     }
 
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 0.5rem;
+      background: #f5f5f5;
+      border-radius: 4px;
+      padding: 2px;
+
+      .toggle-btn {
+        padding: 0.5rem;
+        border: none;
+        background: transparent;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        transition: all 0.2s;
+
+        &:hover {
+          background: #e0e0e0;
+          color: #333;
+        }
+
+        &.active {
+          background: #2196f3;
+          color: white;
+
+          &:hover {
+            background: #1976d2;
+          }
+        }
+
+        svg {
+          font-size: 1.25rem;
+        }
+      }
+    }
+
     .btn {
       padding: 0.75rem 1.5rem;
       border: none;
@@ -75,99 +120,7 @@
   }
 
   .articles-content {
-    .articles-list {
-      h2 {
-        margin-bottom: 1.5rem;
-        color: #333;
-      }
-
-      .no-articles {
-        text-align: center;
-        padding: 3rem;
-        color: #666;
-      }
-
-      .article-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 1.5rem;
-
-        .article-card {
-          background: white;
-          border: 1px solid #e0e0e0;
-          border-radius: 8px;
-          padding: 1.5rem;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-          transition: box-shadow 0.3s;
-
-          &:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-          }
-
-          .article-card-header {
-            margin-bottom: 1rem;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 1rem;
-
-            h3 {
-              margin: 0;
-              color: #333;
-              font-size: 1.25rem;
-            }
-          }
-
-          .article-card-body {
-            margin-bottom: 1rem;
-            color: #666;
-
-            p {
-              margin: 0.5rem 0;
-              font-size: 0.9rem;
-              line-height: 1.5;
-
-              strong {
-                color: #333;
-                font-weight: 600;
-              }
-            }
-          }
-
-          .article-card-actions {
-            display: flex;
-            gap: 0.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid #e0e0e0;
-
-            .btn {
-              padding: 0.5rem 1rem;
-              border: none;
-              border-radius: 4px;
-              cursor: pointer;
-              font-size: 0.875rem;
-              transition: background 0.3s;
-
-              &.btn-primary {
-                background: #2196f3;
-                color: white;
-
-                &:hover {
-                  background: #1976d2;
-                }
-              }
-
-              &.btn-danger {
-                background: #f44336;
-                color: white;
-
-                &:hover {
-                  background: #d32f2f;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+    // Styles moved to List and Grid components
   }
 }
 
@@ -179,6 +132,12 @@
 
       .btn {
         width: 100%;
+      }
+
+      .view-toggle {
+        position: fixed;
+        left: 24px;
+        bottom: 24px;
       }
     }
 

@@ -2,7 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { bankAccountsApi, businessesApi, BankAccount, Business } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import BankAccountsList from './BankAccountsList';
+import BankAccountsGrid from './BankAccountsGrid';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import GridViewIcon from '@mui/icons-material/GridView';
 import './BankAccountsPage.scss';
+
+type ViewMode = 'list' | 'grid';
 
 interface BankAccountWithBusiness extends BankAccount {
   business?: Business;
@@ -16,6 +22,10 @@ const BankAccountsPage = () => {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('bank-accounts-view-mode');
+    return (saved === 'list' || saved === 'grid') ? saved : 'list';
+  });
 
   const loadBusinesses = useCallback(async () => {
     try {
@@ -110,7 +120,12 @@ const BankAccountsPage = () => {
     }
   };
 
-  if (loading) {
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    localStorage.setItem('bank-accounts-view-mode', mode);
+  };
+
+  if (loading && bankAccounts.length === 0) {
     return (
       <div className="bank-accounts-page">
         <div className="container">
@@ -124,11 +139,29 @@ const BankAccountsPage = () => {
     <div className="bank-accounts-page">
       <div className="container">
         <div className="bank-accounts-header">
-          {businesses.length > 0 && (
-            <button onClick={handleCreate} className="btn btn-primary">
-              Krijo Llogari Bankare
+          <div className="header-actions">
+            {businesses.length > 0 && (
+              <button onClick={handleCreate} className="btn btn-primary">
+                Krijo Llogari Bankare
+              </button>
+            )}
+          </div>
+          <div className="view-toggle">
+            <button
+              onClick={() => handleViewModeChange('list')}
+              className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+              title="Lista"
+            >
+              <GridViewIcon />
             </button>
-          )}
+            <button
+              onClick={() => handleViewModeChange('grid')}
+              className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              title="Tabelë"
+            >
+              <ViewListIcon />
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -139,69 +172,27 @@ const BankAccountsPage = () => {
         )}
 
         <div className="bank-accounts-content">
-          <div className="bank-accounts-list">
-            {bankAccounts.length === 0 ? (
-              <p className="no-bank-accounts">
-                {businesses.length === 0 
-                  ? 'Nuk u gjetën subjekte. Ju lutem krijoni një subjekt fillimisht.'
-                  : 'Nuk u gjetën llogari bankare. Klikoni "Krijo Llogari Bankare" për të shtuar një të re.'}
-              </p>
-            ) : (
-              <div className="bank-account-cards">
-                {bankAccounts.map((bankAccount) => (
-                  <div key={`${bankAccount.business_id}-${bankAccount.id}`} className="bank-account-card">
-                    <div className="bank-account-card-header">
-                      <h3>
-                        {bankAccount.business?.business_name || `Subjekti #${bankAccount.business_id}`}
-                      </h3>
-                      {isAdminTenant && bankAccount.business && (
-                        <span className="badge business-badge">
-                          {bankAccount.business.business_name}
-                        </span>
-                      )}
-                    </div>
-                    <div className="bank-account-card-body">
-                      {bankAccount.bank_name && (
-                        <p><strong>Emri i bankës:</strong> {bankAccount.bank_name}</p>
-                      )}
-                      {bankAccount.swift && (
-                        <p><strong>SWIFT:</strong> {bankAccount.swift}</p>
-                      )}
-                      {bankAccount.iban && (
-                        <p><strong>IBAN:</strong> {bankAccount.iban}</p>
-                      )}
-                      {bankAccount.bank_account_number && (
-                        <p><strong>Numri i llogarisë:</strong> {bankAccount.bank_account_number}</p>
-                      )}
-                      {bankAccount.created_at && (
-                        <p><strong>Krijuar:</strong> {new Date(bankAccount.created_at).toLocaleDateString()}</p>
-                      )}
-                    </div>
-                    <div className="bank-account-card-actions">
-                      <button 
-                        onClick={() => handleView(bankAccount)} 
-                        className="btn btn-secondary"
-                      >
-                        Shiko
-                      </button>
-                      <button 
-                        onClick={() => handleEdit(bankAccount)} 
-                        className="btn btn-primary"
-                      >
-                        Ndrysho
-                      </button>
-                      <button
-                        onClick={() => handleDelete(bankAccount)}
-                        className="btn btn-danger"
-                      >
-                        Fshi
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {viewMode === 'list' ? (
+            <BankAccountsList
+              bankAccounts={bankAccounts}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              isAdminTenant={isAdminTenant}
+              businessesCount={businesses.length}
+            />
+          ) : (
+            <BankAccountsGrid
+              bankAccounts={bankAccounts}
+              loading={loading}
+              error={null}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          )}
         </div>
       </div>
     </div>

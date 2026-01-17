@@ -1,0 +1,15 @@
+.bank-accounts-grid {
+  .error-message {
+    background: #ffebee;
+    color: #c62828;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .no-bank-accounts {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+  }
+}
