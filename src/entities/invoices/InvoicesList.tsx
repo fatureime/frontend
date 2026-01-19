@@ -1,9 +1,8 @@
-import { Link } from 'react-router-dom';
-import { Card, CardContent, CardActions, Button, IconButton, Typography, Box, Select, MenuItem, useMediaQuery, useTheme } from '@mui/material';
+import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
+import { Select, MenuItem, Box, IconButton, Menu } from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { Link } from 'react-router-dom';
 import { Invoice, InvoiceStatus } from '../../services/api';
 import './InvoicesList.scss';
 
@@ -21,6 +20,11 @@ interface InvoicesListProps {
   invoiceStatuses: InvoiceStatus[];
   statusLabels: Record<string, string>;
   downloadingIds: Set<number>;
+  selectedInvoiceIds: number[];
+  onSelectionChange: (selectedIds: number[]) => void;
+  menuAnchor: { [key: number]: HTMLElement | null };
+  onMenuOpen: (invoiceId: number, anchor: HTMLElement) => void;
+  onMenuClose: (invoiceId: number) => void;
 }
 
 const InvoicesList = ({
@@ -35,135 +39,186 @@ const InvoicesList = ({
   invoiceStatuses,
   statusLabels,
   downloadingIds,
+  selectedInvoiceIds,
+  onSelectionChange,
+  menuAnchor,
+  onMenuOpen,
+  onMenuClose,
 }: InvoicesListProps) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  if (loading) {
-    return (
-      <Box className="invoices-list" sx={{ textAlign: 'center', padding: 3 }}>
-        <Typography variant="body1" color="text.secondary">Duke u ngarkuar fatura...</Typography>
-      </Box>
-    );
-  }
-
   if (error) {
     return (
-      <Box className="invoices-list" sx={{ p: 2 }}>
-        <Box className="error-message" sx={{ bgcolor: '#ffebee', color: '#c62828', p: 2, borderRadius: 1 }}>
-          <Typography variant="body2">{error}</Typography>
-        </Box>
-      </Box>
+      <div className="invoices-list">
+        <div className="error-message">{error}</div>
+      </div>
     );
   }
 
   return (
-    <Box className="invoices-list">
+    <div className="invoices-list">
       {invoices.length === 0 ? (
-        <Typography variant="body1" className="no-invoices" sx={{ textAlign: 'center', padding: 3, color: 'text.secondary' }}>
-          Nuk u gjetën fatura.
-        </Typography>
+        <p className="no-invoices">Nuk u gjetën fatura.</p>
       ) : (
-        <Box className="invoice-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
-          {invoices.map((invoice) => (
-            <Card key={invoice.id} className="invoice-card" sx={{ display: 'flex', flexDirection: 'column' }}>
-              <CardContent>
-                <Typography variant="h6" component="h3" sx={{ mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
-                  <Link
-                    to={`/invoices/${invoice.id}`}
-                    style={{ color: '#1976d2', textDecoration: 'none' }}
+        <Box sx={{ 
+          height: 600, 
+          width: '100%',
+          maxWidth: '100%',
+          overflow: 'hidden'
+        }}>
+          <DataGrid
+            rows={invoices}
+            columns={[
+              {
+                field: 'invoice_number',
+                headerName: 'Numri i Faturës',
+                flex: 1,
+                renderCell: (params: GridRenderCellParams<Invoice>) => {
+                  return (
+                    <Link
+                      to={`/invoices/${params.row.id}`}
+                      style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 500 }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {params.value}
+                    </Link>
+                  );
+                },
+              },
+              {
+                field: 'invoice_date',
+                headerName: 'Data',
+                flex: 0.8,
+                valueFormatter: (value: string) => new Date(value).toLocaleDateString(),
+              },
+              {
+                field: 'due_date',
+                headerName: 'Data e Maturimit',
+                flex: 1,
+                valueFormatter: (value: string) => new Date(value).toLocaleDateString(),
+              },
+              {
+                field: 'issuer',
+                headerName: 'Fatura Nga',
+                flex: 1.2,
+                valueGetter: (_value: unknown, row: Invoice) => row.issuer?.business_name || 'N/A',
+              },
+              {
+                field: 'receiver',
+                headerName: 'Fatura Për',
+                flex: 1.2,
+                valueGetter: (_value: unknown, row: Invoice) => row.receiver?.business_name || 'N/A',
+              },
+              {
+                field: 'status',
+                headerName: 'Statusi',
+                flex: 1,
+                renderCell: (params: GridRenderCellParams<Invoice>) => (
+                  <Select
+                    value={params.value}
+                    onChange={(e) => onStatusChange(params.row.id, e.target.value as InvoiceStatusCode)}
+                    size="small"
+                    sx={{ 
+                      width: '100%',
+                      '& .MuiSelect-select': {
+                        padding: '4px 8px',
+                      }
+                    }}
                   >
-                    {invoice.invoice_number}
-                  </Link>
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <Typography variant="body2"><strong>Data:</strong> {new Date(invoice.invoice_date).toLocaleDateString()}</Typography>
-                  <Typography variant="body2"><strong>Data e Maturimit:</strong> {new Date(invoice.due_date).toLocaleDateString()}</Typography>
-                  <Typography variant="body2"><strong>Fatura Nga:</strong> {invoice.issuer?.business_name || 'N/A'}</Typography>
-                  <Typography variant="body2"><strong>Fatura Për:</strong> {invoice.receiver?.business_name || 'N/A'}</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="body2" component="strong">Statusi:</Typography>
-                    <Select
-                      value={invoice.status}
-                      onChange={(e) => onStatusChange(invoice.id, e.target.value as InvoiceStatusCode)}
-                      size="small"
-                      sx={{ minWidth: 150 }}
-                    >
-                      {invoiceStatuses.map((status) => (
-                        <MenuItem key={status.id} value={status.code}>
-                          {statusLabels[status.code] || status.code}
+                    {invoiceStatuses.map((status) => (
+                      <MenuItem key={status.id} value={status.code}>
+                        {statusLabels[status.code] || status.code}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                ),
+              },
+              {
+                field: 'total',
+                headerName: 'Totali',
+                flex: 0.8,
+                valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
+              },
+              {
+                field: 'actions',
+                headerName: 'Veprimet',
+                flex: 0.8,
+                sortable: false,
+                filterable: false,
+                renderCell: (params: GridRenderCellParams<Invoice>) => {
+                  const open = Boolean(menuAnchor[params.row.id]);
+                  return (
+                    <Box sx={{ 
+                      display: 'flex', 
+                      gap: 1, 
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                      width: '100%'
+                    }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => onDownloadPdf(params.row.id, params.row.invoice_number)}
+                        disabled={downloadingIds.has(params.row.id)}
+                        title="Shkarko PDF"
+                      >
+                        <PrintIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => onMenuOpen(params.row.id, e.currentTarget)}
+                        title="Më shumë veprime"
+                      >
+                        <MoreVertIcon fontSize="small" />
+                      </IconButton>
+                      <Menu
+                        anchorEl={menuAnchor[params.row.id]}
+                        open={open}
+                        onClose={() => onMenuClose(params.row.id)}
+                      >
+                        <MenuItem onClick={() => {
+                          onView(params.row.id);
+                          onMenuClose(params.row.id);
+                        }}>
+                          Shiko
                         </MenuItem>
-                      ))}
-                    </Select>
-                  </Box>
-                  <Typography variant="body2"><strong>Totali:</strong> {parseFloat(invoice.total).toFixed(2)} €</Typography>
-                </Box>
-              </CardContent>
-              <CardActions sx={{ pt: 1, borderTop: 1, borderColor: 'divider', flexWrap: 'wrap' }}>
-                {isMobile ? (
-                  <>
-                    <IconButton
-                      size="small"
-                      onClick={() => onDownloadPdf(invoice.id, invoice.invoice_number)}
-                      disabled={downloadingIds.has(invoice.id)}
-                      title="Shkarko PDF"
-                      color="primary"
-                    >
-                      <PrintIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => onView(invoice.id)}
-                      title="Shiko"
-                      color="primary"
-                    >
-                      <VisibilityIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => onEdit(invoice.id)}
-                      title="Ndrysho"
-                      color="primary"
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => onDelete(invoice.id)}
-                      title="Fshi"
-                      color="error"
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </>
-                ) : (
-                  <>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  onClick={() => onDownloadPdf(invoice.id, invoice.invoice_number)}
-                  disabled={downloadingIds.has(invoice.id)}
-                  title="Shkarko PDF"
-                >
-                  {downloadingIds.has(invoice.id) ? 'Duke u shkarkuar...' : 'PDF'}
-                </Button>
-                <Button size="small" variant="outlined" onClick={() => onView(invoice.id)}>
-                  Shiko
-                </Button>
-                <Button size="small" variant="contained" onClick={() => onEdit(invoice.id)}>
-                  Ndrysho
-                </Button>
-                <Button size="small" variant="outlined" color="error" onClick={() => onDelete(invoice.id)}>
-                  Fshi
-                </Button>
-                  </>
-                )}
-              </CardActions>
-            </Card>
-          ))}
+                        <MenuItem onClick={() => {
+                          onEdit(params.row.id);
+                          onMenuClose(params.row.id);
+                        }}>
+                          Ndrysho
+                        </MenuItem>
+                        <MenuItem onClick={() => {
+                          onDelete(params.row.id);
+                          onMenuClose(params.row.id);
+                        }} sx={{ color: 'error.main' }}>
+                          Fshi
+                        </MenuItem>
+                      </Menu>
+                    </Box>
+                  );
+                },
+              },
+            ]}
+            getRowId={(row: Invoice) => row.id}
+            checkboxSelection
+            rowSelectionModel={selectedInvoiceIds}
+            onRowSelectionModelChange={(newSelection) => {
+              onSelectionChange(newSelection as number[]);
+            }}
+            pageSizeOptions={[10, 25, 50, 100]}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 25 },
+              },
+            }}
+            loading={loading}
+            sx={{
+              width: '100%',
+              maxWidth: '100%',
+            }}
+          />
         </Box>
       )}
-    </Box>
+    </div>
   );
 };
 

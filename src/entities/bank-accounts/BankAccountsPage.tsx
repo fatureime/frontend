@@ -152,14 +152,14 @@ const BankAccountsPage = () => {
               className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
               title="Lista"
             >
-              <GridViewIcon />
+              <ViewListIcon />
             </button>
             <button
               onClick={() => handleViewModeChange('grid')}
               className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
               title="Tabelë"
             >
-              <ViewListIcon />
+              <GridViewIcon />
             </button>
           </div>
         </div>
@@ -180,8 +180,6 @@ const BankAccountsPage = () => {
               onView={handleView}
               onEdit={handleEdit}
               onDelete={handleDelete}
-              isAdminTenant={isAdminTenant}
-              businessesCount={businesses.length}
             />
           ) : (
             <BankAccountsGrid
@@ -191,6 +189,8 @@ const BankAccountsPage = () => {
               onView={handleView}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              isAdminTenant={isAdminTenant}
+              businessesCount={businesses.length}
             />
           )}
         </div>

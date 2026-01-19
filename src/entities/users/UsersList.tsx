@@ -1,7 +1,5 @@
-import { Card, CardContent, CardActions, Button, IconButton, Typography, Box, Chip, useMediaQuery, useTheme } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
+import { Button, Box, Chip } from '@mui/material';
 import { User } from '../../services/api';
 import './UsersList.scss';
 
@@ -24,121 +22,126 @@ const UsersList = ({
   onDelete,
   currentUserId,
 }: UsersListProps) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  if (loading) {
-    return (
-      <Box className="users-list" sx={{ textAlign: 'center', padding: 3 }}>
-        <Typography variant="body1" color="text.secondary">Duke u ngarkuar përdoruesit...</Typography>
-      </Box>
-    );
-  }
-
   if (error) {
     return (
-      <Box className="users-list" sx={{ p: 2 }}>
-        <Box className="error-message" sx={{ bgcolor: '#ffebee', color: '#c62828', p: 2, borderRadius: 1 }}>
-          <Typography variant="body2">{error}</Typography>
-        </Box>
-      </Box>
+      <div className="users-list">
+        <div className="error-message">{error}</div>
+      </div>
     );
   }
 
   return (
-    <Box className="users-list">
+    <div className="users-list">
       {users.length === 0 ? (
-        <Typography variant="body1" className="no-users" sx={{ textAlign: 'center', padding: 3, color: 'text.secondary' }}>
-          Nuk u gjetën përdorues.
-        </Typography>
+        <p className="no-users">Nuk u gjetën përdorues.</p>
       ) : (
-        <Box className="user-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 2 }}>
-          {users.map((userItem) => (
-            <Card key={userItem.id} className="user-card" sx={{ display: 'flex', flexDirection: 'column' }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider', flexWrap: 'wrap', gap: 1 }}>
-                  <Typography variant="h6" component="h3" sx={{ flex: 1, wordBreak: 'break-word' }}>
-                    {userItem.email}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                    {userItem.roles?.includes('ROLE_ADMIN') && (
-                      <Chip label="Menagjues" color="success" size="small" />
-                    )}
-                    {userItem.is_active ? (
-                      <Chip label="Aktiv" color="primary" size="small" />
-                    ) : (
-                      <Chip label="Jo Aktiv" size="small" />
-                    )}
-                    {!userItem.email_verified && (
-                      <Chip label="I Paverifikuar" color="warning" size="small" />
-                    )}
-                  </Box>
-                </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  <Typography variant="body2"><strong>ID:</strong> {userItem.id}</Typography>
-                  <Typography variant="body2"><strong>Rolet:</strong> {userItem.roles?.join(', ') || 'ROLE_USER'}</Typography>
-                  {userItem.tenant && (
-                    <Typography variant="body2"><strong>Hapësirëmarrësi:</strong> {userItem.tenant.name}</Typography>
-                  )}
-                  {userItem.created_at && (
-                    <Typography variant="body2"><strong>Krijuar:</strong> {new Date(userItem.created_at).toLocaleDateString()}</Typography>
-                  )}
-                </Box>
-              </CardContent>
-              <CardActions>
-                {isMobile ? (
-                  <>
-                    <IconButton
-                      size="small"
-                      onClick={() => onView(userItem)}
-                      title="Shiko"
-                      color="primary"
-                    >
-                      <VisibilityIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => onEdit(userItem)}
-                      title="Edit"
-                      color="primary"
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => onDelete(userItem.id)}
-                      disabled={userItem.id === currentUserId}
-                      title={userItem.id === currentUserId ? 'Cannot delete current user' : 'Delete'}
-                      color="error"
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </>
-                ) : (
-                  <>
-                <Button size="small" variant="outlined" onClick={() => onView(userItem)}>
-                  Shiko
-                </Button>
-                <Button size="small" variant="contained" onClick={() => onEdit(userItem)}>
-                  Edit
-                </Button>
-                <Button
-                  size="small"
-                  variant="outlined"
-                  color="error"
-                  onClick={() => onDelete(userItem.id)}
-                  disabled={userItem.id === currentUserId}
-                >
-                  Delete
-                </Button>
-                  </>
-                )}
-              </CardActions>
-            </Card>
-          ))}
+        <Box sx={{ height: 600, width: '100%' }}>
+          <DataGrid
+            rows={users}
+            columns={[
+              {
+                field: 'id',
+                headerName: 'ID',
+              },
+              {
+                field: 'email',
+                headerName: 'E-mail',
+                flex: 1,
+              },
+              {
+                field: 'roles',
+                headerName: 'Rolet',
+                valueGetter: (_value: unknown, row: User) => 
+                  row.roles?.join(', ') || 'ROLE_USER',
+              },
+              {
+                field: 'is_active',
+                headerName: 'Statusi',
+                renderCell: (params: GridRenderCellParams<User>) => (
+                  <Chip
+                    label={params.row.is_active ? 'Aktiv' : 'Jo Aktiv'}
+                    color={params.row.is_active ? 'success' : 'default'}
+                    size="small"
+                  />
+                ),
+              },
+              {
+                field: 'email_verified',
+                headerName: 'Verifikuar',
+                renderCell: (params: GridRenderCellParams<User>) => (
+                  params.row.email_verified ? (
+                    <Chip label="Po" color="success" size="small" />
+                  ) : (
+                    <Chip label="Jo" color="warning" size="small" />
+                  )
+                ),
+              },
+              {
+                field: 'tenant',
+                headerName: 'Hapësirëmarrësi',
+                flex: 1,
+                valueGetter: (_value: unknown, row: User) => 
+                  row.tenant?.name || 'N/A',
+              },
+              {
+                field: 'created_at',
+                headerName: 'Krijuar',
+                valueGetter: (_value: unknown, row: User) => 
+                  row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
+              },
+              {
+                field: 'actions',
+                headerName: 'Veprimet',
+                sortable: false,
+                filterable: false,
+                renderCell: (params: GridRenderCellParams<User>) => {
+                  const isCurrentUser = currentUserId === params.row.id;
+                  return (
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => onView(params.row)}
+                        sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                      >
+                        Shiko
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        onClick={() => onEdit(params.row)}
+                        sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        onClick={() => onDelete(params.row.id)}
+                        disabled={isCurrentUser}
+                        sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                      >
+                        Delete
+                      </Button>
+                    </Box>
+                  );
+                },
+              },
+            ]}
+            getRowId={(row: User) => row.id}
+            disableRowSelectionOnClick
+            pageSizeOptions={[10, 25, 50]}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 25 },
+              },
+            }}
+            loading={loading}
+          />
         </Box>
       )}
-    </Box>
+    </div>
   );
 };
 

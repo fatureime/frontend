@@ -1,5 +1,8 @@
-import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
-import { Button, Box } from '@mui/material';
+import { Card, CardContent, CardActions, Button, IconButton, Typography, Box, useMediaQuery, useTheme } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { InvoiceStatus } from '../../services/api';
 import { getStatusLabel } from '../../utils/invoiceStatusLabels';
 import './InvoiceStatusesGrid.scss';
@@ -27,106 +30,111 @@ const InvoiceStatusesGrid = ({
   canEdit = false,
   labels = {},
 }: InvoiceStatusesGridProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  if (loading) {
+    return (
+      <Box className="invoice-statuses-grid" sx={{ textAlign: 'center', padding: 3 }}>
+        <Typography variant="body1" color="text.secondary">Duke u ngarkuar gjendje të faturave...</Typography>
+      </Box>
+    );
+  }
+
   if (error) {
     return (
-      <div className="invoice-statuses-grid">
-        <div className="error-message">{error}</div>
-      </div>
+      <Box className="invoice-statuses-grid" sx={{ p: 2 }}>
+        <Box className="error-message" sx={{ bgcolor: '#ffebee', color: '#c62828', p: 2, borderRadius: 1 }}>
+          <Typography variant="body2">{error}</Typography>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <div className="invoice-statuses-grid">
+    <Box className="invoice-statuses-grid">
       {statuses.length === 0 ? (
-        <p className="no-statuses">Nuk u gjetën gjendje të faturave.</p>
+        <Typography variant="body1" className="no-statuses" sx={{ textAlign: 'center', padding: 3, color: 'text.secondary' }}>
+          Nuk u gjetën gjendje të faturave.
+        </Typography>
       ) : (
-        <Box sx={{ height: 400, width: '100%' }}>
-          <DataGrid
-            rows={statuses}
-            columns={[
-              {
-                field: 'id',
-                headerName: 'ID',
-              },
-              {
-                field: 'code',
-                headerName: 'Kodi',
-                renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
-                  <strong>{params.value}</strong>
-                ),
-              },
-              {
-                field: 'label',
-                headerName: 'Etiketa',
-                valueGetter: (_value: unknown, row: InvoiceStatus) => 
-                  labels[row.code] || getStatusLabel(row.code),
-                flex: 1,
-              },
-              {
-                field: 'view',
-                headerName: 'Shiko',
-                sortable: false,
-                filterable: false,
-                renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => onView(params.row)}
-                    sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                  >
-                    Shiko
-                  </Button>
-                ),
-              },
-              ...(canEdit ? [{
-                field: 'actions',
-                headerName: 'Veprimet',
-                sortable: false,
-                filterable: false,
-                renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
+        <Box className="status-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 2 }}>
+          {statuses.map((status) => (
+            <Card key={status.id} className="status-card" sx={{ display: 'flex', flexDirection: 'column' }}>
+              <CardContent>
+                <Typography variant="h6" component="h3" sx={{ mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
+                  {status.code}
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Typography variant="body2"><strong>Etiketa:</strong> {labels[status.code] || getStatusLabel(status.code)}</Typography>
+                </Box>
+              </CardContent>
+              <CardActions sx={{ pt: 1, borderTop: 1, borderColor: 'divider', flexWrap: 'wrap' }}>
+                {isMobile ? (
+                  <>
+                    <IconButton
                       size="small"
-                      variant="contained"
-                      onClick={() => onEdit(params.row)}
-                      sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                      onClick={() => onView(status)}
+                      title="Shiko"
+                      color="primary"
                     >
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
+                    {canEdit && (
+                      <>
+                        <IconButton
+                          size="small"
+                          onClick={() => onEdit(status)}
+                          title="Ndrysho Kod"
+                          color="primary"
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => onEditLabel(status)}
+                          title="Ndrysho Etiketë"
+                          color="primary"
+                        >
+                          <EditNoteIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => onDelete(status.id)}
+                          title="Fshi"
+                          color="error"
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
+                <Button size="small" variant="outlined" onClick={() => onView(status)}>
+                  Shiko
+                </Button>
+                {canEdit && (
+                  <>
+                    <Button size="small" variant="contained" onClick={() => onEdit(status)}>
                       Ndrysho Kod
                     </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => onEditLabel(params.row)}
-                      sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                    >
+                    <Button size="small" variant="contained" onClick={() => onEditLabel(status)}>
                       Ndrysho Etiketë
                     </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      color="error"
-                      onClick={() => onDelete(params.row.id)}
-                      sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                    >
+                    <Button size="small" variant="outlined" color="error" onClick={() => onDelete(status.id)}>
                       Fshi
                     </Button>
-                  </Box>
-                ),
-              }] : []),
-            ]}
-            getRowId={(row: InvoiceStatus) => row.id}
-            disableRowSelectionOnClick
-            pageSizeOptions={[10, 25, 50]}
-            initialState={{
-              pagination: {
-                paginationModel: { pageSize: 25 },
-              },
-            }}
-            loading={loading}
-          />
+                      </>
+                    )}
+                  </>
+                )}
+              </CardActions>
+            </Card>
+          ))}
         </Box>
       )}
-    </div>
+    </Box>
   );
 };
 

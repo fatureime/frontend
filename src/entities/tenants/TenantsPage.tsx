@@ -122,14 +122,14 @@ const TenantsPage = () => {
               className={`toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
               title="Lista"
             >
-              <GridViewIcon />
+              <ViewListIcon />
             </button>
             <button
               onClick={() => handleViewModeChange('grid')}
               className={`toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
               title="Tabelë"
             >
-              <ViewListIcon />
+              <GridViewIcon />
             </button>
           </div>
         </div>

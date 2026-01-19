@@ -1,5 +1,7 @@
-import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
-import { Button, Box, Chip } from '@mui/material';
+import { Card, CardContent, CardActions, Button, IconButton, Typography, Box, Chip, useMediaQuery, useTheme } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Tenant } from '../../services/api';
 import './TenantsGrid.scss';
 
@@ -22,124 +24,111 @@ const TenantsGrid = ({
   onDelete,
   canDelete = false,
 }: TenantsGridProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  if (loading) {
+    return (
+      <Box className="tenants-grid" sx={{ textAlign: 'center', padding: 3 }}>
+        <Typography variant="body1" color="text.secondary">Duke u ngarkuar hapësirëmarrësit...</Typography>
+      </Box>
+    );
+  }
+
   if (error) {
     return (
-      <div className="tenants-grid">
-        <div className="error-message">{error}</div>
-      </div>
+      <Box className="tenants-grid" sx={{ p: 2 }}>
+        <Box className="error-message" sx={{ bgcolor: '#ffebee', color: '#c62828', p: 2, borderRadius: 1 }}>
+          <Typography variant="body2">{error}</Typography>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <div className="tenants-grid">
+    <Box className="tenants-grid">
       {tenants.length === 0 ? (
-        <p className="no-tenants">Nuk u gjetën hapësirëmarrës.</p>
+        <Typography variant="body1" className="no-tenants" sx={{ textAlign: 'center', padding: 3, color: 'text.secondary' }}>
+          Nuk u gjetën hapësirëmarrës.
+        </Typography>
       ) : (
-        <Box sx={{ height: 600, width: '100%' }}>
-          <DataGrid
-            rows={tenants}
-            columns={[
-              {
-                field: 'id',
-                headerName: 'ID',
-              },
-              {
-                field: 'name',
-                headerName: 'Emri',
-                flex: 1,
-              },
-              {
-                field: 'is_admin',
-                headerName: 'Menagjues',
-                renderCell: (params: GridRenderCellParams<Tenant>) => (
-                  params.row.is_admin ? (
-                    <Chip label="Po" color="success" size="small" />
-                  ) : (
-                    <Chip label="Jo" size="small" />
-                  )
-                ),
-              },
-              {
-                field: 'has_paid',
-                headerName: 'I Paguar',
-                renderCell: (params: GridRenderCellParams<Tenant>) => (
-                  params.row.has_paid ? (
-                    <Chip label="Po" color="success" size="small" />
-                  ) : (
-                    <Chip label="Jo" size="small" />
-                  )
-                ),
-              },
-              {
-                field: 'issuer_business',
-                headerName: 'Subjekti Lëshues',
-                flex: 1,
-                valueGetter: (_value: unknown, row: Tenant) => 
-                  row.issuer_business?.business_name || 'N/A',
-              },
-              {
-                field: 'users',
-                headerName: 'Përdoruesit',
-                valueGetter: (_value: unknown, row: Tenant) => 
-                  row.users?.length || 0,
-              },
-              {
-                field: 'created_at',
-                headerName: 'Krijuar',
-                valueGetter: (_value: unknown, row: Tenant) => 
-                  row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
-              },
-              {
-                field: 'actions',
-                headerName: 'Veprimet',
-                sortable: false,
-                filterable: false,
-                renderCell: (params: GridRenderCellParams<Tenant>) => (
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => onView(params.row)}
-                      sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                    >
-                      Shiko
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      onClick={() => onEdit(params.row)}
-                      sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                    >
-                      Ndrysho
-                    </Button>
-                    {canDelete && (
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="error"
-                        onClick={() => onDelete(params.row.id)}
-                        sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                      >
-                        Fshi
-                      </Button>
-                    )}
+        <Box className="tenant-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 2 }}>
+          {tenants.map((tenant) => (
+            <Card key={tenant.id} className="tenant-card" sx={{ display: 'flex', flexDirection: 'column' }}>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider', flexWrap: 'wrap', gap: 1 }}>
+                  <Typography variant="h6" component="h3" sx={{ flex: 1, wordBreak: 'break-word' }}>
+                    {tenant.name}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                    {tenant.is_admin && <Chip label="Menagjues" color="success" size="small" />}
+                    {tenant.has_paid && <Chip label="I Paguar" color="primary" size="small" />}
                   </Box>
-                ),
-              },
-            ]}
-            getRowId={(row: Tenant) => row.id}
-            disableRowSelectionOnClick
-            pageSizeOptions={[10, 25, 50]}
-            initialState={{
-              pagination: {
-                paginationModel: { pageSize: 25 },
-              },
-            }}
-            loading={loading}
-          />
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Typography variant="body2"><strong>ID:</strong> {tenant.id}</Typography>
+                  {tenant.issuer_business && (
+                    <Typography variant="body2"><strong>Subjekti Lëshues:</strong> {tenant.issuer_business.business_name}</Typography>
+                  )}
+                  {tenant.users && (
+                    <Typography variant="body2"><strong>Përdoruesit:</strong> {tenant.users.length}</Typography>
+                  )}
+                  {tenant.created_at && (
+                    <Typography variant="body2"><strong>Krijuar:</strong> {new Date(tenant.created_at).toLocaleDateString()}</Typography>
+                  )}
+                </Box>
+              </CardContent>
+              <CardActions>
+                {isMobile ? (
+                  <>
+                    <IconButton
+                      size="small"
+                      onClick={() => onView(tenant)}
+                      title="Shiko"
+                      color="primary"
+                    >
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => onEdit(tenant)}
+                      title="Ndrysho"
+                      color="primary"
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                    {canDelete && (
+                      <IconButton
+                        size="small"
+                        onClick={() => onDelete(tenant.id)}
+                        title="Fshi"
+                        color="error"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </>
+                ) : (
+                  <>
+                <Button size="small" variant="outlined" onClick={() => onView(tenant)}>
+                  Shiko
+                </Button>
+                <Button size="small" variant="contained" onClick={() => onEdit(tenant)}>
+                  Ndrysho
+                </Button>
+                {canDelete && (
+                  <Button size="small" variant="outlined" color="error" onClick={() => onDelete(tenant.id)}>
+                    Fshi
+                  </Button>
+                    )}
+                  </>
+                )}
+              </CardActions>
+            </Card>
+          ))}
         </Box>
       )}
-    </div>
+    </Box>
   );
 };
 

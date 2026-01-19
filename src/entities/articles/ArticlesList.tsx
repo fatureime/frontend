@@ -1,7 +1,5 @@
-import { Card, CardContent, CardActions, Button, IconButton, Typography, Box, useMediaQuery, useTheme } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
+import { Button, Box } from '@mui/material';
 import { Article } from '../../services/api';
 import './ArticlesList.scss';
 
@@ -22,109 +20,102 @@ const ArticlesList = ({
   onEdit,
   onDelete,
 }: ArticlesListProps) => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  if (loading) {
-    return (
-      <Box className="articles-list" sx={{ textAlign: 'center', padding: 3 }}>
-        <Typography variant="body1" color="text.secondary">Duke u ngarkuar artikujt...</Typography>
-      </Box>
-    );
-  }
-
   if (error) {
     return (
-      <Box className="articles-list" sx={{ p: 2 }}>
-        <Box className="error-message" sx={{ bgcolor: '#ffebee', color: '#c62828', p: 2, borderRadius: 1 }}>
-          <Typography variant="body2">{error}</Typography>
-        </Box>
-      </Box>
+      <div className="articles-list">
+        <div className="error-message">{error}</div>
+      </div>
     );
   }
 
   return (
-    <Box className="articles-list">
+    <div className="articles-list">
       {articles.length === 0 ? (
-        <Typography variant="body1" className="no-articles" sx={{ textAlign: 'center', padding: 3, color: 'text.secondary' }}>
-          Nuk u gjetën artikuj.
-        </Typography>
+        <p className="no-articles">Nuk u gjetën artikuj.</p>
       ) : (
-        <Box className="article-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
-          {articles.map((article) => (
-            <Card key={article.id} className="article-card" sx={{ display: 'flex', flexDirection: 'column' }}>
-              <CardContent>
-                <Typography variant="h6" component="h3" sx={{ mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
-                  {article.name}
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {article.description && (
-                    <Typography variant="body2">
-                      <strong>Përshkrimi:</strong> {article.description}
-                    </Typography>
-                  )}
-                  <Typography variant="body2">
-                    <strong>Çmimi për njësi:</strong> {parseFloat(article.unit_price).toFixed(2)} €
-                  </Typography>
-                  {article.unit && (
-                    <Typography variant="body2">
-                      <strong>Njësia:</strong> {article.unit}
-                    </Typography>
-                  )}
-                  {article.created_at && (
-                    <Typography variant="body2">
-                      <strong>Krijuar:</strong> {new Date(article.created_at).toLocaleDateString()}
-                    </Typography>
-                  )}
-                </Box>
-              </CardContent>
-              <CardActions sx={{ pt: 1, borderTop: 1, borderColor: 'divider' }}>
-                {isMobile ? (
-                  <>
-                    <IconButton
+        <Box sx={{ height: 600, width: '100%' }}>
+          <DataGrid
+            rows={articles}
+            columns={[
+              {
+                field: 'id',
+                headerName: 'ID',
+              },
+              {
+                field: 'name',
+                headerName: 'Emri',
+                flex: 1,
+              },
+              {
+                field: 'description',
+                headerName: 'Përshkrimi',
+                flex: 1,
+              },
+              {
+                field: 'unit_price',
+                headerName: 'Çmimi për njësi',
+                valueGetter: (_value: unknown, row: Article) => 
+                  `${parseFloat(row.unit_price).toFixed(2)} €`,
+              },
+              {
+                field: 'unit',
+                headerName: 'Njësia',
+              },
+              {
+                field: 'created_at',
+                headerName: 'Krijuar',
+                valueGetter: (_value: unknown, row: Article) => 
+                  row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
+              },
+              {
+                field: 'actions',
+                headerName: 'Veprimet',
+                sortable: false,
+                filterable: false,
+                renderCell: (params: GridRenderCellParams<Article>) => (
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
                       size="small"
-                      onClick={() => onView(article)}
-                      title="Shiko"
-                      color="primary"
+                      variant="outlined"
+                      onClick={() => onView(params.row)}
+                      sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
                     >
-                      <VisibilityIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
+                      Shiko
+                    </Button>
+                    <Button
                       size="small"
-                      onClick={() => onEdit(article)}
-                      title="Ndrysho"
-                      color="primary"
+                      variant="contained"
+                      onClick={() => onEdit(params.row)}
+                      sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
                     >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
+                      Ndrysho
+                    </Button>
+                    <Button
                       size="small"
-                      onClick={() => onDelete(article.id)}
-                      title="Fshi"
+                      variant="outlined"
                       color="error"
+                      onClick={() => onDelete(params.row.id)}
+                      sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
                     >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </>
-                ) : (
-                  <>
-                <Button size="small" variant="outlined" onClick={() => onView(article)}>
-                  Shiko
-                </Button>
-                <Button size="small" variant="contained" onClick={() => onEdit(article)}>
-                  Ndrysho
-                </Button>
-                <Button size="small" variant="outlined" color="error" onClick={() => onDelete(article.id)}>
-                  Fshi
-                </Button>
-                  </>
-                )}
-              </CardActions>
-            </Card>
-          ))}
+                      Fshi
+                    </Button>
+                  </Box>
+                ),
+              },
+            ]}
+            getRowId={(row: Article) => row.id}
+            disableRowSelectionOnClick
+            pageSizeOptions={[10, 25, 50]}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 25 },
+              },
+            }}
+            loading={loading}
+          />
         </Box>
       )}
-    </Box>
+    </div>
   );
 };
 
