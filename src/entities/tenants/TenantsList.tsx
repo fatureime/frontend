@@ -42,15 +42,18 @@ const TenantsList = ({
               {
                 field: 'id',
                 headerName: 'ID',
+                minWidth: 100,
               },
               {
                 field: 'name',
                 headerName: 'Emri',
                 flex: 1,
+                minWidth: 100,
               },
               {
                 field: 'is_admin',
                 headerName: 'Menagjues',
+                minWidth: 100,
                 renderCell: (params: GridRenderCellParams<Tenant>) => (
                   params.row.is_admin ? (
                     <Chip label="Po" color="success" size="small" />
@@ -62,6 +65,7 @@ const TenantsList = ({
               {
                 field: 'has_paid',
                 headerName: 'I Paguar',
+                minWidth: 100,
                 renderCell: (params: GridRenderCellParams<Tenant>) => (
                   params.row.has_paid ? (
                     <Chip label="Po" color="success" size="small" />
@@ -74,24 +78,28 @@ const TenantsList = ({
                 field: 'issuer_business',
                 headerName: 'Subjekti Lëshues',
                 flex: 1,
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: Tenant) => 
                   row.issuer_business?.business_name || 'N/A',
               },
               {
                 field: 'users',
                 headerName: 'Përdoruesit',
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: Tenant) => 
                   row.users?.length || 0,
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: Tenant) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
+                minWidth: 100,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Tenant>) => (
@@ -136,6 +144,26 @@ const TenantsList = ({
               },
             }}
             loading={loading}
+            sx={{
+              width: '100%',
+              maxWidth: '100%',
+              '& .MuiDataGrid-columnHeaderTitle': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                textAlign: 'center',
+              },
+              '& .MuiDataGrid-columnHeader': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+              },
+              '& .MuiDataGrid-cell': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                wordBreak: 'break-word',
+                display: 'flex',
+                alignItems: 'center',
+              },
+            }}
           />
         </Box>
       )}

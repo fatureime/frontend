@@ -467,11 +467,13 @@ const InvoiceView = () => {
                     {
                       field: 'index',
                       headerName: '#',
+                      minWidth: 100,
                     },
                     {
                       field: 'description',
                       headerName: 'Përshkrimi',
                       flex: 1,
+                      minWidth: 100,
                       renderCell: (params: GridRenderCellParams<InvoiceItem & { index: number }>) => (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <span>{params.value}</span>
@@ -484,16 +486,19 @@ const InvoiceView = () => {
                     {
                       field: 'quantity',
                       headerName: 'Sasia',
+                      minWidth: 100,
                       valueFormatter: (value: string) => parseFloat(value).toFixed(2),
                     },
                     {
                       field: 'unit_price',
                       headerName: 'Çmimi për Njësi',
+                      minWidth: 100,
                       valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
                     },
                     {
                       field: 'tax_rate',
                       headerName: 'Vlera e TVSH',
+                      minWidth: 100,
                       valueGetter: (_value: unknown, row: InvoiceItem & { index: number }) => 
                         row.tax?.rate ?? null,
                       renderCell: (params: GridRenderCellParams<InvoiceItem & { index: number }>) => (
@@ -505,16 +510,19 @@ const InvoiceView = () => {
                     {
                       field: 'subtotal',
                       headerName: 'Vlera pa TVSH',
+                      minWidth: 100,
                       valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
                     },
                     {
                       field: 'tax_amount',
                       headerName: 'Vlera e TVSH',
+                      minWidth: 100,
                       valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
                     },
                     {
                       field: 'total',
                       headerName: 'Totali',
+                      minWidth: 100,
                       valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
                       renderCell: (params: GridRenderCellParams<InvoiceItem & { index: number }>) => (
                         <strong>{parseFloat(params.value as string).toFixed(2)} €</strong>
@@ -526,7 +534,23 @@ const InvoiceView = () => {
                   disableColumnMenu
                   hideFooter
                   sx={{
+                    width: '100%',
+                    maxWidth: '100%',
+                    '& .MuiDataGrid-columnHeaderTitle': {
+                      whiteSpace: 'normal',
+                      lineHeight: 1.5,
+                      textAlign: 'center',
+                    },
+                    '& .MuiDataGrid-columnHeader': {
+                      whiteSpace: 'normal',
+                      lineHeight: 1.5,
+                    },
                     '& .MuiDataGrid-cell': {
+                      whiteSpace: 'normal',
+                      lineHeight: 1.5,
+                      wordBreak: 'break-word',
+                      display: 'flex',
+                      alignItems: 'center',
                       borderBottom: '1px solid rgba(224, 224, 224, 1)',
                     },
                     '& .MuiDataGrid-filler': {

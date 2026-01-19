@@ -71,6 +71,7 @@ const InvoicesList = ({
                 field: 'invoice_number',
                 headerName: 'Numri i Faturës',
                 flex: 1,
+                minWidth: 100,
                 renderCell: (params: GridRenderCellParams<Invoice>) => {
                   return (
                     <Link
@@ -87,30 +88,35 @@ const InvoicesList = ({
                 field: 'invoice_date',
                 headerName: 'Data',
                 flex: 0.8,
+                minWidth: 100,
                 valueFormatter: (value: string) => new Date(value).toLocaleDateString(),
               },
               {
                 field: 'due_date',
                 headerName: 'Data e Maturimit',
                 flex: 1,
+                minWidth: 100,
                 valueFormatter: (value: string) => new Date(value).toLocaleDateString(),
               },
               {
                 field: 'issuer',
                 headerName: 'Fatura Nga',
                 flex: 1.2,
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: Invoice) => row.issuer?.business_name || 'N/A',
               },
               {
                 field: 'receiver',
                 headerName: 'Fatura Për',
                 flex: 1.2,
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: Invoice) => row.receiver?.business_name || 'N/A',
               },
               {
                 field: 'status',
                 headerName: 'Statusi',
-                flex: 1,
+                flex: 1,  
+                minWidth: 100,
                 renderCell: (params: GridRenderCellParams<Invoice>) => (
                   <Select
                     value={params.value}
@@ -135,12 +141,14 @@ const InvoicesList = ({
                 field: 'total',
                 headerName: 'Totali',
                 flex: 0.8,
+                minWidth: 100,
                 valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
                 flex: 0.8,
+                minWidth: 100,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Invoice>) => {
@@ -200,6 +208,7 @@ const InvoicesList = ({
             ]}
             getRowId={(row: Invoice) => row.id}
             checkboxSelection
+            disableRowSelectionOnClick
             rowSelectionModel={selectedInvoiceIds}
             onRowSelectionModelChange={(newSelection) => {
               onSelectionChange(newSelection as number[]);
@@ -214,6 +223,22 @@ const InvoicesList = ({
             sx={{
               width: '100%',
               maxWidth: '100%',
+              '& .MuiDataGrid-columnHeaderTitle': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                textAlign: 'center',
+              },
+              '& .MuiDataGrid-columnHeader': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+              },
+              '& .MuiDataGrid-cell': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                wordBreak: 'break-word',
+                display: 'flex',
+                alignItems: 'center',
+              },
             }}
           />
         </Box>

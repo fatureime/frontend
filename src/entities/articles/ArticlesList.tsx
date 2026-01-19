@@ -40,36 +40,43 @@ const ArticlesList = ({
               {
                 field: 'id',
                 headerName: 'ID',
+                minWidth: 100,
               },
               {
                 field: 'name',
                 headerName: 'Emri',
                 flex: 1,
+                minWidth: 100,
               },
               {
                 field: 'description',
                 headerName: 'Përshkrimi',
                 flex: 1,
+                minWidth: 100,
               },
               {
                 field: 'unit_price',
                 headerName: 'Çmimi për njësi',
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: Article) => 
                   `${parseFloat(row.unit_price).toFixed(2)} €`,
               },
               {
                 field: 'unit',
                 headerName: 'Njësia',
+                minWidth: 100,
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: Article) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
+                minWidth: 100,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Article>) => (
@@ -112,6 +119,26 @@ const ArticlesList = ({
               },
             }}
             loading={loading}
+            sx={{
+              width: '100%',
+              maxWidth: '100%',
+              '& .MuiDataGrid-columnHeaderTitle': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                textAlign: 'center',
+              },
+              '& .MuiDataGrid-columnHeader': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+              },
+              '& .MuiDataGrid-cell': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                wordBreak: 'break-word',
+                display: 'flex',
+                alignItems: 'center',
+              },
+            }}
           />
         </Box>
       )}

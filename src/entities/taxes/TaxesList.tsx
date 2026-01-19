@@ -47,26 +47,31 @@ const TaxesList = ({
               {
                 field: 'id',
                 headerName: 'ID',
+                minWidth: 100,
               },
               {
                 field: 'rate',
                 headerName: 'Norma',
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: Tax) => formatRate(row.rate),
               },
               {
                 field: 'name',
                 headerName: 'Emri',
                 flex: 1,
+                minWidth: 100,
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: Tax) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
               },
               {
                 field: 'view',
                 headerName: 'Shiko',
+                minWidth: 100,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Tax>) => (
@@ -83,6 +88,7 @@ const TaxesList = ({
               ...(canEdit ? [{
                 field: 'actions',
                 headerName: 'Veprimet',
+                minWidth: 100,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Tax>) => (
@@ -117,6 +123,26 @@ const TaxesList = ({
               },
             }}
             loading={loading}
+            sx={{
+              width: '100%',
+              maxWidth: '100%',
+              '& .MuiDataGrid-columnHeaderTitle': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                textAlign: 'center',
+              },
+              '& .MuiDataGrid-columnHeader': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+              },
+              '& .MuiDataGrid-cell': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                wordBreak: 'break-word',
+                display: 'flex',
+                alignItems: 'center',
+              },
+            }}
           />
         </Box>
       )}

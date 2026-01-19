@@ -42,21 +42,25 @@ const UsersList = ({
               {
                 field: 'id',
                 headerName: 'ID',
+                minWidth: 100,
               },
               {
                 field: 'email',
                 headerName: 'E-mail',
                 flex: 1,
+                minWidth: 100,
               },
               {
                 field: 'roles',
                 headerName: 'Rolet',
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: User) => 
                   row.roles?.join(', ') || 'ROLE_USER',
               },
               {
                 field: 'is_active',
                 headerName: 'Statusi',
+                minWidth: 100,
                 renderCell: (params: GridRenderCellParams<User>) => (
                   <Chip
                     label={params.row.is_active ? 'Aktiv' : 'Jo Aktiv'}
@@ -68,6 +72,7 @@ const UsersList = ({
               {
                 field: 'email_verified',
                 headerName: 'Verifikuar',
+                minWidth: 100,
                 renderCell: (params: GridRenderCellParams<User>) => (
                   params.row.email_verified ? (
                     <Chip label="Po" color="success" size="small" />
@@ -80,18 +85,21 @@ const UsersList = ({
                 field: 'tenant',
                 headerName: 'Hapësirëmarrësi',
                 flex: 1,
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: User) => 
                   row.tenant?.name || 'N/A',
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: User) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
+                minWidth: 100,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<User>) => {
@@ -138,6 +146,26 @@ const UsersList = ({
               },
             }}
             loading={loading}
+            sx={{
+              width: '100%',
+              maxWidth: '100%',
+              '& .MuiDataGrid-columnHeaderTitle': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                textAlign: 'center',
+              },
+              '& .MuiDataGrid-columnHeader': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+              },
+              '& .MuiDataGrid-cell': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                wordBreak: 'break-word',
+                display: 'flex',
+                alignItems: 'center',
+              },
+            }}
           />
         </Box>
       )}

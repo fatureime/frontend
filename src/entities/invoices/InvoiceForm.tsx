@@ -576,6 +576,7 @@ const InvoiceForm = () => {
                     {
                       field: 'articleId',
                       headerName: 'Artikulli',
+                      minWidth: 100,
                       editable: true,
                       renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
                         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', height: '100%', width: '100%' }}>
@@ -629,6 +630,7 @@ const InvoiceForm = () => {
                     {
                       field: 'description',
                       headerName: 'Përshkrimi',
+                      minWidth: 100,
                       editable: true,
                       flex: 1,
                       renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
@@ -647,6 +649,7 @@ const InvoiceForm = () => {
                     {
                       field: 'quantity',
                       headerName: 'Sasia',
+                      minWidth: 100,
                       editable: true,
                       type: 'number',
                       renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
@@ -667,6 +670,7 @@ const InvoiceForm = () => {
                     {
                       field: 'unitPrice',
                       headerName: 'Çmimi për Njësi',
+                      minWidth: 100,
                       editable: true,
                       type: 'number',
                       renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
@@ -687,6 +691,7 @@ const InvoiceForm = () => {
                     {
                       field: 'taxId',
                       headerName: 'Vlera e TVSH',
+                      minWidth: 100,
                       editable: true,
                       renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
                         <Select
@@ -716,6 +721,7 @@ const InvoiceForm = () => {
                     {
                       field: 'total',
                       headerName: 'Totali',
+                      minWidth: 100,
                       valueFormatter: (value: number) => `${value.toFixed(2)} €`,
                       renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => (
                         <strong>{(params.value as number).toFixed(2)} €</strong>
@@ -724,6 +730,7 @@ const InvoiceForm = () => {
                     {
                       field: 'actions',
                       headerName: '',
+                      minWidth: 100,
                       sortable: false,
                       filterable: false,
                       renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => (
@@ -749,7 +756,23 @@ const InvoiceForm = () => {
                     return updated;
                   }}
                   sx={{
+                    width: '100%',
+                    maxWidth: '100%',
+                    '& .MuiDataGrid-columnHeaderTitle': {
+                      whiteSpace: 'normal',
+                      lineHeight: 1.5,
+                      textAlign: 'center',
+                    },
+                    '& .MuiDataGrid-columnHeader': {
+                      whiteSpace: 'normal',
+                      lineHeight: 1.5,
+                    },
                     '& .MuiDataGrid-cell': {
+                      whiteSpace: 'normal',
+                      lineHeight: 1.5,
+                      wordBreak: 'break-word',
+                      display: 'flex',
+                      alignItems: 'center',
                       borderBottom: '1px solid rgba(224, 224, 224, 1)',
                     },
                   }}

@@ -44,11 +44,13 @@ const BankAccountsList = ({
               {
                 field: 'id',
                 headerName: 'ID',
+                minWidth: 100,
               },
               {
                 field: 'business',
                 headerName: 'Subjekti',
                 flex: 1,
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: BankAccountWithBusiness) => 
                   row.business?.business_name || `Subjekti #${row.business_id}`,
               },
@@ -56,30 +58,36 @@ const BankAccountsList = ({
                 field: 'bank_name',
                 headerName: 'Emri i Bankës',
                 flex: 1,
+                minWidth: 100,
               },
               {
                 field: 'iban',
                 headerName: 'IBAN',
                 flex: 1,
+                minWidth: 100,
               },
               {
                 field: 'swift',
                 headerName: 'SWIFT',
+                minWidth: 100,
               },
               {
                 field: 'bank_account_number',
                 headerName: 'Numri i Llogarisë',
                 flex: 1,
+                minWidth: 100,
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: BankAccountWithBusiness) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
+                minWidth: 100,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<BankAccountWithBusiness>) => (
@@ -122,6 +130,26 @@ const BankAccountsList = ({
               },
             }}
             loading={loading}
+            sx={{
+              width: '100%',
+              maxWidth: '100%',
+              '& .MuiDataGrid-columnHeaderTitle': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                textAlign: 'center',
+              },
+              '& .MuiDataGrid-columnHeader': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+              },
+              '& .MuiDataGrid-cell': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                wordBreak: 'break-word',
+                display: 'flex',
+                alignItems: 'center',
+              },
+            }}
           />
         </Box>
       )}

@@ -42,47 +42,57 @@ const BusinessesList = ({
               {
                 field: 'id',
                 headerName: 'ID',
+                minWidth: 100,
               },
               {
                 field: 'business_name',
                 headerName: 'Emri i Biznesit',
                 flex: 1,
+                minWidth: 100,
               },
               {
                 field: 'trade_name',
                 headerName: 'Emri Tregtar',
                 flex: 1,
+                minWidth: 100,
               },
               {
                 field: 'business_type',
                 headerName: 'Lloji',
+                minWidth: 100,
               },
               {
                 field: 'fiscal_number',
                 headerName: 'Numri Fiskal',
+                minWidth: 100,
               },
               {
                 field: 'vat_number',
                 headerName: 'Numri TVSH',
+                minWidth: 100,
               },
               {
                 field: 'email',
                 headerName: 'E-mail',
                 flex: 1,
+                minWidth: 100,
               },
               {
                 field: 'phone',
                 headerName: 'Telefoni',
+                minWidth: 100,
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: Business) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
               },
               {
                 field: 'issuer',
                 headerName: 'Lëshues',
+                minWidth: 100,
                 renderCell: (params: GridRenderCellParams<Business>) => {
                   const isIssuer = issuerBusinessId === params.row.id;
                   return isIssuer ? (
@@ -93,6 +103,7 @@ const BusinessesList = ({
               {
                 field: 'actions',
                 headerName: 'Veprimet',
+                minWidth: 100,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Business>) => {
@@ -140,6 +151,26 @@ const BusinessesList = ({
               },
             }}
             loading={loading}
+            sx={{
+              width: '100%',
+              maxWidth: '100%',
+              '& .MuiDataGrid-columnHeaderTitle': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                textAlign: 'center',
+              },
+              '& .MuiDataGrid-columnHeader': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+              },
+              '& .MuiDataGrid-cell': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                wordBreak: 'break-word',
+                display: 'flex',
+                alignItems: 'center',
+              },
+            }}
           />
         </Box>
       )}

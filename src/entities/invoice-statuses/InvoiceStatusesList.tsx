@@ -47,10 +47,12 @@ const InvoiceStatusesList = ({
               {
                 field: 'id',
                 headerName: 'ID',
+                minWidth: 100,
               },
               {
                 field: 'code',
                 headerName: 'Kodi',
+                minWidth: 100,
                 renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
                   <strong>{params.value}</strong>
                 ),
@@ -58,6 +60,7 @@ const InvoiceStatusesList = ({
               {
                 field: 'label',
                 headerName: 'Etiketa',
+                minWidth: 100,
                 valueGetter: (_value: unknown, row: InvoiceStatus) => 
                   labels[row.code] || getStatusLabel(row.code),
                 flex: 1,
@@ -65,6 +68,7 @@ const InvoiceStatusesList = ({
               {
                 field: 'view',
                 headerName: 'Shiko',
+                minWidth: 100,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
@@ -81,6 +85,7 @@ const InvoiceStatusesList = ({
               ...(canEdit ? [{
                 field: 'actions',
                 headerName: 'Veprimet',
+                minWidth: 100,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
@@ -123,6 +128,26 @@ const InvoiceStatusesList = ({
               },
             }}
             loading={loading}
+            sx={{
+              width: '100%',
+              maxWidth: '100%',
+              '& .MuiDataGrid-columnHeaderTitle': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                textAlign: 'center',
+              },
+              '& .MuiDataGrid-columnHeader': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+              },
+              '& .MuiDataGrid-cell': {
+                whiteSpace: 'normal',
+                lineHeight: 1.5,
+                wordBreak: 'break-word',
+                display: 'flex',
+                alignItems: 'center',
+              },
+            }}
           />
         </Box>
       )}
