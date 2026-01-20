@@ -1,4 +1,5 @@
 // Responsive mixins and utilities
+@use 'variables' as *;
 
 // Mobile-first breakpoint mixins
 @mixin mobile {

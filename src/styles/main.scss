@@ -1,6 +1,6 @@
 // Main SASS file - imports shared partials
-@import 'variables';
-@import 'responsive';
+@use 'variables' as *;
+@use 'responsive' as *;
 // Component styles are imported directly in their respective component files
 
 // Global styles

@@ -1,5 +1,5 @@
-@import '../../styles/variables';
-@import '../../styles/responsive';
+@use '../../styles/variables' as *;
+@use '../../styles/responsive' as *;
 
 .login-page {
   min-height: calc(100vh - 80px); // Subtract navbar height
