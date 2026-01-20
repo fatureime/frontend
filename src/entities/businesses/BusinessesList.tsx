@@ -49,6 +49,14 @@ const BusinessesList = ({
                 headerName: 'Emri i Biznesit',
                 flex: 1,
                 minWidth: 100,
+                renderCell: (params: GridRenderCellParams<Business>) => {
+                  const isIssuer = issuerBusinessId === params.row.id;
+                  return (
+                    <span style={{ fontWeight: isIssuer ? 'bold' : 'normal' }}>
+                      {params.row.business_name}
+                    </span>
+                  );
+                },
               },
               {
                 field: 'trade_name',
@@ -88,17 +96,6 @@ const BusinessesList = ({
                 minWidth: 100,
                 valueGetter: (_value: unknown, row: Business) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
-              },
-              {
-                field: 'issuer',
-                headerName: 'Lëshues',
-                minWidth: 100,
-                renderCell: (params: GridRenderCellParams<Business>) => {
-                  const isIssuer = issuerBusinessId === params.row.id;
-                  return isIssuer ? (
-                    <span className="badge issuer">Biznesi Lëshues</span>
-                  ) : null;
-                },
               },
               {
                 field: 'actions',
