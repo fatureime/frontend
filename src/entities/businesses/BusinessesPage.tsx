@@ -74,6 +74,11 @@ const BusinessesPage = () => {
     localStorage.setItem('businesses-view-mode', mode);
   };
 
+  const handleToggleView = () => {
+    const newMode = viewMode === 'list' ? 'grid' : 'list';
+    handleViewModeChange(newMode);
+  };
+
   if (loading && businesses.length === 0) {
     return (
       <div className="businesses-page">
@@ -107,6 +112,13 @@ const BusinessesPage = () => {
               title="Tabelë"
             >
               <GridViewIcon />
+            </button>
+            <button
+              onClick={handleToggleView}
+              className="toggle-btn toggle-btn-mobile"
+              title={viewMode === 'list' ? 'Shfaq tabelë' : 'Shfaq listë'}
+            >
+              {viewMode === 'list' ? <GridViewIcon /> : <ViewListIcon />}
             </button>
           </div>
         </div>

@@ -125,6 +125,11 @@ const BankAccountsPage = () => {
     localStorage.setItem('bank-accounts-view-mode', mode);
   };
 
+  const handleToggleView = () => {
+    const newMode = viewMode === 'list' ? 'grid' : 'list';
+    handleViewModeChange(newMode);
+  };
+
   if (loading && bankAccounts.length === 0) {
     return (
       <div className="bank-accounts-page">
@@ -160,6 +165,13 @@ const BankAccountsPage = () => {
               title="Tabelë"
             >
               <GridViewIcon />
+            </button>
+            <button
+              onClick={handleToggleView}
+              className="toggle-btn toggle-btn-mobile"
+              title={viewMode === 'list' ? 'Shfaq tabelë' : 'Shfaq listë'}
+            >
+              {viewMode === 'list' ? <GridViewIcon /> : <ViewListIcon />}
             </button>
           </div>
         </div>

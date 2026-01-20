@@ -84,6 +84,11 @@ const TaxesPage = () => {
     localStorage.setItem('taxes-view-mode', mode);
   };
 
+  const handleToggleView = () => {
+    const newMode = viewMode === 'list' ? 'grid' : 'list';
+    handleViewModeChange(newMode);
+  };
+
   return (
     <div className="taxes-page">
       <div className="container">
@@ -109,6 +114,13 @@ const TaxesPage = () => {
               title="Tabelë"
             >
               <GridViewIcon />
+            </button>
+            <button
+              onClick={handleToggleView}
+              className="toggle-btn toggle-btn-mobile"
+              title={viewMode === 'list' ? 'Shfaq tabelë' : 'Shfaq listë'}
+            >
+              {viewMode === 'list' ? <GridViewIcon /> : <ViewListIcon />}
             </button>
           </div>
         </div>

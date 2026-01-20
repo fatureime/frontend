@@ -71,6 +71,10 @@
         svg {
           font-size: 1.25rem;
         }
+
+        &.toggle-btn-mobile {
+          display: none;
+        }
       }
     }
 
@@ -177,6 +181,38 @@
         position: fixed;
         left: 24px;
         bottom: 24px;
+        z-index: 900;
+        padding: 6px;
+        background: #f5f5f5;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+        // Hide regular toggle buttons on mobile
+        .toggle-btn:not(.toggle-btn-mobile) {
+          display: none;
+        }
+
+        // Show only mobile toggle button
+        .toggle-btn-mobile {
+          display: flex !important;
+          padding: 1rem;
+          background: #2196f3;
+          color: white;
+          border-radius: 6px;
+          min-width: 56px;
+          min-height: 56px;
+
+          &:hover {
+            background: #1976d2;
+            color: white;
+          }
+
+          svg {
+            font-size: 1.75rem;
+            color: white;
+            fill: white;
+          }
+        }
       }
     }
 

@@ -80,6 +80,11 @@ const TenantsPage = () => {
     localStorage.setItem('tenants-view-mode', mode);
   };
 
+  const handleToggleView = () => {
+    const newMode = viewMode === 'list' ? 'grid' : 'list';
+    handleViewModeChange(newMode);
+  };
+
   // Show access denied if user is not part of an admin tenant
   if (user && !isAdminTenant) {
     return (
@@ -130,6 +135,13 @@ const TenantsPage = () => {
               title="Tabelë"
             >
               <GridViewIcon />
+            </button>
+            <button
+              onClick={handleToggleView}
+              className="toggle-btn toggle-btn-mobile"
+              title={viewMode === 'list' ? 'Shfaq tabelë' : 'Shfaq listë'}
+            >
+              {viewMode === 'list' ? <GridViewIcon /> : <ViewListIcon />}
             </button>
           </div>
         </div>

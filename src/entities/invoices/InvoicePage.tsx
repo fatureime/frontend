@@ -189,6 +189,11 @@ const InvoicePage = () => {
     localStorage.setItem('invoices-view-mode', mode);
   };
 
+  const handleToggleView = () => {
+    const newMode = viewMode === 'list' ? 'grid' : 'list';
+    handleViewModeChange(newMode);
+  };
+
   const handleMenuOpen = (invoiceId: number, anchor: HTMLElement) => {
     setMenuAnchor({ ...menuAnchor, [invoiceId]: anchor });
   };
@@ -268,6 +273,13 @@ const InvoicePage = () => {
               title="Tabelë"
             >
               <GridViewIcon />
+            </button>
+            <button
+              onClick={handleToggleView}
+              className="toggle-btn toggle-btn-mobile"
+              title={viewMode === 'list' ? 'Shfaq tabelë' : 'Shfaq listë'}
+            >
+              {viewMode === 'list' ? <GridViewIcon /> : <ViewListIcon />}
             </button>
           </div>
         </div>
