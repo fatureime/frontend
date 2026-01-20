@@ -1,5 +1,8 @@
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
-import { Button, Box, Chip } from '@mui/material';
+import { Button, Box, Chip, IconButton, useMediaQuery, useTheme } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { User } from '../../services/api';
 import './UsersList.scss';
 
@@ -22,6 +25,9 @@ const UsersList = ({
   onDelete,
   currentUserId,
 }: UsersListProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   if (error) {
     return (
       <div className="users-list">
@@ -106,32 +112,64 @@ const UsersList = ({
                   const isCurrentUser = currentUserId === params.row.id;
                   return (
                     <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => onView(params.row)}
-                        sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                      >
-                        Shiko
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="contained"
-                        onClick={() => onEdit(params.row)}
-                        sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        color="error"
-                        onClick={() => onDelete(params.row.id)}
-                        disabled={isCurrentUser}
-                        sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                      >
-                        Delete
-                      </Button>
+                      {isMobile ? (
+                        <>
+                          <IconButton
+                            size="small"
+                            onClick={() => onView(params.row)}
+                            title="Shiko"
+                            color="primary"
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={() => onEdit(params.row)}
+                            title="Edit"
+                            color="primary"
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={() => onDelete(params.row.id)}
+                            disabled={isCurrentUser}
+                            title={isCurrentUser ? 'Cannot delete current user' : 'Delete'}
+                            color="error"
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => onView(params.row)}
+                            sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                          >
+                            Shiko
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={() => onEdit(params.row)}
+                            sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            color="error"
+                            onClick={() => onDelete(params.row.id)}
+                            disabled={isCurrentUser}
+                            sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                          >
+                            Delete
+                          </Button>
+                        </>
+                      )}
                     </Box>
                   );
                 },

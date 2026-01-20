@@ -1,5 +1,9 @@
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
-import { Button, Box } from '@mui/material';
+import { Button, Box, IconButton, useMediaQuery, useTheme } from '@mui/material';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import EditIcon from '@mui/icons-material/Edit';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { InvoiceStatus } from '../../services/api';
 import { getStatusLabel } from '../../utils/invoiceStatusLabels';
 import './InvoiceStatusesList.scss';
@@ -27,6 +31,9 @@ const InvoiceStatusesList = ({
   canEdit = false,
   labels = {},
 }: InvoiceStatusesListProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   if (error) {
     return (
       <div className="invoice-statuses-list">
@@ -72,14 +79,25 @@ const InvoiceStatusesList = ({
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => onView(params.row)}
-                    sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                  >
-                    Shiko
-                  </Button>
+                  isMobile ? (
+                    <IconButton
+                      size="small"
+                      onClick={() => onView(params.row)}
+                      title="Shiko"
+                      color="primary"
+                    >
+                      <VisibilityIcon fontSize="small" />
+                    </IconButton>
+                  ) : (
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => onView(params.row)}
+                      sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                    >
+                      Shiko
+                    </Button>
+                  )
                 ),
               },
               ...(canEdit ? [{
@@ -90,31 +108,62 @@ const InvoiceStatusesList = ({
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
                   <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                      size="small"
-                      variant="contained"
-                      onClick={() => onEdit(params.row)}
-                      sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                    >
-                      Ndrysho Kod
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => onEditLabel(params.row)}
-                      sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                    >
-                      Ndrysho Etiketë
-                    </Button>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      color="error"
-                      onClick={() => onDelete(params.row.id)}
-                      sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
-                    >
-                      Fshi
-                    </Button>
+                    {isMobile ? (
+                      <>
+                        <IconButton
+                          size="small"
+                          onClick={() => onEdit(params.row)}
+                          title="Ndrysho Kod"
+                          color="primary"
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => onEditLabel(params.row)}
+                          title="Ndrysho Etiketë"
+                          color="primary"
+                        >
+                          <EditNoteIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => onDelete(params.row.id)}
+                          title="Fshi"
+                          color="error"
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          onClick={() => onEdit(params.row)}
+                          sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                        >
+                          Ndrysho Kod
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => onEditLabel(params.row)}
+                          sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                        >
+                          Ndrysho Etiketë
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          color="error"
+                          onClick={() => onDelete(params.row.id)}
+                          sx={{ minWidth: 'auto', fontSize: '0.75rem' }}
+                        >
+                          Fshi
+                        </Button>
+                      </>
+                    )}
                   </Box>
                 ),
               }] : []),
