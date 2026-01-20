@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { DataGrid, GridRenderCellParams, GridRenderEditCellParams } from '@mui/x-data-grid';
 import { Select, MenuItem, TextField, Box, IconButton, Card, CardContent, Typography } from '@mui/material';
@@ -115,7 +115,7 @@ const InvoiceForm = () => {
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi ngarkimi i bizneseve');
     }
-  }, [isAdminTenant, user?.tenant?.id, user?.tenant?.issuer_business_id]);
+  }, [isAdminTenant, user?.tenant?.issuer_business_id]);
 
   const loadArticles = useCallback(async () => {
     if (!issuerId) return;
@@ -201,7 +201,7 @@ const InvoiceForm = () => {
   }, [isEditMode, loadInvoice]);
 
   // Calculate item totals
-  const calculateItemTotals = (item: InvoiceItemForm): InvoiceItemForm => {
+  const calculateItemTotals = useCallback((item: InvoiceItemForm): InvoiceItemForm => {
     const qty = typeof item.quantity === 'string' ? parseFloat(item.quantity) || 0 : item.quantity;
     const price = typeof item.unitPrice === 'string' ? parseFloat(item.unitPrice) || 0 : item.unitPrice;
     const subtotal = qty * price;
@@ -223,11 +223,24 @@ const InvoiceForm = () => {
       taxAmount,
       total,
     };
-  };
+  }, [taxes]);
 
-  // Update item
-  const updateItem = (id: string, field: keyof InvoiceItemForm, value: any) => {
-    setItems(items.map(item => {
+  // Debounce refs for expensive calculations
+  const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
+
+  // Update item - update value immediately, debounce only the expensive calculations
+  const updateItem = useCallback((id: string, field: keyof InvoiceItemForm, value: any) => {
+    const timerKey = `${id}-calculation`;
+    const isTextField = field === 'description' || field === 'articleName';
+    
+    // Clear existing calculation timer if any
+    if (debounceTimers.current[timerKey]) {
+      clearTimeout(debounceTimers.current[timerKey]);
+      delete debounceTimers.current[timerKey];
+    }
+
+    // Update the field value immediately for responsive typing
+    setItems(prevItems => prevItems.map(item => {
       if (item.id === id) {
         const updated = { ...item, [field]: value };
         
@@ -241,11 +254,32 @@ const InvoiceForm = () => {
           }
         }
         
-        return calculateItemTotals(updated);
+        // For text fields, update value immediately but debounce the calculation
+        // For other fields, calculate immediately
+        if (isTextField) {
+          // Return updated item without recalculating totals yet
+          return updated;
+        } else {
+          // Calculate totals immediately for non-text fields
+          return calculateItemTotals(updated);
+        }
       }
       return item;
     }));
-  };
+
+    // Debounce the expensive calculation for text fields
+    if (isTextField) {
+      debounceTimers.current[timerKey] = setTimeout(() => {
+        setItems(prevItems => prevItems.map(item => {
+          if (item.id === id) {
+            return calculateItemTotals(item);
+          }
+          return item;
+        }));
+        delete debounceTimers.current[timerKey];
+      }, 300);
+    }
+  }, [articles, calculateItemTotals]);
 
   // Handle article selection from modal
   const handleArticleSelect = (article: Article) => {
@@ -387,6 +421,16 @@ const InvoiceForm = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [error]);
+
+  // Cleanup debounce timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(debounceTimers.current).forEach(timer => {
+        clearTimeout(timer);
+      });
+      debounceTimers.current = {};
+    };
+  }, []);
 
 
   // Filter businesses for issuer selection
@@ -595,29 +639,29 @@ const InvoiceForm = () => {
                   rows={items}
                   columns={[
                     {
-                      field: 'articleId',
+                      field: 'articleName',
                       headerName: 'Emri',
                       flex: 1,
                       minWidth: 100,
                       maxWidth: 250,
                       editable: true,
                       renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => {
-                        const item = items.find(i => i.id === params.id.toString());
                         return (
                           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', height: '100%', width: '100%' }}>
                             <TextField
-                              value={item?.articleName || ''}
+                              value={params.value || ''}
                               onChange={(e: { target: { value: string } }) => {
                                 const newValue = e.target.value;
                                 params.api.setEditCellValue({ id: params.id, field: 'articleName', value: newValue });
-                                // Clear articleId when manually typing
-                                updateItem(params.id.toString(), 'articleName', newValue);
+                                // Clear articleId when manually typing and update articleName
                                 updateItem(params.id.toString(), 'articleId', null);
+                                updateItem(params.id.toString(), 'articleName', newValue);
                               }}
                               fullWidth
                               size="small"
                               placeholder="Shkruani emrin e artikullit"
                               sx={{ flex: 1 }}
+                              autoFocus
                             />
                             <IconButton
                               size="small"
@@ -631,7 +675,6 @@ const InvoiceForm = () => {
                         );
                       },
                       renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => {
-                        const item = items.find(i => i.id === params.id.toString());
                         return (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, maxWidth: 250 }}>
                             <Box
@@ -643,7 +686,7 @@ const InvoiceForm = () => {
                                 flex: 1,
                               }}
                             >
-                              {item?.articleName || ''}
+                              {params.value || ''}
                             </Box>
                             <IconButton
                               size="small"
@@ -668,12 +711,15 @@ const InvoiceForm = () => {
                         <TextField
                           value={params.value || ''}
                           onChange={(e: { target: { value: string } }) => {
-                            params.api.setEditCellValue({ id: params.id, field: params.field, value: e.target.value });
-                            updateItem(params.id.toString(), 'description', e.target.value);
+                            const newValue = e.target.value;
+                            params.api.setEditCellValue({ id: params.id, field: params.field, value: newValue });
+                            // Update immediately (value updates, calculation is debounced)
+                            updateItem(params.id.toString(), 'description', newValue);
                           }}
                           fullWidth
                           size="small"
                           placeholder="Përshkrimi i artikullit"
+                          autoFocus
                         />
                       ),
                       renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => (
@@ -824,6 +870,13 @@ const InvoiceForm = () => {
                   hideFooter
                   processRowUpdate={(newRow: InvoiceItemForm) => {
                     const updated = calculateItemTotals(newRow);
+                    // Clear any pending debounce timers for this row
+                    Object.keys(debounceTimers.current).forEach(key => {
+                      if (key.startsWith(`${updated.id}-`)) {
+                        clearTimeout(debounceTimers.current[key]);
+                        delete debounceTimers.current[key];
+                      }
+                    });
                     setItems(items.map(item => item.id === updated.id ? updated : item));
                     return updated;
                   }}
@@ -887,19 +940,19 @@ const InvoiceForm = () => {
                               Emri
                             </Typography>
                             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                              <TextField
-                                value={item.articleName || ''}
-                                onChange={(e) => {
-                                  const newValue = e.target.value;
-                                  // Clear articleId when manually typing
-                                  updateItem(item.id, 'articleName', newValue);
-                                  updateItem(item.id, 'articleId', null);
-                                }}
-                                fullWidth
-                                size="small"
-                                placeholder="Shkruani emrin e artikullit"
-                                sx={{ flex: 1 }}
-                              />
+                            <TextField
+                              value={item.articleName || ''}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                const newValue = e.target.value;
+                                // Clear articleId when manually typing and update articleName
+                                updateItem(item.id, 'articleId', null);
+                                updateItem(item.id, 'articleName', newValue);
+                              }}
+                              fullWidth
+                              size="small"
+                              placeholder="Shkruani emrin e artikullit"
+                              sx={{ flex: 1 }}
+                            />
                               <IconButton
                                 size="small"
                                 onClick={() => handleOpenArticleModal(item.id)}
@@ -918,7 +971,7 @@ const InvoiceForm = () => {
                             </Typography>
                             <TextField
                               value={item.description || ''}
-                              onChange={(e) => updateItem(item.id, 'description', e.target.value)}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(item.id, 'description', e.target.value)}
                               fullWidth
                               size="small"
                               placeholder="Përshkrimi i artikullit"
@@ -934,7 +987,7 @@ const InvoiceForm = () => {
                               <TextField
                                 type="number"
                                 value={item.quantity || 0}
-                                onChange={(e) => updateItem(item.id, 'quantity', e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(item.id, 'quantity', e.target.value)}
                                 fullWidth
                                 size="small"
                                 inputProps={{ min: 0, step: 0.01 }}
@@ -947,7 +1000,7 @@ const InvoiceForm = () => {
                               <TextField
                                 type="number"
                                 value={item.unitPrice || 0}
-                                onChange={(e) => updateItem(item.id, 'unitPrice', e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateItem(item.id, 'unitPrice', e.target.value)}
                                 fullWidth
                                 size="small"
                                 inputProps={{ min: 0, step: 0.01 }}
@@ -962,7 +1015,7 @@ const InvoiceForm = () => {
                             </Typography>
                             <Select
                               value={item.taxId || ''}
-                              onChange={(e) => {
+                              onChange={(e: { target: { value: unknown } }) => {
                                 const newValue = e.target.value ? parseInt(String(e.target.value)) : null;
                                 updateItem(item.id, 'taxId', newValue);
                               }}
