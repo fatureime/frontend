@@ -12,6 +12,7 @@ interface ArticlesGridProps {
   onView: (article: Article) => void;
   onEdit: (article: Article) => void;
   onDelete: (articleId: number) => void;
+  isAdminTenant?: boolean;
 }
 
 const ArticlesGrid = ({
@@ -21,6 +22,7 @@ const ArticlesGrid = ({
   onView,
   onEdit,
   onDelete,
+  isAdminTenant = false,
 }: ArticlesGridProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -69,6 +71,11 @@ const ArticlesGrid = ({
                   {article.unit && (
                     <Typography variant="body2">
                       <strong>Njësia:</strong> {article.unit}
+                    </Typography>
+                  )}
+                  {isAdminTenant && article.business && (
+                    <Typography variant="body2">
+                      <strong>Biznesi:</strong> {article.business.business_name}
                     </Typography>
                   )}
                   {article.created_at && (

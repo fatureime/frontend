@@ -13,6 +13,7 @@ interface ArticlesListProps {
   onView: (article: Article) => void;
   onEdit: (article: Article) => void;
   onDelete: (articleId: number) => void;
+  isAdminTenant?: boolean;
 }
 
 const ArticlesList = ({
@@ -22,6 +23,7 @@ const ArticlesList = ({
   onView,
   onEdit,
   onDelete,
+  isAdminTenant = false,
 }: ArticlesListProps) => {
   if (error) {
     return (
@@ -136,6 +138,31 @@ const ArticlesList = ({
                   </Box>
                 ),
               },
+              ...(isAdminTenant
+                ? [
+                    {
+                      field: 'business',
+                      headerName: 'Biznesi',
+                      flex: 1,
+                      minWidth: 100,
+                      maxWidth: 250,
+                      valueGetter: (_value: unknown, row: Article) =>
+                        row.business?.business_name || '',
+                      renderCell: (params: GridRenderCellParams<Article>) => (
+                        <Box
+                          sx={{
+                            maxWidth: 250,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {params.value}
+                        </Box>
+                      ),
+                    },
+                  ]
+                : []),
               {
                 field: 'created_at',
                 headerName: 'Krijuar',

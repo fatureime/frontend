@@ -200,6 +200,7 @@ const ArticlesPage = () => {
               onView={handleView}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              isAdminTenant={isAdminTenant}
             />
           ) : (
             <ArticlesGrid
@@ -209,6 +210,7 @@ const ArticlesPage = () => {
               onView={handleView}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              isAdminTenant={isAdminTenant}
             />
           )}
         </div>
