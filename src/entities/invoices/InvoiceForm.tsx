@@ -576,7 +576,9 @@ const InvoiceForm = () => {
                     {
                       field: 'articleId',
                       headerName: 'Artikulli',
+                      flex: 1,
                       minWidth: 100,
+                      maxWidth: 250,
                       editable: true,
                       renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
                         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', height: '100%', width: '100%' }}>
@@ -611,8 +613,18 @@ const InvoiceForm = () => {
                       renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => {
                         const article = articles.find(a => a.id === params.value);
                         return (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <span>{article ? article.name : ''}</span>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, maxWidth: 250 }}>
+                            <Box
+                              sx={{
+                                maxWidth: 250,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                whiteSpace: 'nowrap',
+                                flex: 1,
+                              }}
+                            >
+                              {article ? article.name : ''}
+                            </Box>
                             {!params.value && (
                               <IconButton
                                 size="small"
@@ -630,9 +642,10 @@ const InvoiceForm = () => {
                     {
                       field: 'description',
                       headerName: 'Përshkrimi',
-                      minWidth: 100,
-                      editable: true,
                       flex: 1,
+                      minWidth: 100,
+                      maxWidth: 250,
+                      editable: true,
                       renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
                         <TextField
                           value={params.value || ''}
@@ -645,11 +658,25 @@ const InvoiceForm = () => {
                           placeholder="Përshkrimi i artikullit"
                         />
                       ),
+                      renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => (
+                        <Box
+                          sx={{
+                            maxWidth: 250,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          {params.value}
+                        </Box>
+                      ),
                     },
                     {
                       field: 'quantity',
                       headerName: 'Sasia',
+                      flex: 1,
                       minWidth: 100,
+                      maxWidth: 250,
                       editable: true,
                       type: 'number',
                       renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
@@ -670,7 +697,9 @@ const InvoiceForm = () => {
                     {
                       field: 'unitPrice',
                       headerName: 'Çmimi për Njësi',
+                      flex: 1,
                       minWidth: 100,
+                      maxWidth: 250,
                       editable: true,
                       type: 'number',
                       renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
@@ -691,7 +720,9 @@ const InvoiceForm = () => {
                     {
                       field: 'taxId',
                       headerName: 'Vlera e TVSH',
+                      flex: 1,
                       minWidth: 100,
+                      maxWidth: 250,
                       editable: true,
                       renderEditCell: (params: GridRenderEditCellParams<InvoiceItemForm>) => (
                         <Select
@@ -715,22 +746,45 @@ const InvoiceForm = () => {
                       ),
                       renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => {
                         const tax = taxes.find(t => t.id === params.value);
-                        return tax ? (tax.rate === null ? 'E përjashtuar' : `${tax.rate}%`) : '';
+                        return (
+                          <Box
+                            sx={{
+                              maxWidth: 250,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {tax ? (tax.rate === null ? 'E përjashtuar' : `${tax.rate}%`) : ''}
+                          </Box>
+                        );
                       },
                     },
                     {
                       field: 'total',
                       headerName: 'Totali',
+                      flex: 1,
                       minWidth: 100,
+                      maxWidth: 250,
                       valueFormatter: (value: number) => `${value.toFixed(2)} €`,
                       renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => (
-                        <strong>{(params.value as number).toFixed(2)} €</strong>
+                        <Box
+                          sx={{
+                            maxWidth: 250,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
+                          <strong>{(params.value as number).toFixed(2)} €</strong>
+                        </Box>
                       ),
                     },
                     {
                       field: 'actions',
                       headerName: '',
-                      minWidth: 100,
+                      flex: 0,
+                      minWidth: 80,
                       sortable: false,
                       filterable: false,
                       renderCell: (params: GridRenderCellParams<InvoiceItemForm>) => (
@@ -774,6 +828,13 @@ const InvoiceForm = () => {
                       display: 'flex',
                       alignItems: 'center',
                       borderBottom: '1px solid rgba(224, 224, 224, 1)',
+                    },
+                    '& .MuiDataGrid-cell[data-field="actions"]': {
+                      overflow: 'visible',
+                      minWidth: '80px !important',
+                    },
+                    '& .MuiDataGrid-columnHeader[data-field="actions"]': {
+                      minWidth: '80px !important',
                     },
                   }}
                 />

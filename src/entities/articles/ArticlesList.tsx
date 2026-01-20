@@ -44,42 +44,124 @@ const ArticlesList = ({
                 field: 'id',
                 headerName: 'ID',
                 minWidth: 40,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Article>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'name',
                 headerName: 'Emri',
                 flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Article>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'description',
                 headerName: 'Përshkrimi',
                 flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Article>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'unit_price',
                 headerName: 'Çmimi për njësi',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: Article) => 
                   `${parseFloat(row.unit_price).toFixed(2)} €`,
+                renderCell: (params: GridRenderCellParams<Article>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'unit',
                 headerName: 'Njësia',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Article>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: Article) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
+                renderCell: (params: GridRenderCellParams<Article>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
-                minWidth: 100,
+                flex: 0,
+                minWidth: 140,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Article>) => (
@@ -139,6 +221,13 @@ const ArticlesList = ({
                 wordBreak: { xs: 'break-word', sm: 'normal' },
                 display: 'flex',
                 alignItems: 'center',
+              },
+              '& .MuiDataGrid-cell[data-field="actions"]': {
+                overflow: 'visible',
+                minWidth: '140px !important',
+              },
+              '& .MuiDataGrid-columnHeader[data-field="actions"]': {
+                minWidth: '140px !important',
               },
             }}
           />

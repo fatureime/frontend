@@ -46,17 +46,45 @@ const TenantsList = ({
                 field: 'id',
                 headerName: 'ID',
                 minWidth: 40,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Tenant>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'name',
                 headerName: 'Emri',
                 flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Tenant>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'is_admin',
                 headerName: 'Menagjues',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 renderCell: (params: GridRenderCellParams<Tenant>) => (
                   params.row.is_admin ? (
                     <Chip label="Po" color="success" size="small" />
@@ -68,7 +96,9 @@ const TenantsList = ({
               {
                 field: 'has_paid',
                 headerName: 'I Paguar',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 renderCell: (params: GridRenderCellParams<Tenant>) => (
                   params.row.has_paid ? (
                     <Chip label="Po" color="success" size="small" />
@@ -82,27 +112,69 @@ const TenantsList = ({
                 headerName: 'Subjekti Lëshues',
                 flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: Tenant) => 
                   row.issuer_business?.business_name || 'N/A',
+                renderCell: (params: GridRenderCellParams<Tenant>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'users',
                 headerName: 'Përdoruesit',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: Tenant) => 
                   row.users?.length || 0,
+                renderCell: (params: GridRenderCellParams<Tenant>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: Tenant) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
+                renderCell: (params: GridRenderCellParams<Tenant>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
-                minWidth: 100,
+                flex: 0,
+                minWidth: 140,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Tenant>) => (
@@ -164,6 +236,13 @@ const TenantsList = ({
                 wordBreak: { xs: 'break-word', sm: 'normal' },
                 display: 'flex',
                 alignItems: 'center',
+              },
+              '& .MuiDataGrid-cell[data-field="actions"]': {
+                overflow: 'visible',
+                minWidth: '140px !important',
+              },
+              '& .MuiDataGrid-columnHeader[data-field="actions"]': {
+                minWidth: '140px !important',
               },
             }}
           />

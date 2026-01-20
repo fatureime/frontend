@@ -51,30 +51,85 @@ const TaxesList = ({
                 field: 'id',
                 headerName: 'ID',
                 minWidth: 40,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Tax>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'rate',
                 headerName: 'Norma',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: Tax) => formatRate(row.rate),
+                renderCell: (params: GridRenderCellParams<Tax>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'name',
                 headerName: 'Emri',
                 flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Tax>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: Tax) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
+                renderCell: (params: GridRenderCellParams<Tax>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'view',
                 headerName: 'Shiko',
-                minWidth: 100,
+                flex: 0,
+                minWidth: 80,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Tax>) => (
@@ -91,7 +146,8 @@ const TaxesList = ({
               ...(canEdit ? [{
                 field: 'actions',
                 headerName: 'Veprimet',
-                minWidth: 100,
+                flex: 0,
+                minWidth: 140,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Tax>) => (
@@ -143,6 +199,13 @@ const TaxesList = ({
                 wordBreak: { xs: 'break-word', sm: 'normal' },
                 display: 'flex',
                 alignItems: 'center',
+              },
+              '& .MuiDataGrid-cell[data-field="actions"]': {
+                overflow: 'visible',
+                minWidth: '140px !important',
+              },
+              '& .MuiDataGrid-columnHeader[data-field="actions"]': {
+                minWidth: '140px !important',
               },
             }}
           />

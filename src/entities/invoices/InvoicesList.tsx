@@ -72,51 +72,114 @@ const InvoicesList = ({
                 headerName: 'Numri i Faturës',
                 flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 renderCell: (params: GridRenderCellParams<Invoice>) => {
                   return (
-                    <Link
-                      to={`/invoices/${params.row.id}`}
-                      style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 500 }}
-                      onClick={(e) => e.stopPropagation()}
+                    <Box
+                      sx={{
+                        maxWidth: 250,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
                     >
-                      {params.value}
-                    </Link>
+                      <Link
+                        to={`/invoices/${params.row.id}`}
+                        style={{ color: '#1976d2', textDecoration: 'none', fontWeight: 500 }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {params.value}
+                      </Link>
+                    </Box>
                   );
                 },
               },
               {
                 field: 'invoice_date',
                 headerName: 'Data',
-                flex: 0.8,
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueFormatter: (value: string) => new Date(value).toLocaleDateString(),
+                renderCell: (params: GridRenderCellParams<Invoice>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'due_date',
                 headerName: 'Data e Maturimit',
                 flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueFormatter: (value: string) => new Date(value).toLocaleDateString(),
+                renderCell: (params: GridRenderCellParams<Invoice>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'issuer',
                 headerName: 'Fatura Nga',
-                flex: 1.2,
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: Invoice) => row.issuer?.business_name || 'N/A',
+                renderCell: (params: GridRenderCellParams<Invoice>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'receiver',
                 headerName: 'Fatura Për',
-                flex: 1.2,
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: Invoice) => row.receiver?.business_name || 'N/A',
+                renderCell: (params: GridRenderCellParams<Invoice>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'status',
                 headerName: 'Statusi',
                 flex: 1,  
                 minWidth: 100,
+                maxWidth: 250,
                 renderCell: (params: GridRenderCellParams<Invoice>) => (
                   <Select
                     value={params.value}
@@ -124,6 +187,7 @@ const InvoicesList = ({
                     size="small"
                     sx={{ 
                       width: '100%',
+                      maxWidth: 250,
                       '& .MuiSelect-select': {
                         padding: '4px 8px',
                       }
@@ -140,15 +204,28 @@ const InvoicesList = ({
               {
                 field: 'total',
                 headerName: 'Totali',
-                flex: 0.8,
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueFormatter: (value: string) => `${parseFloat(value).toFixed(2)} €`,
+                renderCell: (params: GridRenderCellParams<Invoice>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
-                flex: 0.8,
-                minWidth: 100,
+                flex: 0,
+                minWidth: 140,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Invoice>) => {
@@ -238,6 +315,13 @@ const InvoicesList = ({
                 wordBreak: { xs: 'break-word', sm: 'normal' },
                 display: 'flex',
                 alignItems: 'center',
+              },
+              '& .MuiDataGrid-cell[data-field="actions"]': {
+                overflow: 'visible',
+                minWidth: '140px !important',
+              },
+              '& .MuiDataGrid-columnHeader[data-field="actions"]': {
+                minWidth: '140px !important',
               },
             }}
           />

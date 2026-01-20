@@ -52,27 +52,66 @@ const InvoiceStatusesList = ({
                 field: 'id',
                 headerName: 'ID',
                 minWidth: 40,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'code',
                 headerName: 'Kodi',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
-                  <strong>{params.value}</strong>
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
                 ),
               },
               {
                 field: 'label',
                 headerName: 'Etiketa',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: InvoiceStatus) => 
                   labels[row.code] || getStatusLabel(row.code),
-                flex: 1,
+                renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'view',
                 headerName: 'Shiko',
-                minWidth: 100,
+                flex: 0,
+                minWidth: 80,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
@@ -89,7 +128,8 @@ const InvoiceStatusesList = ({
               ...(canEdit ? [{
                 field: 'actions',
                 headerName: 'Veprimet',
-                minWidth: 100,
+                flex: 0,
+                minWidth: 140,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<InvoiceStatus>) => (
@@ -149,6 +189,13 @@ const InvoiceStatusesList = ({
                 wordBreak: { xs: 'break-word', sm: 'normal' },
                 display: 'flex',
                 alignItems: 'center',
+              },
+              '& .MuiDataGrid-cell[data-field="actions"]': {
+                overflow: 'visible',
+                minWidth: '140px !important',
+              },
+              '& .MuiDataGrid-columnHeader[data-field="actions"]': {
+                minWidth: '140px !important',
               },
             }}
           />

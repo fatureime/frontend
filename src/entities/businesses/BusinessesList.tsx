@@ -45,19 +45,40 @@ const BusinessesList = ({
               {
                 field: 'id',
                 headerName: 'ID',
-                minWidth: 40,
+                maxWidth: 80,
+                renderCell: (params: GridRenderCellParams<Business>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'business_name',
                 headerName: 'Emri i Biznesit',
                 flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 renderCell: (params: GridRenderCellParams<Business>) => {
                   const isIssuer = issuerBusinessId === params.row.id;
                   return (
-                    <span style={{ fontWeight: isIssuer ? 'bold' : 'normal' }}>
+                    <Box
+                      sx={{
+                        maxWidth: 250,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'wrap',
+                        fontWeight: isIssuer ? 'bold' : 'normal',
+                      }}
+                    >
                       {params.row.business_name}
-                    </span>
+                    </Box>
                   );
                 },
               },
@@ -66,44 +87,140 @@ const BusinessesList = ({
                 headerName: 'Emri Tregtar',
                 flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Business>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'business_type',
                 headerName: 'Lloji',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Business>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'fiscal_number',
                 headerName: 'Numri Fiskal',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Business>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'vat_number',
                 headerName: 'Numri TVSH',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Business>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'email',
                 headerName: 'E-mail',
                 flex: 1,
                 minWidth: 100,
+                maxWidth: 350,
+                renderCell: (params: GridRenderCellParams<Business>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      wordWrap: 'anywhere',
+                      whiteSpace: 'normal',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'phone',
                 headerName: 'Telefoni',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<Business>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: Business) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
+                renderCell: (params: GridRenderCellParams<Business>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
-                minWidth: 100,
+                flex: 0,
+                minWidth: 140,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<Business>) => {
@@ -167,6 +284,13 @@ const BusinessesList = ({
                 wordBreak: { xs: 'break-word', sm: 'normal' },
                 display: 'flex',
                 alignItems: 'center',
+              },
+              '& .MuiDataGrid-cell[data-field="actions"]': {
+                overflow: 'visible',
+                minWidth: '140px !important',
+              },
+              '& .MuiDataGrid-columnHeader[data-field="actions"]': {
+                minWidth: '140px !important',
               },
             }}
           />

@@ -46,24 +46,65 @@ const UsersList = ({
                 field: 'id',
                 headerName: 'ID',
                 minWidth: 40,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<User>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'email',
                 headerName: 'E-mail',
                 flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
+                renderCell: (params: GridRenderCellParams<User>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      wordWrap: 'anywhere',
+                      whiteSpace: 'normal',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'roles',
                 headerName: 'Rolet',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: User) => 
                   row.roles?.join(', ') || 'ROLE_USER',
+                renderCell: (params: GridRenderCellParams<User>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'is_active',
                 headerName: 'Statusi',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 renderCell: (params: GridRenderCellParams<User>) => (
                   <Chip
                     label={params.row.is_active ? 'Aktiv' : 'Jo Aktiv'}
@@ -75,7 +116,9 @@ const UsersList = ({
               {
                 field: 'email_verified',
                 headerName: 'Verifikuar',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 renderCell: (params: GridRenderCellParams<User>) => (
                   params.row.email_verified ? (
                     <Chip label="Po" color="success" size="small" />
@@ -89,20 +132,48 @@ const UsersList = ({
                 headerName: 'Hapësirëmarrësi',
                 flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: User) => 
                   row.tenant?.name || 'N/A',
+                renderCell: (params: GridRenderCellParams<User>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'created_at',
                 headerName: 'Krijuar',
+                flex: 1,
                 minWidth: 100,
+                maxWidth: 250,
                 valueGetter: (_value: unknown, row: User) => 
                   row.created_at ? new Date(row.created_at).toLocaleDateString() : '',
+                renderCell: (params: GridRenderCellParams<User>) => (
+                  <Box
+                    sx={{
+                      maxWidth: 250,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {params.value}
+                  </Box>
+                ),
               },
               {
                 field: 'actions',
                 headerName: 'Veprimet',
-                minWidth: 100,
+                flex: 0,
+                minWidth: 140,
                 sortable: false,
                 filterable: false,
                 renderCell: (params: GridRenderCellParams<User>) => {
@@ -166,6 +237,13 @@ const UsersList = ({
                 wordBreak: { xs: 'break-word', sm: 'normal' },
                 display: 'flex',
                 alignItems: 'center',
+              },
+              '& .MuiDataGrid-cell[data-field="actions"]': {
+                overflow: 'visible',
+                minWidth: '140px !important',
+              },
+              '& .MuiDataGrid-columnHeader[data-field="actions"]': {
+                minWidth: '140px !important',
               },
             }}
           />
