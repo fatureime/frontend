@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { invoiceStatusesApi, InvoiceStatus } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
 import { getStatusLabel } from '../../utils/invoiceStatusLabels';
+import Button from '../../components/Button';
 import './InvoiceStatusView.scss';
 
 const InvoiceStatusView = () => {
@@ -82,9 +83,9 @@ const InvoiceStatusView = () => {
         <div className="container">
           <div className="error-message">
             {error}
-            <button onClick={() => navigate('/invoice-statuses')} className="btn btn-secondary">
+            <Button onClick={() => navigate('/invoice-statuses')} variant="secondary">
               Kthehu te Lista
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -105,17 +106,17 @@ const InvoiceStatusView = () => {
     <div className="invoice-status-view">
       <div className="container">
         <div className="invoice-status-view-header">
-          <button onClick={() => navigate('/invoice-statuses')} className="btn btn-secondary">
+          <Button onClick={() => navigate('/invoice-statuses')} variant="secondary">
             ← Kthehu te Lista
-          </button>
+          </Button>
           {canEdit && (
             <div className="invoice-status-view-actions">
-              <button onClick={handleEdit} className="btn btn-primary">
+              <Button onClick={handleEdit} variant="primary">
                 Ndrysho
-              </button>
-              <button onClick={handleDelete} className="btn btn-danger">
+              </Button>
+              <Button onClick={handleDelete} variant="danger">
                 Fshi
-              </button>
+              </Button>
             </div>
           )}
         </div>

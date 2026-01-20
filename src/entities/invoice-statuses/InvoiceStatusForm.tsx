@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { invoiceStatusesApi, InvoiceStatus } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
 import { getStatusLabel, setStatusLabel } from '../../utils/invoiceStatusLabels';
+import Button from '../../components/Button';
 import './InvoiceStatusForm.scss';
 
 const InvoiceStatusForm = () => {
@@ -110,6 +111,13 @@ const InvoiceStatusForm = () => {
     }
   };
 
+  // Scroll to top when error appears
+  useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [error]);
+
   if (!canEdit) {
     return (
       <div className="invoice-status-form">
@@ -134,9 +142,9 @@ const InvoiceStatusForm = () => {
     <div className="invoice-status-form">
       <div className="container">
         <div className="invoice-status-form-header">
-          <button onClick={handleCancel} className="btn btn-secondary">
+          <Button onClick={handleCancel} variant="secondary">
             ← Anulo
-          </button>
+          </Button>
         </div>
         <h2>{isEditMode ? 'Ndrysho Gjendje' : 'Krijo Gjendje të Re'}</h2>
         <form onSubmit={handleSubmit}>
@@ -182,12 +190,12 @@ const InvoiceStatusForm = () => {
           </div>
 
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <Button type="submit" variant="primary" disabled={loading}>
               {loading ? 'Duke u ruajtur...' : (isEditMode ? 'Ruaj Ndryshimet' : 'Krijo Gjendje')}
-            </button>
-            <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={loading}>
+            </Button>
+            <Button type="button" variant="secondary" onClick={handleCancel} disabled={loading}>
               Anulo
-            </button>
+            </Button>
           </div>
         </form>
       </div>

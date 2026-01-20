@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { businessesApi, Business } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import Button from '../../components/Button';
 import BusinessesList from './BusinessesList';
 import BusinessesGrid from './BusinessesGrid';
 import ViewListIcon from '@mui/icons-material/ViewList';
@@ -94,9 +95,9 @@ const BusinessesPage = () => {
       <div className="container">
         <div className="businesses-header">
           <div className="header-actions">
-          <button onClick={handleCreate} className="btn btn-primary">
+          <Button onClick={handleCreate} variant="primary">
             Krijo Subjekt
-          </button>
+          </Button>
           </div>
           <div className="view-toggle">
             <button

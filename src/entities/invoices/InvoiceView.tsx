@@ -6,6 +6,7 @@ import ViewListIcon from '@mui/icons-material/ViewList';
 import GridViewIcon from '@mui/icons-material/GridView';
 import { invoicesApi, Invoice, invoiceStatusesApi, InvoiceStatus, InvoiceItem } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import Button from '../../components/Button';
 import './InvoiceView.scss';
 
 type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
@@ -190,9 +191,9 @@ const InvoiceView = () => {
         <div className="container">
           <div className="error-message">
             {error}
-            <button onClick={handleBack} className="btn btn-primary" style={{ marginLeft: '1rem' }}>
+            <Button onClick={handleBack} variant="primary" style={{ marginLeft: '1rem' }}>
               Kthehu
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -214,9 +215,9 @@ const InvoiceView = () => {
       <div className="container">
         <div className="invoice-detail-header">
           <div>
-            <button onClick={handleBack} className="btn btn-secondary">
+            <Button onClick={handleBack} variant="secondary">
               ← Kthehu
-            </button>
+            </Button>
           </div>
           <div className="header-actions">
             <select
@@ -230,19 +231,19 @@ const InvoiceView = () => {
                 </option>
               ))}
             </select>
-            <button
+            <Button
               onClick={handleDownloadPdf}
-              className="btn btn-primary"
+              variant="primary"
               disabled={downloading}
             >
               {downloading ? 'Duke u shkarkuar...' : 'Shkarko'}
-            </button>
-            <button onClick={handleEdit} className="btn btn-primary">
+            </Button>
+            <Button onClick={handleEdit} variant="primary">
               Ndrysho
-            </button>
-            <button onClick={handleDelete} className="btn btn-danger">
+            </Button>
+            <Button onClick={handleDelete} variant="danger">
               Fshi
-            </button>
+            </Button>
           </div>
         </div>
 

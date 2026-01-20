@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { articlesApi, Article, CreateArticleData, Business, businessesApi } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import Button from '../../components/Button';
 import './ArticleForm.scss';
 
 const ArticleForm = () => {
@@ -149,6 +150,13 @@ const ArticleForm = () => {
     }
   };
 
+  // Scroll to top when error appears
+  useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [error]);
+
   if (initialLoading) {
     return (
       <div className="article-form">
@@ -163,9 +171,9 @@ const ArticleForm = () => {
     <div className="article-form">
       <div className="container">
         <div className="article-form-header">
-          <button onClick={handleCancel} className="btn btn-secondary">
+          <Button onClick={handleCancel} variant="secondary">
             ← Anulo
-          </button>
+          </Button>
         </div>
         <h2>{isEditMode ? 'Ndrysho Artikullin' : 'Krijo Artikull'}</h2>
         <form onSubmit={handleSubmit}>
@@ -269,12 +277,12 @@ const ArticleForm = () => {
         </div>
 
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <Button type="submit" variant="primary" disabled={loading}>
               {loading ? 'Duke u ruajtur...' : (isEditMode ? 'Ruaj Ndryshimet' : 'Krijo Artikull')}
-            </button>
-            <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={loading}>
+            </Button>
+            <Button type="button" variant="secondary" onClick={handleCancel} disabled={loading}>
               Anulo
-            </button>
+            </Button>
           </div>
         </form>
       </div>

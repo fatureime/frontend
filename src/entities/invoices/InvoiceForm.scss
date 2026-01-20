@@ -35,7 +35,7 @@
 }
 
 .invoice-content {
-  padding: 0 $spacing-2xl;
+  padding: $spacing-2xl;
 
   @include mobile {
     padding: $spacing-lg;

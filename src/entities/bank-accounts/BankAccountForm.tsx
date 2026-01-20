@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { bankAccountsApi, businessesApi, BankAccount, CreateBankAccountData, Business } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import Button from '../../components/Button';
 import './BankAccountForm.scss';
 
 const BankAccountForm = () => {
@@ -156,6 +157,13 @@ const BankAccountForm = () => {
     }
   };
 
+  // Scroll to top when error appears
+  useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [error]);
+
   if (initialLoading) {
     return (
       <div className="bank-account-form">
@@ -170,9 +178,9 @@ const BankAccountForm = () => {
     <div className="bank-account-form">
       <div className="container">
         <div className="bank-account-form-header">
-          <button onClick={handleCancel} className="btn btn-secondary">
+          <Button onClick={handleCancel} variant="secondary">
             ← Anulo
-          </button>
+          </Button>
         </div>
         <h2>{isEditMode ? 'Ndrysho Llogarinë Bankare' : 'Krijo Llogari Bankare'}</h2>
         <form onSubmit={handleSubmit}>
@@ -285,12 +293,12 @@ const BankAccountForm = () => {
         </div>
 
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <Button type="submit" variant="primary" disabled={loading}>
               {loading ? 'Duke u ruajtur...' : (isEditMode ? 'Ruaj Ndryshimet' : 'Krijo Llogari Bankare')}
-            </button>
-            <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={loading}>
+            </Button>
+            <Button type="button" variant="secondary" onClick={handleCancel} disabled={loading}>
               Anulo
-            </button>
+            </Button>
           </div>
         </form>
       </div>

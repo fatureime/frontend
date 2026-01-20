@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usersApi, User } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import Button from '../../components/Button';
 import './UserView.scss';
 
 const UserView = () => {
@@ -79,9 +80,9 @@ const UserView = () => {
         <div className="container">
           <div className="error-message">
             {error}
-            <button onClick={() => navigate('/users')} className="btn btn-secondary">
+            <Button onClick={() => navigate('/users')} variant="secondary">
               Kthehu te Lista
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -102,17 +103,17 @@ const UserView = () => {
     <div className="user-view">
       <div className="container">
         <div className="user-view-header">
-          <button onClick={() => navigate('/users')} className="btn btn-secondary">
+          <Button onClick={() => navigate('/users')} variant="secondary">
             ← Kthehu te Lista
-          </button>
+          </Button>
           <div className="user-view-actions">
-            <button onClick={handleEdit} className="btn btn-primary">
+            <Button onClick={handleEdit} variant="primary">
               Edit
-            </button>
+            </Button>
             {user.id !== currentUser?.id && (
-              <button onClick={handleDelete} className="btn btn-danger">
+              <Button onClick={handleDelete} variant="danger">
                 Delete
-              </button>
+              </Button>
             )}
           </div>
         </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { articlesApi, Article, businessesApi, Business } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import Button from '../../components/Button';
 import './ArticleView.scss';
 
 const ArticleView = () => {
@@ -74,9 +75,9 @@ const ArticleView = () => {
         <div className="container">
           <div className="error-message">
             {error}
-            <button onClick={() => navigate('/articles')} className="btn btn-secondary">
+            <Button onClick={() => navigate('/articles')} variant="secondary">
               Kthehu te Lista
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -97,16 +98,16 @@ const ArticleView = () => {
     <div className="article-view">
       <div className="container">
         <div className="article-view-header">
-          <button onClick={() => navigate('/articles')} className="btn btn-secondary">
+          <Button onClick={() => navigate('/articles')} variant="secondary">
             ← Kthehu te Lista
-          </button>
+          </Button>
           <div className="article-view-actions">
-            <button onClick={handleEdit} className="btn btn-primary">
+            <Button onClick={handleEdit} variant="primary">
               Ndrysho
-            </button>
-            <button onClick={handleDelete} className="btn btn-danger">
+            </Button>
+            <Button onClick={handleDelete} variant="danger">
               Fshi
-            </button>
+            </Button>
           </div>
         </div>
 

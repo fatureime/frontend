@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { taxesApi, Tax } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import Button from '../../components/Button';
 import './TaxesPage.scss';
 
 const TaxView = () => {
@@ -81,9 +82,9 @@ const TaxView = () => {
         <div className="container">
           <div className="error-message">
             {error}
-            <button onClick={() => navigate('/taxes')} className="btn btn-secondary">
+            <Button onClick={() => navigate('/taxes')} variant="secondary">
               Kthehu te Lista
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -104,17 +105,17 @@ const TaxView = () => {
     <div className="tax-view">
       <div className="container">
         <div className="tax-view-header">
-          <button onClick={() => navigate('/taxes')} className="btn btn-secondary">
+          <Button onClick={() => navigate('/taxes')} variant="secondary">
             ← Kthehu te Lista
-          </button>
+          </Button>
           {canEdit && (
             <div className="tax-view-actions">
-              <button onClick={handleEdit} className="btn btn-primary">
+              <Button onClick={handleEdit} variant="primary">
                 Ndrysho
-              </button>
-              <button onClick={handleDelete} className="btn btn-danger">
+              </Button>
+              <Button onClick={handleDelete} variant="danger">
                 Fshi
-              </button>
+              </Button>
             </div>
           )}
         </div>

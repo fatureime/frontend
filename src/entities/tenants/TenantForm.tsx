@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { tenantsApi, Tenant } from '../../services/api';
+import Button from '../../components/Button';
 import './TenantForm.scss';
 
 const TenantForm = () => {
@@ -77,6 +78,13 @@ const TenantForm = () => {
     }
   };
 
+  // Scroll to top when error appears
+  useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [error]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -99,9 +107,9 @@ const TenantForm = () => {
     <div className="tenant-form">
       <div className="container">
         <div className="tenant-form-header">
-          <button onClick={handleCancel} className="btn btn-secondary">
+          <Button onClick={handleCancel} variant="secondary">
             ← Anulo
-          </button>
+          </Button>
         </div>
         <h2>{isEditMode ? 'Ndrysho Hapësirëmarrësin' : 'Krijo Hapësirëmarrës'}</h2>
         <form onSubmit={handleSubmit}>
@@ -151,12 +159,12 @@ const TenantForm = () => {
         </div>
 
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <Button type="submit" variant="primary" disabled={loading}>
               {loading ? 'Duke u ruajtur...' : (isEditMode ? 'Ruaj Ndryshimet' : 'Krijo Hapësirëmarrës')}
-            </button>
-            <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={loading}>
+            </Button>
+            <Button type="button" variant="secondary" onClick={handleCancel} disabled={loading}>
               Anulo
-            </button>
+            </Button>
           </div>
         </form>
       </div>

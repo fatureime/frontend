@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { businessesApi, Business } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import Button from '../../components/Button';
 import './BusinessView.scss';
 
 const BusinessView = () => {
@@ -74,9 +75,9 @@ const BusinessView = () => {
         <div className="container">
           <div className="error-message">
             {error}
-            <button onClick={() => navigate('/businesses')} className="btn btn-secondary">
+            <Button onClick={() => navigate('/businesses')} variant="secondary">
               Kthehu te Lista
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -99,17 +100,17 @@ const BusinessView = () => {
     <div className="business-view">
       <div className="container">
         <div className="business-view-header">
-          <button onClick={() => navigate('/businesses')} className="btn btn-secondary">
+          <Button onClick={() => navigate('/businesses')} variant="secondary">
             ← Kthehu te Lista
-          </button>
+          </Button>
           <div className="business-view-actions">
-            <button onClick={handleEdit} className="btn btn-primary">
+            <Button onClick={handleEdit} variant="primary">
               Ndrysho
-            </button>
+            </Button>
             {!isIssuer && (
-              <button onClick={handleDelete} className="btn btn-danger">
+              <Button onClick={handleDelete} variant="danger">
                 Fshi
-              </button>
+              </Button>
             )}
           </div>
         </div>

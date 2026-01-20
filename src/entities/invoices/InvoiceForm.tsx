@@ -21,6 +21,7 @@ import {
 } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
 import ArticleSelectionModal from './ArticleSelectionModal';
+import Button from '../../components/Button';
 import './InvoiceForm.scss';
 
 interface InvoiceItemForm {
@@ -380,6 +381,13 @@ const InvoiceForm = () => {
     navigate('/invoices');
   };
 
+  // Scroll to top when error appears
+  useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [error]);
+
 
   // Filter businesses for issuer selection
   // For non-admin tenants, only show their tenant's issuer business
@@ -571,13 +579,14 @@ const InvoiceForm = () => {
                   </Box>
                 )}
               </div>
-              <button
+              <Button
                 type="button"
-                className="btn btn--secondary btn--small"
+                variant="secondary"
+                size="small"
                 onClick={addItem}
               >
                 + Shto Artikull
-              </button>
+              </Button>
             </div>
 
             {itemsViewMode === 'grid' ? (
@@ -1010,30 +1019,30 @@ const InvoiceForm = () => {
 
           {/* Action Buttons */}
           <div className="invoice-actions">
-            <button
+            <Button
               type="button"
-              className="btn btn--secondary"
+              variant="secondary"
               onClick={handleCancel}
             >
               Anulo
-            </button>
+            </Button>
             <div className="actions-right">
-              <button
+              <Button
                 type="button"
-                className="btn btn--outline"
+                variant="outline"
                 onClick={() => handleSave(true)}
                 disabled={saving}
               >
                 Ruaj si Draft
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className="btn btn--primary"
+                variant="primary"
                 onClick={() => handleSave(false)}
                 disabled={saving}
               >
                 {saving ? 'Duke u ruajtur...' : (isEditMode ? 'Përditëso' : 'Krijo')}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

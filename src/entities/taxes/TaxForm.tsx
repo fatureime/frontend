@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { taxesApi, Tax } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import Button from '../../components/Button';
 import './TaxesPage.scss';
 
 const TaxForm = () => {
@@ -117,6 +118,13 @@ const TaxForm = () => {
     }
   };
 
+  // Scroll to top when error appears
+  useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [error]);
+
   if (!canEdit) {
     return (
       <div className="tax-form">
@@ -141,9 +149,9 @@ const TaxForm = () => {
     <div className="tax-form">
       <div className="container">
         <div className="tax-form-header">
-          <button onClick={handleCancel} className="btn btn-secondary">
+          <Button onClick={handleCancel} variant="secondary">
             ← Anulo
-          </button>
+          </Button>
         </div>
         <h2>{isEditMode ? 'Ndrysho Takse' : 'Krijo Takse të Re'}</h2>
         <form onSubmit={handleSubmit}>
@@ -196,12 +204,12 @@ const TaxForm = () => {
           </div>
 
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <Button type="submit" variant="primary" disabled={loading}>
               {loading ? 'Duke u ruajtur...' : (isEditMode ? 'Ruaj Ndryshimet' : 'Krijo Takse')}
-            </button>
-            <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={loading}>
+            </Button>
+            <Button type="button" variant="secondary" onClick={handleCancel} disabled={loading}>
               Anulo
-            </button>
+            </Button>
           </div>
         </form>
       </div>

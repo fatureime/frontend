@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usersApi, User } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import Button from '../../components/Button';
 import UsersList from './UsersList';
 import UsersGrid from './UsersGrid';
 import ViewListIcon from '@mui/icons-material/ViewList';
@@ -116,9 +117,9 @@ const UsersPage = () => {
       <div className="container">
         <div className="users-header">
           <div className="users-header-actions">
-            <button onClick={handleInvite} className="btn btn-primary">
+            <Button onClick={handleInvite} variant="primary">
               Fto Përdorues
-            </button>
+            </Button>
           </div>
           <div className="view-toggle">
             <button

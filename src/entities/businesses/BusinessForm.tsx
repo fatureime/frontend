@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { businessesApi, Business, CreateBusinessData } from '../../services/api';
+import Button from '../../components/Button';
 import './BusinessForm.scss';
 
 const BusinessForm = () => {
@@ -294,6 +295,13 @@ const BusinessForm = () => {
     }
   };
 
+  // Scroll to top when error appears
+  useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [error]);
+
   if (initialLoading) {
     return (
       <div className="business-form">
@@ -308,9 +316,9 @@ const BusinessForm = () => {
     <div className="business-form">
       <div className="container">
         <div className="business-form-header">
-          <button onClick={handleCancel} className="btn btn-secondary">
+          <Button onClick={handleCancel} variant="secondary">
             ← Anulo
-          </button>
+          </Button>
         </div>
         <h2>{isEditMode ? 'Ndrysho Subjektin' : 'Krijo Subjekt'}</h2>
         <form onSubmit={handleSubmit}>
@@ -339,14 +347,15 @@ const BusinessForm = () => {
               disabled={loading}
               className="bulk-textarea"
             />
-            <button
+            <Button
               type="button"
               onClick={parseBulkInput}
-              className="btn btn-secondary btn-parse"
+              variant="secondary"
+              className="btn-parse"
               disabled={loading || !bulkInput.trim()}
             >
               Analizo dhe Plotëso Automatikisht
-            </button>
+            </Button>
           </div>
         )}
 
@@ -583,12 +592,12 @@ const BusinessForm = () => {
         </div>
 
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <Button type="submit" variant="primary" disabled={loading}>
               {loading ? 'Duke u ruajtur...' : (isEditMode ? 'Ruaj Ndryshimet' : 'Krijo Subjekt')}
-            </button>
-            <button type="button" className="btn btn-secondary" onClick={handleCancel} disabled={loading}>
+            </Button>
+            <Button type="button" variant="secondary" onClick={handleCancel} disabled={loading}>
               Anulo
-            </button>
+            </Button>
           </div>
         </form>
       </div>

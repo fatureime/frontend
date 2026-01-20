@@ -16,6 +16,10 @@
 
   &__navbar {
     grid-area: navbar;
+
+    @include desktop {
+      position: relative;
+    }
   }
 
   &__content {

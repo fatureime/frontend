@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { tenantsApi, Tenant } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import Button from '../../components/Button';
 import './TenantView.scss';
 
 const TenantView = () => {
@@ -79,9 +80,9 @@ const TenantView = () => {
         <div className="container">
           <div className="error-message">
             {error}
-            <button onClick={() => navigate('/tenants')} className="btn btn-secondary">
+            <Button onClick={() => navigate('/tenants')} variant="secondary">
               Kthehu te Lista
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -102,17 +103,17 @@ const TenantView = () => {
     <div className="tenant-view">
       <div className="container">
         <div className="tenant-view-header">
-          <button onClick={() => navigate('/tenants')} className="btn btn-secondary">
+          <Button onClick={() => navigate('/tenants')} variant="secondary">
             ← Kthehu te Lista
-          </button>
+          </Button>
           <div className="tenant-view-actions">
-            <button onClick={handleEdit} className="btn btn-primary">
+            <Button onClick={handleEdit} variant="primary">
               Ndrysho
-            </button>
+            </Button>
             {user?.tenant?.is_admin && (
-              <button onClick={handleDelete} className="btn btn-danger">
+              <Button onClick={handleDelete} variant="danger">
                 Fshi
-              </button>
+              </Button>
             )}
           </div>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { bankAccountsApi, businessesApi, BankAccount, Business } from '../../services/api';
+import Button from '../../components/Button';
 import './BankAccountView.scss';
 
 const BankAccountView = () => {
@@ -93,9 +94,9 @@ const BankAccountView = () => {
         <div className="container">
           <div className="error-message">
             {error}
-            <button onClick={() => navigate('/bank-accounts')} className="btn btn-secondary">
+            <Button onClick={() => navigate('/bank-accounts')} variant="secondary">
               Kthehu te Lista
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -116,16 +117,16 @@ const BankAccountView = () => {
     <div className="bank-account-view">
       <div className="container">
         <div className="bank-account-view-header">
-          <button onClick={() => navigate('/bank-accounts')} className="btn btn-secondary">
+          <Button onClick={() => navigate('/bank-accounts')} variant="secondary">
             ← Kthehu te Lista
-          </button>
+          </Button>
           <div className="bank-account-view-actions">
-            <button onClick={handleEdit} className="btn btn-primary">
+            <Button onClick={handleEdit} variant="primary">
               Ndrysho
-            </button>
-            <button onClick={handleDelete} className="btn btn-danger">
+            </Button>
+            <Button onClick={handleDelete} variant="danger">
               Fshi
-            </button>
+            </Button>
           </div>
         </div>
 

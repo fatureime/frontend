@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { articlesApi, Article, businessesApi, Business } from '../../services/api';
 import { useAuth } from '../../contexts/useAuth';
+import Button from '../../components/Button';
 import ArticlesList from './ArticlesList';
 import ArticlesGrid from './ArticlesGrid';
 import ViewListIcon from '@mui/icons-material/ViewList';
@@ -155,9 +156,9 @@ const ArticlesPage = () => {
       <div className="container">
         <div className="articles-header">
           <div className="header-actions">
-            <button onClick={handleCreate} className="btn btn-primary">
+            <Button onClick={handleCreate} variant="primary">
               Krijo Artikull
-            </button>
+            </Button>
           </div>
           <div className="view-toggle">
             <button
