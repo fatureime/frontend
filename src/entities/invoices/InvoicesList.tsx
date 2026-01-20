@@ -62,7 +62,7 @@ const InvoicesList = ({
           height: 600, 
           width: '100%',
           maxWidth: '100%',
-          overflow: 'hidden'
+          overflow: 'auto'
         }}>
           <DataGrid
             rows={invoices}
@@ -233,9 +233,9 @@ const InvoicesList = ({
                 lineHeight: 1.5,
               },
               '& .MuiDataGrid-cell': {
-                whiteSpace: 'normal',
+                whiteSpace: { xs: 'normal', sm: 'nowrap' },
                 lineHeight: 1.5,
-                wordBreak: 'break-word',
+                wordBreak: { xs: 'break-word', sm: 'normal' },
                 display: 'flex',
                 alignItems: 'center',
               },

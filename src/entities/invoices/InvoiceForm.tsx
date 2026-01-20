@@ -768,9 +768,9 @@ const InvoiceForm = () => {
                       lineHeight: 1.5,
                     },
                     '& .MuiDataGrid-cell': {
-                      whiteSpace: 'normal',
+                      whiteSpace: { xs: 'normal', sm: 'nowrap' },
                       lineHeight: 1.5,
-                      wordBreak: 'break-word',
+                      wordBreak: { xs: 'break-word', sm: 'normal' },
                       display: 'flex',
                       alignItems: 'center',
                       borderBottom: '1px solid rgba(224, 224, 224, 1)',
