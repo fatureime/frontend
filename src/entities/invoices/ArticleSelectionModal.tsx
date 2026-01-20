@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, Box, Card, CardContent, CardActions, Typography } from '@mui/material';
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import GridViewIcon from '@mui/icons-material/GridView';
 import CloseIcon from '@mui/icons-material/Close';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { Article } from '../../services/api';
 
 type ViewMode = 'list' | 'grid';
@@ -14,6 +15,7 @@ interface ArticleSelectionModalProps {
   articles: Article[];
   loading: boolean;
   onSelect: (article: Article) => void;
+  issuerId: number | null;
 }
 
 const ArticleSelectionModal = ({
@@ -22,6 +24,7 @@ const ArticleSelectionModal = ({
   articles,
   loading,
   onSelect,
+  issuerId,
 }: ArticleSelectionModalProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     const saved = localStorage.getItem('invoice-article-selection-view-mode');
@@ -37,6 +40,12 @@ const ArticleSelectionModal = ({
     onSelect(article);
     onClose();
   };
+
+  // Filter articles by issuer
+  const filteredArticles = useMemo(() => {
+    if (!issuerId) return [];
+    return articles.filter(article => article.business_id === issuerId);
+  }, [articles, issuerId]);
 
   return (
     <Dialog
@@ -100,13 +109,17 @@ const ArticleSelectionModal = ({
           <Box sx={{ textAlign: 'center', padding: 3 }}>
             <Typography variant="body1" color="text.secondary">Duke u ngarkuar artikujt...</Typography>
           </Box>
-        ) : articles.length === 0 ? (
+        ) : !issuerId ? (
           <Box sx={{ textAlign: 'center', padding: 3 }}>
-            <Typography variant="body1" color="text.secondary">Nuk u gjetën artikuj.</Typography>
+            <Typography variant="body1" color="text.secondary">Ju lutem zgjidhni lëshuesin e faturës për të parë artikujt.</Typography>
+          </Box>
+        ) : filteredArticles.length === 0 ? (
+          <Box sx={{ textAlign: 'center', padding: 3 }}>
+            <Typography variant="body1" color="text.secondary">Nuk u gjetën artikuj për lëshuesin e zgjedhur.</Typography>
           </Box>
         ) : viewMode === 'list' ? (
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
-            {articles.map((article) => (
+            {filteredArticles.map((article) => (
               <Card
                 key={article.id}
                 sx={{
@@ -139,28 +152,37 @@ const ArticleSelectionModal = ({
                     )}
                   </Box>
                 </CardContent>
-                <CardActions sx={{ pt: 1, borderTop: 1, borderColor: 'divider' }}>
-                  <Button size="small" variant="contained" fullWidth>
-                    Zgjidh
-                  </Button>
+                <CardActions sx={{ pt: 1, borderTop: 1, borderColor: 'divider', justifyContent: 'center' }}>
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleArticleSelect(article);
+                    }}
+                    title="Zgjidh artikullin"
+                  >
+                    <CheckCircleIcon />
+                  </IconButton>
                 </CardActions>
               </Card>
             ))}
           </Box>
         ) : (
-          <Box sx={{ height: 600, width: '100%' }}>
+          <Box sx={{ height: 600, width: '100%', maxWidth: '100%', overflow: 'auto' }}>
             <DataGrid
-              rows={articles}
+              rows={filteredArticles}
               columns={[
                 {
                   field: 'name',
                   headerName: 'Emri',
                   flex: 1,
+                  minWidth: 150,
                 },
                 {
                   field: 'description',
                   headerName: 'Përshkrimi',
                   flex: 1,
+                  minWidth: 200,
                 },
                 {
                   field: 'unit_price',
@@ -178,16 +200,16 @@ const ArticleSelectionModal = ({
                   sortable: false,
                   filterable: false,
                   renderCell: (params: GridRenderCellParams<Article>) => (
-                    <Button
-                      size="small"
-                      variant="contained"
+                    <IconButton
+                      color="primary"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleArticleSelect(params.row);
                       }}
+                      title="Zgjidh artikullin"
                     >
-                      Zgjidh
-                    </Button>
+                      <CheckCircleIcon />
+                    </IconButton>
                   ),
                 },
               ]}
