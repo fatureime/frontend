@@ -1,10 +1,16 @@
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardActions, Button, IconButton, Typography, Box, Select, MenuItem, useMediaQuery, useTheme } from '@mui/material';
+import { 
+  Card, CardContent, CardActions, Button, IconButton, Typography, Box, Select, MenuItem, 
+  useMediaQuery, useTheme
+} from '@mui/material';
 import PrintIcon from '@mui/icons-material/Print';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Invoice, InvoiceStatus } from '../../services/api';
+import { useGridFilters } from '../../hooks/useGridFilters';
+import GridFilters from '../../components/GridFilters';
+import { GridFilterConfig } from '../../types/gridFilters';
 import './InvoicesGrid.scss';
 
 type InvoiceStatusCode = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
@@ -39,6 +45,89 @@ const InvoicesGrid = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // Configure filters for invoices
+  const filterConfig: GridFilterConfig = {
+    textSearchFields: ['invoice_number', 'issuer.business_name', 'receiver.business_name', 'total'],
+    filters: [
+      {
+        type: 'multi-select',
+        field: 'status',
+        label: 'Statusi',
+        options: invoiceStatuses.map(status => ({
+          value: status.code,
+          label: statusLabels[status.code] || status.code,
+        })),
+      },
+      {
+        type: 'relation-select',
+        field: 'issuer',
+        label: 'Lëshues',
+        relationField: 'business_name',
+        relationIdField: 'id',
+      },
+      {
+        type: 'relation-select',
+        field: 'receiver',
+        label: 'Marrës',
+        relationField: 'business_name',
+        relationIdField: 'id',
+      },
+      {
+        type: 'date-range',
+        field: 'invoice_date',
+        label: 'Data e Faturës',
+      },
+      {
+        type: 'date-range',
+        field: 'due_date',
+        label: 'Data e Maturimit',
+      },
+      {
+        type: 'number-range',
+        field: 'total',
+        label: 'Totali',
+      },
+    ],
+    sortFields: [
+      { field: 'invoice_number', label: 'Numri i Faturës' },
+      { field: 'invoice_date', label: 'Data e Faturës' },
+      { field: 'due_date', label: 'Data e Maturimit' },
+      { field: 'total', label: 'Totali' },
+      { 
+        field: 'status', 
+        label: 'Statusi',
+        getValue: (item: Invoice) => statusLabels[item.status] || item.status,
+      },
+      { 
+        field: 'issuer.business_name', 
+        label: 'Lëshues',
+        getValue: (item: Invoice) => item.issuer?.business_name || '',
+      },
+      { 
+        field: 'receiver.business_name', 
+        label: 'Marrës',
+        getValue: (item: Invoice) => item.receiver?.business_name || '',
+      },
+    ],
+    defaultSort: {
+      field: 'invoice_date',
+      direction: 'desc',
+    },
+  };
+
+  // Use the grid filters hook
+  const {
+    filteredData: filteredAndSortedInvoices,
+    filterState,
+    sortConfig,
+    setFilters,
+    setSort,
+  } = useGridFilters<Invoice>({
+    data: invoices,
+    config: filterConfig,
+    initialSort: filterConfig.defaultSort,
+  });
+
   if (loading) {
     return (
       <Box className="invoices-grid" sx={{ textAlign: 'center', padding: 3 }}>
@@ -64,8 +153,33 @@ const InvoicesGrid = ({
           Nuk u gjetën fatura.
         </Typography>
       ) : (
-        <Box className="invoice-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
-          {invoices.map((invoice) => (
+        <>
+          {/* Filter Panel */}
+          <GridFilters
+            data={invoices}
+            filterConfig={filterConfig}
+            filterState={filterState}
+            onFilterChange={setFilters}
+            sortConfig={sortConfig}
+            onSortChange={setSort}
+            statusLabels={statusLabels}
+          />
+
+          {/* Results count */}
+          {filteredAndSortedInvoices.length !== invoices.length && (
+            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+              {filteredAndSortedInvoices.length} nga {invoices.length} fatura
+            </Typography>
+          )}
+
+          {/* Invoice Cards */}
+          {filteredAndSortedInvoices.length === 0 ? (
+            <Typography variant="body1" className="no-invoices" sx={{ textAlign: 'center', padding: 3, color: 'text.secondary' }}>
+              Nuk u gjetën fatura që përputhen me filtrat.
+            </Typography>
+          ) : (
+            <Box className="invoice-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
+              {filteredAndSortedInvoices.map((invoice) => (
             <Card key={invoice.id} className="invoice-card" sx={{ display: 'flex', flexDirection: 'column' }}>
               <CardContent>
                 <Typography variant="h6" component="h3" sx={{ mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
@@ -85,7 +199,7 @@ const InvoicesGrid = ({
                     <Typography variant="body2" component="strong">Statusi:</Typography>
                     <Select
                       value={invoice.status}
-                      onChange={(e) => onStatusChange(invoice.id, e.target.value as InvoiceStatusCode)}
+                      onChange={(e: { target: { value: unknown } }) => onStatusChange(invoice.id, e.target.value as InvoiceStatusCode)}
                       size="small"
                       sx={{ minWidth: 150 }}
                     >
@@ -160,8 +274,10 @@ const InvoicesGrid = ({
                 )}
               </CardActions>
             </Card>
-          ))}
-        </Box>
+              ))}
+            </Box>
+          )}
+        </>
       )}
     </Box>
   );
