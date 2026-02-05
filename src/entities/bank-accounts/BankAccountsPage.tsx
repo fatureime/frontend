@@ -52,10 +52,24 @@ const BankAccountsPage = () => {
         return;
       }
 
-      // Load bank accounts for all businesses
+      // For normal tenants, only load bank accounts for their tenant's business
+      let businessesToLoad = businessesList;
+      if (!isAdminTenant && user?.tenant?.issuer_business_id) {
+        const tenantBusiness = businessesList.find(b => b.id === user.tenant.issuer_business_id);
+        if (tenantBusiness) {
+          businessesToLoad = [tenantBusiness];
+        } else {
+          // If tenant business not found, show empty list
+          setBankAccounts([]);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Load bank accounts for selected businesses
       const allBankAccounts: BankAccountWithBusiness[] = [];
       
-      for (const business of businessesList) {
+      for (const business of businessesToLoad) {
         try {
           const accounts = await bankAccountsApi.getBankAccounts(business.id);
           const accountsWithBusiness = accounts.map(account => ({
@@ -84,7 +98,7 @@ const BankAccountsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [loadBusinesses]);
+  }, [loadBusinesses, isAdminTenant, user]);
 
   useEffect(() => {
     loadBankAccounts();

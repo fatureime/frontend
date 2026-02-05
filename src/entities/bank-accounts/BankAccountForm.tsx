@@ -33,12 +33,24 @@ const BankAccountForm = () => {
       const data = await businessesApi.getBusinesses();
       setBusinesses(data);
       if (data.length > 0 && !isEditMode) {
-        setSelectedBusinessId(data[0].id);
+        // For normal tenants, automatically select the tenant's issuer business
+        if (!isAdminTenant && user?.tenant?.issuer_business_id) {
+          const issuerBusiness = data.find(b => b.id === user.tenant.issuer_business_id);
+          if (issuerBusiness) {
+            setSelectedBusinessId(issuerBusiness.id);
+          } else {
+            // Fallback to first business if issuer business not found
+            setSelectedBusinessId(data[0].id);
+          }
+        } else {
+          // For admin tenants, select first business
+          setSelectedBusinessId(data[0].id);
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Dështoi ngarkimi i bizneseve');
     }
-  }, [isEditMode]);
+  }, [isEditMode, isAdminTenant, user]);
 
   const loadBankAccount = useCallback(async () => {
     if (!id) return;
