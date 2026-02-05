@@ -3,6 +3,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Business } from '../../services/api';
+import { useGridFilters } from '../../hooks/useGridFilters';
+import GridFilters from '../../components/GridFilters';
+import { GridFilterConfig } from '../../types/gridFilters';
 import './BusinessesGrid.scss';
 
 interface BusinessesGridProps {
@@ -27,6 +30,76 @@ const BusinessesGrid = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // Configure filters for businesses
+  const filterConfig: GridFilterConfig = {
+    textSearchFields: ['business_name', 'trade_name', 'fiscal_number', 'vat_number', 'email', 'phone'],
+    filters: [
+      {
+        type: 'date-range',
+        field: 'registration_date',
+        label: 'Data e Regjistrimit',
+      },
+      {
+        type: 'date-range',
+        field: 'created_at',
+        label: 'Data e Krijimit',
+      },
+      {
+        type: 'number-range',
+        field: 'number_of_employees',
+        label: 'Numri i Punëtorëve',
+      },
+      {
+        type: 'relation-select',
+        field: 'created_by',
+        label: 'Krijuar Nga',
+        relationField: 'email',
+        relationIdField: 'id',
+      },
+      {
+        type: 'relation-select',
+        field: 'tenant',
+        label: 'Hapësirëmarrësi',
+        relationField: 'name',
+        relationIdField: 'id',
+      },
+    ],
+    sortFields: [
+      { field: 'business_name', label: 'Emri i Biznesit' },
+      { field: 'trade_name', label: 'Emri Tregtar' },
+      { field: 'registration_date', label: 'Data e Regjistrimit' },
+      { field: 'created_at', label: 'Data e Krijimit' },
+      { field: 'number_of_employees', label: 'Numri i Punëtorëve' },
+      { 
+        field: 'created_by.email', 
+        label: 'Krijuar Nga',
+        getValue: (item: Business) => item.created_by?.email || '',
+      },
+      { 
+        field: 'tenant.name', 
+        label: 'Hapësirëmarrësi',
+        getValue: (item: Business) => item.tenant?.name || '',
+      },
+    ],
+    defaultSort: {
+      field: 'created_at',
+      direction: 'desc',
+    },
+  };
+
+  // Use the grid filters hook
+  const {
+    filteredData: filteredAndSortedBusinesses,
+    filterState,
+    sortConfig,
+    setFilters,
+    setSort,
+  } = useGridFilters<Business>({
+    data: businesses,
+    config: filterConfig,
+    initialSort: filterConfig.defaultSort,
+  });
+
   if (loading) {
     return (
       <Box className="businesses-grid" sx={{ textAlign: 'center', padding: 3 }}>
@@ -50,8 +123,32 @@ const BusinessesGrid = ({
       {businesses.length === 0 ? (
         <Typography variant="body1" className="no-businesses">Nuk u gjetën subjekte.</Typography>
       ) : (
-        <Box className="business-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
-          {businesses.map((business) => {
+        <>
+          {/* Filter Panel */}
+          <GridFilters
+            data={businesses}
+            filterConfig={filterConfig}
+            filterState={filterState}
+            onFilterChange={setFilters}
+            sortConfig={sortConfig}
+            onSortChange={setSort}
+          />
+
+          {/* Results count */}
+          {filteredAndSortedBusinesses.length !== businesses.length && (
+            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+              {filteredAndSortedBusinesses.length} nga {businesses.length} subjekte
+            </Typography>
+          )}
+
+          {/* Business Cards */}
+          {filteredAndSortedBusinesses.length === 0 ? (
+            <Typography variant="body1" className="no-businesses" sx={{ textAlign: 'center', padding: 3, color: 'text.secondary' }}>
+              Nuk u gjetën subjekte që përputhen me filtrat.
+            </Typography>
+          ) : (
+            <Box className="business-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
+              {filteredAndSortedBusinesses.map((business) => {
             const isIssuer = issuerBusinessId === business.id;
             return (
               <Card key={business.id} className="business-card" sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -188,7 +285,9 @@ const BusinessesGrid = ({
               </Card>
             );
           })}
-        </Box>
+            </Box>
+          )}
+        </>
       )}
     </div>
   );

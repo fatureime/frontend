@@ -3,6 +3,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { User } from '../../services/api';
+import { useGridFilters } from '../../hooks/useGridFilters';
+import GridFilters from '../../components/GridFilters';
+import { GridFilterConfig } from '../../types/gridFilters';
 import './UsersGrid.scss';
 
 interface UsersGridProps {
@@ -26,6 +29,79 @@ const UsersGrid = ({
 }: UsersGridProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Configure filters for users
+  const filterConfig: GridFilterConfig = {
+    textSearchFields: ['email'],
+    filters: [
+      {
+        type: 'multi-select',
+        field: 'is_active',
+        label: 'Statusi',
+        options: [
+          { value: 'true', label: 'Aktiv' },
+          { value: 'false', label: 'Jo Aktiv' },
+        ],
+      },
+      {
+        type: 'multi-select',
+        field: 'email_verified',
+        label: 'Verifikimi i Email',
+        options: [
+          { value: 'true', label: 'I Verifikuar' },
+          { value: 'false', label: 'I Paverifikuar' },
+        ],
+      },
+      {
+        type: 'date-range',
+        field: 'created_at',
+        label: 'Data e Krijimit',
+      },
+      {
+        type: 'relation-select',
+        field: 'tenant',
+        label: 'Hapësirëmarrësi',
+        relationField: 'name',
+        relationIdField: 'id',
+      },
+    ],
+    sortFields: [
+      { field: 'email', label: 'Email' },
+      { 
+        field: 'is_active', 
+        label: 'Statusi',
+        getValue: (item: User) => item.is_active ? 'Aktiv' : 'Jo Aktiv',
+      },
+      { 
+        field: 'email_verified', 
+        label: 'Verifikimi',
+        getValue: (item: User) => item.email_verified ? 'I Verifikuar' : 'I Paverifikuar',
+      },
+      { field: 'created_at', label: 'Data e Krijimit' },
+      { 
+        field: 'tenant.name', 
+        label: 'Hapësirëmarrësi',
+        getValue: (item: User) => item.tenant?.name || '',
+      },
+    ],
+    defaultSort: {
+      field: 'created_at',
+      direction: 'desc',
+    },
+  };
+
+  // Use the grid filters hook
+  const {
+    filteredData: filteredAndSortedUsers,
+    filterState,
+    sortConfig,
+    setFilters,
+    setSort,
+  } = useGridFilters<User>({
+    data: users,
+    config: filterConfig,
+    initialSort: filterConfig.defaultSort,
+  });
 
   if (loading) {
     return (
@@ -52,8 +128,32 @@ const UsersGrid = ({
           Nuk u gjetën përdorues.
         </Typography>
       ) : (
-        <Box className="user-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 2 }}>
-          {users.map((userItem) => (
+        <>
+          {/* Filter Panel */}
+          <GridFilters
+            data={users}
+            filterConfig={filterConfig}
+            filterState={filterState}
+            onFilterChange={setFilters}
+            sortConfig={sortConfig}
+            onSortChange={setSort}
+          />
+
+          {/* Results count */}
+          {filteredAndSortedUsers.length !== users.length && (
+            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+              {filteredAndSortedUsers.length} nga {users.length} përdorues
+            </Typography>
+          )}
+
+          {/* User Cards */}
+          {filteredAndSortedUsers.length === 0 ? (
+            <Typography variant="body1" className="no-users" sx={{ textAlign: 'center', padding: 3, color: 'text.secondary' }}>
+              Nuk u gjetën përdorues që përputhen me filtrat.
+            </Typography>
+          ) : (
+            <Box className="user-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 2 }}>
+              {filteredAndSortedUsers.map((userItem) => (
             <Card key={userItem.id} className="user-card" sx={{ display: 'flex', flexDirection: 'column' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider', flexWrap: 'wrap', gap: 1 }}>
@@ -135,8 +235,10 @@ const UsersGrid = ({
                 )}
               </CardActions>
             </Card>
-          ))}
-        </Box>
+              ))}
+            </Box>
+          )}
+        </>
       )}
     </Box>
   );

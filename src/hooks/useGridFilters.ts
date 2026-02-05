@@ -122,7 +122,16 @@ export function useGridFilters<T = any>({
                   return relation && relation[filterConfig.relationIdField!] && 
                          filterValue.includes(relation[filterConfig.relationIdField!]);
                 }
-                return filterValue.includes(item[filterKey]);
+                
+                // Handle boolean fields - filter values are strings ('true'/'false') but item values are booleans
+                const itemValue = item[filterKey];
+                if (typeof itemValue === 'boolean') {
+                  // Convert filter string values to booleans for comparison
+                  const booleanFilterValues = filterValue.map(v => v === 'true' || v === true);
+                  return booleanFilterValues.includes(itemValue);
+                }
+                
+                return filterValue.includes(itemValue);
               });
             }
             break;

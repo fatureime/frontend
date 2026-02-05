@@ -3,6 +3,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Tenant } from '../../services/api';
+import { useGridFilters } from '../../hooks/useGridFilters';
+import GridFilters from '../../components/GridFilters';
+import { GridFilterConfig } from '../../types/gridFilters';
 import './TenantsGrid.scss';
 
 interface TenantsGridProps {
@@ -26,6 +29,79 @@ const TenantsGrid = ({
 }: TenantsGridProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Configure filters for tenants
+  const filterConfig: GridFilterConfig = {
+    textSearchFields: ['name'],
+    filters: [
+      {
+        type: 'multi-select',
+        field: 'is_admin',
+        label: 'Statusi',
+        options: [
+          { value: 'true', label: 'Menagjues' },
+          { value: 'false', label: 'Jo Menagjues' },
+        ],
+      },
+      {
+        type: 'multi-select',
+        field: 'has_paid',
+        label: 'Pagesa',
+        options: [
+          { value: 'true', label: 'I Paguar' },
+          { value: 'false', label: 'I Papaguar' },
+        ],
+      },
+      {
+        type: 'date-range',
+        field: 'created_at',
+        label: 'Data e Krijimit',
+      },
+      {
+        type: 'relation-select',
+        field: 'issuer_business',
+        label: 'Subjekti Lëshues',
+        relationField: 'business_name',
+        relationIdField: 'id',
+      },
+    ],
+    sortFields: [
+      { field: 'name', label: 'Emri' },
+      { 
+        field: 'is_admin', 
+        label: 'Statusi',
+        getValue: (item: Tenant) => item.is_admin ? 'Menagjues' : 'Jo Menagjues',
+      },
+      { 
+        field: 'has_paid', 
+        label: 'Pagesa',
+        getValue: (item: Tenant) => item.has_paid ? 'I Paguar' : 'I Papaguar',
+      },
+      { field: 'created_at', label: 'Data e Krijimit' },
+      { 
+        field: 'issuer_business.business_name', 
+        label: 'Subjekti Lëshues',
+        getValue: (item: Tenant) => item.issuer_business?.business_name || '',
+      },
+    ],
+    defaultSort: {
+      field: 'created_at',
+      direction: 'desc',
+    },
+  };
+
+  // Use the grid filters hook
+  const {
+    filteredData: filteredAndSortedTenants,
+    filterState,
+    sortConfig,
+    setFilters,
+    setSort,
+  } = useGridFilters<Tenant>({
+    data: tenants,
+    config: filterConfig,
+    initialSort: filterConfig.defaultSort,
+  });
 
   if (loading) {
     return (
@@ -52,8 +128,32 @@ const TenantsGrid = ({
           Nuk u gjetën hapësirëmarrës.
         </Typography>
       ) : (
-        <Box className="tenant-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 2 }}>
-          {tenants.map((tenant) => (
+        <>
+          {/* Filter Panel */}
+          <GridFilters
+            data={tenants}
+            filterConfig={filterConfig}
+            filterState={filterState}
+            onFilterChange={setFilters}
+            sortConfig={sortConfig}
+            onSortChange={setSort}
+          />
+
+          {/* Results count */}
+          {filteredAndSortedTenants.length !== tenants.length && (
+            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+              {filteredAndSortedTenants.length} nga {tenants.length} hapësirëmarrës
+            </Typography>
+          )}
+
+          {/* Tenant Cards */}
+          {filteredAndSortedTenants.length === 0 ? (
+            <Typography variant="body1" className="no-tenants" sx={{ textAlign: 'center', padding: 3, color: 'text.secondary' }}>
+              Nuk u gjetën hapësirëmarrës që përputhen me filtrat.
+            </Typography>
+          ) : (
+            <Box className="tenant-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 2 }}>
+              {filteredAndSortedTenants.map((tenant) => (
             <Card key={tenant.id} className="tenant-card" sx={{ display: 'flex', flexDirection: 'column' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider', flexWrap: 'wrap', gap: 1 }}>
@@ -125,8 +225,10 @@ const TenantsGrid = ({
                 )}
               </CardActions>
             </Card>
-          ))}
-        </Box>
+              ))}
+            </Box>
+          )}
+        </>
       )}
     </Box>
   );

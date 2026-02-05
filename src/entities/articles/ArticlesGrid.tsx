@@ -3,6 +3,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Article } from '../../services/api';
+import { useGridFilters } from '../../hooks/useGridFilters';
+import GridFilters from '../../components/GridFilters';
+import { GridFilterConfig } from '../../types/gridFilters';
 import './ArticlesGrid.scss';
 
 interface ArticlesGridProps {
@@ -26,6 +29,58 @@ const ArticlesGrid = ({
 }: ArticlesGridProps) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Configure filters for articles
+  const filterConfig: GridFilterConfig = {
+    textSearchFields: ['name', 'description'],
+    filters: [
+      {
+        type: 'number-range',
+        field: 'unit_price',
+        label: 'Çmimi për Njësi',
+      },
+      {
+        type: 'date-range',
+        field: 'created_at',
+        label: 'Data e Krijimit',
+      },
+      // Only show business filter if admin tenant
+      ...(isAdminTenant ? [{
+        type: 'relation-select' as const,
+        field: 'business',
+        label: 'Biznesi',
+        relationField: 'business_name',
+        relationIdField: 'id',
+      }] : []),
+    ],
+    sortFields: [
+      { field: 'name', label: 'Emri' },
+      { field: 'unit_price', label: 'Çmimi për Njësi' },
+      { field: 'created_at', label: 'Data e Krijimit' },
+      ...(isAdminTenant ? [{
+        field: 'business.business_name',
+        label: 'Biznesi',
+        getValue: (item: Article) => item.business?.business_name || '',
+      }] : []),
+    ],
+    defaultSort: {
+      field: 'created_at',
+      direction: 'desc',
+    },
+  };
+
+  // Use the grid filters hook
+  const {
+    filteredData: filteredAndSortedArticles,
+    filterState,
+    sortConfig,
+    setFilters,
+    setSort,
+  } = useGridFilters<Article>({
+    data: articles,
+    config: filterConfig,
+    initialSort: filterConfig.defaultSort,
+  });
 
   if (loading) {
     return (
@@ -52,8 +107,32 @@ const ArticlesGrid = ({
           Nuk u gjetën artikuj.
         </Typography>
       ) : (
-        <Box className="article-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
-          {articles.map((article) => (
+        <>
+          {/* Filter Panel */}
+          <GridFilters
+            data={articles}
+            filterConfig={filterConfig}
+            filterState={filterState}
+            onFilterChange={setFilters}
+            sortConfig={sortConfig}
+            onSortChange={setSort}
+          />
+
+          {/* Results count */}
+          {filteredAndSortedArticles.length !== articles.length && (
+            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+              {filteredAndSortedArticles.length} nga {articles.length} artikuj
+            </Typography>
+          )}
+
+          {/* Article Cards */}
+          {filteredAndSortedArticles.length === 0 ? (
+            <Typography variant="body1" className="no-articles" sx={{ textAlign: 'center', padding: 3, color: 'text.secondary' }}>
+              Nuk u gjetën artikuj që përputhen me filtrat.
+            </Typography>
+          ) : (
+            <Box className="article-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
+              {filteredAndSortedArticles.map((article) => (
             <Card key={article.id} className="article-card" sx={{ display: 'flex', flexDirection: 'column' }}>
               <CardContent>
                 <Typography variant="h6" component="h3" sx={{ mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
@@ -128,8 +207,10 @@ const ArticlesGrid = ({
                 )}
               </CardActions>
             </Card>
-          ))}
-        </Box>
+              ))}
+            </Box>
+          )}
+        </>
       )}
     </Box>
   );

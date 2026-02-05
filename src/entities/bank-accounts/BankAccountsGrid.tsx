@@ -3,6 +3,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { BankAccount, Business } from '../../services/api';
+import { useGridFilters } from '../../hooks/useGridFilters';
+import GridFilters from '../../components/GridFilters';
+import { GridFilterConfig } from '../../types/gridFilters';
 import './BankAccountsGrid.scss';
 
 interface BankAccountWithBusiness extends BankAccount {
@@ -33,6 +36,54 @@ const BankAccountsGrid = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // Configure filters for bank accounts
+  const filterConfig: GridFilterConfig = {
+    textSearchFields: ['bank_name', 'swift', 'iban', 'bank_account_number'],
+    filters: [
+      {
+        type: 'date-range',
+        field: 'created_at',
+        label: 'Data e Krijimit',
+      },
+      {
+        type: 'relation-select',
+        field: 'business',
+        label: 'Biznesi',
+        relationField: 'business_name',
+        relationIdField: 'id',
+      },
+    ],
+    sortFields: [
+      { field: 'bank_name', label: 'Emri i Bankës' },
+      { field: 'swift', label: 'SWIFT' },
+      { field: 'iban', label: 'IBAN' },
+      { field: 'bank_account_number', label: 'Numri i Llogarisë' },
+      { field: 'created_at', label: 'Data e Krijimit' },
+      { 
+        field: 'business.business_name', 
+        label: 'Biznesi',
+        getValue: (item: BankAccountWithBusiness) => item.business?.business_name || '',
+      },
+    ],
+    defaultSort: {
+      field: 'created_at',
+      direction: 'desc',
+    },
+  };
+
+  // Use the grid filters hook
+  const {
+    filteredData: filteredAndSortedBankAccounts,
+    filterState,
+    sortConfig,
+    setFilters,
+    setSort,
+  } = useGridFilters<BankAccountWithBusiness>({
+    data: bankAccounts,
+    config: filterConfig,
+    initialSort: filterConfig.defaultSort,
+  });
+
   if (loading) {
     return (
       <Box className="bank-accounts-grid" sx={{ textAlign: 'center', padding: 3 }}>
@@ -60,8 +111,32 @@ const BankAccountsGrid = ({
             : 'Nuk u gjetën llogari bankare. Klikoni "Krijo Llogari Bankare" për të shtuar një të re.'}
         </Typography>
       ) : (
-        <Box className="bank-account-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
-          {bankAccounts.map((bankAccount) => (
+        <>
+          {/* Filter Panel */}
+          <GridFilters
+            data={bankAccounts}
+            filterConfig={filterConfig}
+            filterState={filterState}
+            onFilterChange={setFilters}
+            sortConfig={sortConfig}
+            onSortChange={setSort}
+          />
+
+          {/* Results count */}
+          {filteredAndSortedBankAccounts.length !== bankAccounts.length && (
+            <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+              {filteredAndSortedBankAccounts.length} nga {bankAccounts.length} llogari bankare
+            </Typography>
+          )}
+
+          {/* Bank Account Cards */}
+          {filteredAndSortedBankAccounts.length === 0 ? (
+            <Typography variant="body1" className="no-bank-accounts" sx={{ textAlign: 'center', padding: 3, color: 'text.secondary' }}>
+              Nuk u gjetën llogari bankare që përputhen me filtrat.
+            </Typography>
+          ) : (
+            <Box className="bank-account-cards" sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: 2 }}>
+              {filteredAndSortedBankAccounts.map((bankAccount) => (
             <Card key={`${bankAccount.business_id}-${bankAccount.id}`} className="bank-account-card" sx={{ display: 'flex', flexDirection: 'column' }}>
               <CardContent>
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider', flexWrap: 'wrap', gap: 1 }}>
@@ -133,8 +208,10 @@ const BankAccountsGrid = ({
                 )}
               </CardActions>
             </Card>
-          ))}
-        </Box>
+              ))}
+            </Box>
+          )}
+        </>
       )}
     </Box>
   );
