@@ -174,8 +174,10 @@ const BusinessForm = () => {
       // Mapping of Albanian field names to form field names
       const fieldMapping: { [key: string]: keyof CreateBusinessData } = {
         'Emri i subjektit': 'business_name',
+        'Emri i biznesit': 'business_name',
         'Emri tregtar': 'trade_name',
         'Lloji i subjektit': 'business_type',
+        'Lloji biznesit': 'business_type',
         'Numri unik identifikues': 'unique_identifier_number',
         'Numri i biznesit': 'business_number',
         'Numri Fiskal': 'fiscal_number',
