@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { businessesApi, Business, CreateBusinessData } from '../../services/api';
+import { useAuth } from '../../contexts/useAuth';
 import Button from '../../components/Button';
 import './BusinessForm.scss';
 
 const BusinessForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const isEditMode = !!id;
 
   const [business, setBusiness] = useState<Business | null>(null);
@@ -322,7 +324,12 @@ const BusinessForm = () => {
             ← Anulo
           </Button>
         </div>
-        <h2>{isEditMode ? 'Ndrysho Subjektin' : 'Krijo Subjekt'}</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+          <h2 style={{ margin: 0 }}>{isEditMode ? 'Ndrysho Subjektin' : 'Krijo Subjekt'}</h2>
+          {isEditMode && business && user?.tenant?.issuer_business_id === business.id && (
+            <span className="badge issuer">Biznesi i juaj</span>
+          )}
+        </div>
         <form onSubmit={handleSubmit}>
           {error && (
             <div className="error-message">
@@ -337,29 +344,27 @@ const BusinessForm = () => {
           </div>
         )}
 
-        {!isEditMode && (
-          <div className="form-group bulk-input-group">
-            <label htmlFor="bulk_input">Vendos të dhënat e subjektit (kopjo-ngjis formatin e plotë)</label>
-            <textarea
-              id="bulk_input"
-              name="bulk_input"
-              value={bulkInput}
-              onChange={(e) => setBulkInput(e.target.value)}
-              rows={15}
-              disabled={loading}
-              className="bulk-textarea"
-            />
-            <Button
-              type="button"
-              onClick={parseBulkInput}
-              variant="secondary"
-              className="btn-parse"
-              disabled={loading || !bulkInput.trim()}
-            >
-              Analizo dhe Plotëso Automatikisht
-            </Button>
-          </div>
-        )}
+        <div className="form-group bulk-input-group">
+          <label htmlFor="bulk_input">Vendos të dhënat e subjektit (kopjo-ngjis formatin e plotë)</label>
+          <textarea
+            id="bulk_input"
+            name="bulk_input"
+            value={bulkInput}
+            onChange={(e) => setBulkInput(e.target.value)}
+            rows={15}
+            disabled={loading}
+            className="bulk-textarea"
+          />
+          <Button
+            type="button"
+            onClick={parseBulkInput}
+            variant="secondary"
+            className="btn-parse"
+            disabled={loading || !bulkInput.trim()}
+          >
+            Analizo dhe Plotëso Automatikisht
+          </Button>
+        </div>
 
         <div className="form-group">
           <label htmlFor="business_name">Emri i biznesit *</label>

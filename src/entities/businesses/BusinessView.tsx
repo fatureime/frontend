@@ -135,7 +135,7 @@ const BusinessView = () => {
               <div className="business-title-section">
                 <h2>{business.business_name}</h2>
                 {isIssuer && (
-                  <span className="badge issuer">Biznesi Lëshues</span>
+                  <span className="badge issuer">Biznesi i juaj</span>
                 )}
               </div>
             </div>

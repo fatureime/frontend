@@ -1,5 +1,5 @@
 import { DataGrid, GridRenderCellParams } from '@mui/x-data-grid';
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, Chip } from '@mui/material';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -70,14 +70,27 @@ const BusinessesList = ({
                   return (
                     <Box
                       sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
                         maxWidth: 250,
                         overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'wrap',
-                        fontWeight: isIssuer ? 'bold' : 'normal',
                       }}
                     >
-                      {params.row.business_name}
+                      <Box
+                        sx={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          flex: 1,
+                          minWidth: 0,
+                        }}
+                      >
+                        {params.row.business_name}
+                      </Box>
+                      {isIssuer && (
+                        <Chip label="Biznesi i juaj" color="success" size="small" sx={{ flexShrink: 0 }} />
+                      )}
                     </Box>
                   );
                 },

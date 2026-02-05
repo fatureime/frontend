@@ -153,20 +153,30 @@ const BusinessesGrid = ({
             return (
               <Card key={business.id} className="business-card" sx={{ display: 'flex', flexDirection: 'column' }}>
                 <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, pb: 2, borderBottom: 1, borderColor: 'divider', overflow: 'hidden' }}>
                     {business.logo && (
                       <Box
                         component="img"
                         src={business.logo}
                         alt={`${business.business_name} logo`}
-                        sx={{ maxWidth: '100px', maxHeight: '60px', objectFit: 'contain', mr: 2 }}
+                        sx={{ maxWidth: '100px', maxHeight: '60px', objectFit: 'contain', flexShrink: 0 }}
                       />
                     )}
-                    <Typography variant="h6" component="h3" sx={{ flex: 1 }}>
+                    <Typography 
+                      variant="h6" 
+                      component="h3" 
+                      sx={{ 
+                        flex: 1, 
+                        minWidth: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
                       {business.business_name}
                     </Typography>
                     {isIssuer && (
-                      <Chip label="Biznesi Lëshues" color="success" size="small" />
+                      <Chip label="Biznesi i juaj" color="success" size="small" sx={{ flexShrink: 0 }} />
                     )}
                   </Box>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
