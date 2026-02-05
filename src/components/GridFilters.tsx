@@ -23,7 +23,7 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
-import { GridFiltersProps, FilterFieldConfig, SortConfig } from '../types/gridFilters';
+import { GridFiltersProps, FilterFieldConfig } from '../types/gridFilters';
 import { autoGenerateFilterConfig, mergeFilterConfig } from '../utils/gridFilterUtils';
 import './GridFilters.scss';
 
@@ -159,7 +159,7 @@ export default function GridFilters<T = any>({
         const selectedValues = currentValue || [];
         const getLabel = (value: string | number) => {
           if (filter.type === 'relation-select') {
-            const option = options.find((opt: any) => opt.id === value);
+            const option = options.find((opt: any) => opt.id === value) as { id: number; name: string } | undefined;
             return option?.name || value;
           }
           if (filterKey === 'status' && statusLabels) {
@@ -261,15 +261,34 @@ export default function GridFilters<T = any>({
               </Box>
             </Grid>
             <Grid item xs={12} sm={6} md={4} key={toKey}>
-              <TextField
-                fullWidth
-                label={`${filter.label} Deri`}
-                type="date"
-                value={toValue}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange(toKey, e.target.value)}
-                size="small"
-                InputLabelProps={{ shrink: true }}
-              />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <TextField
+                  fullWidth
+                  label={`${filter.label} Deri`}
+                  type="date"
+                  value={toValue}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange(toKey, e.target.value)}
+                  size="small"
+                  InputLabelProps={{ shrink: true }}
+                />
+                {filterConfig?.sortFields?.some(sf => sf.field === filterKey) && (
+                  <IconButton
+                    size="small"
+                    onClick={() => handleSort(filterKey)}
+                    sx={{
+                      color: sortConfig.field === filterKey ? 'primary.main' : 'action.disabled',
+                      '&:hover': { color: 'primary.main' },
+                    }}
+                    title={`Rendit sipas ${filter.label}`}
+                  >
+                    {sortConfig.field === filterKey && sortConfig.direction === 'asc' ? (
+                      <ArrowUpwardIcon fontSize="small" />
+                    ) : (
+                      <ArrowDownwardIcon fontSize="small" />
+                    )}
+                  </IconButton>
+                )}
+              </Box>
             </Grid>
           </>
         );
@@ -313,15 +332,34 @@ export default function GridFilters<T = any>({
               </Box>
             </Grid>
             <Grid item xs={12} sm={6} md={4} key={maxKey}>
-              <TextField
-                fullWidth
-                label={`${filter.label} Max`}
-                type="number"
-                value={maxValue}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange(maxKey, e.target.value)}
-                size="small"
-                inputProps={{ min: 0, step: 0.01 }}
-              />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <TextField
+                  fullWidth
+                  label={`${filter.label} Max`}
+                  type="number"
+                  value={maxValue}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFilterChange(maxKey, e.target.value)}
+                  size="small"
+                  inputProps={{ min: 0, step: 0.01 }}
+                />
+                {filterConfig?.sortFields?.some(sf => sf.field === filterKey) && (
+                  <IconButton
+                    size="small"
+                    onClick={() => handleSort(filterKey)}
+                    sx={{
+                      color: sortConfig.field === filterKey ? 'primary.main' : 'action.disabled',
+                      '&:hover': { color: 'primary.main' },
+                    }}
+                    title={`Rendit sipas ${filter.label}`}
+                  >
+                    {sortConfig.field === filterKey && sortConfig.direction === 'asc' ? (
+                      <ArrowUpwardIcon fontSize="small" />
+                    ) : (
+                      <ArrowDownwardIcon fontSize="small" />
+                    )}
+                  </IconButton>
+                )}
+              </Box>
             </Grid>
           </>
         );
@@ -333,7 +371,7 @@ export default function GridFilters<T = any>({
 
   // Render active filter chips
   const renderActiveFilterChips = () => {
-    const chips: JSX.Element[] = [];
+    const chips: React.ReactElement[] = [];
 
     if (filterState.text?.trim()) {
       chips.push(
